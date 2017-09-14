@@ -24,10 +24,7 @@ if __name__=="__main__":
     if opt.root_path != '':
         opt.video_path = os.path.join(opt.root_path, opt.video_path)
         opt.annotation_path = os.path.join(opt.root_path, opt.annotation_path)
-        opt.model_path = os.path.join(opt.root_path, opt.model_path)
         opt.result_path = os.path.join(opt.root_path, opt.result_path)
-        if opt.premodel_path:
-            opt.premodel_path = os.path.join(opt.root_path, opt.premodel_path)
         if opt.resume_path:
             opt.resume_path = os.path.join(opt.root_path, opt.resume_path)
     opt.scales = [opt.initial_scale]
