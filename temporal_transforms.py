@@ -2,6 +2,21 @@ import random
 import math
 
 
+class LoopPadding(object):
+    def __init__(self, size):
+        self.size = size
+
+    def __call__(self, frame_indices):
+        out = frame_indices
+
+        for index in out:
+            if len(out) >= self.size:
+                break
+            out.append(index)
+
+        return out
+
+
 class TemporalBeginCrop(object):
     """Temporally crop the given frame indices at a beginning.
 

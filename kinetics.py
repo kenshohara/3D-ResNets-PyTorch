@@ -2,6 +2,7 @@ import torch
 import torch.utils.data as data
 from PIL import Image
 import os
+import math
 import functools
 import json
 import copy
@@ -81,7 +82,8 @@ def get_video_names_and_annotations(data, subset):
     return video_names, annotations
 
 
-def make_dataset(root_path, annotation_path, subset, n_samples_for_each_video):
+def make_dataset(root_path, annotation_path, subset,
+                 n_samples_for_each_video, sample_duration):
     data = load_annotation_data(annotation_path)
     video_names, annotations = get_video_names_and_annotations(data, subset)
     class_to_idx = get_class_labels(data)
@@ -109,22 +111,25 @@ def make_dataset(root_path, annotation_path, subset, n_samples_for_each_video):
             'video': video_path,
             'segment': [begin_t, end_t],
             'n_frames': n_frames,
-            'video_id': video_names[i][:-15]
+            'video_id': video_names[i][:-14].split('/')[1]
         }
         if len(annotations) != 0:
             sample['label'] = class_to_idx[annotations[i]['label']]
         else:
             sample['label'] = -1
 
-        if n_samples_for_each_video > 1:
-            step = n_frames // n_samples_for_each_video
-            for j in range(1, n_frames, step):
-                sample_j = copy.deepcopy(sample)
-                sample_j['frame_indices'] = list(range(j, n_frames + 1))
-                dataset.append(sample_j)
-        else:
+        if n_samples_for_each_video == 1:
             sample['frame_indices'] = list(range(1, n_frames + 1))
             dataset.append(sample)
+        else:
+            if n_samples_for_each_video > 1:
+                step = max(1, math.ceil((n_frames - 1 - sample_duration) / (n_samples_for_each_video - 1)))
+            else:
+                step = sample_duration
+            for j in range(1, (n_frames - sample_duration + 1), step):
+                sample_j = copy.deepcopy(sample)
+                sample_j['frame_indices'] = list(range(j, j + sample_duration))
+                dataset.append(sample_j)
 
     return dataset, idx_to_class
 
@@ -148,9 +153,9 @@ class Kinetics(data.Dataset):
 
     def __init__(self, root_path, annotation_path, subset, n_samples_for_each_video=1,
                  spatial_transform=None, temporal_transform=None, target_transform=None,
-                 get_loader=get_default_video_loader):
+                 sample_duration=16, get_loader=get_default_video_loader):
         self.data, self.class_names = make_dataset(root_path, annotation_path, subset,
-                                                   n_samples_for_each_video)
+                                                   n_samples_for_each_video, sample_duration)
 
         self.spatial_transform = spatial_transform
         self.temporal_transform = temporal_transform
@@ -175,7 +180,7 @@ class Kinetics(data.Dataset):
             clip = [self.spatial_transform(img) for img in clip]
         clip = torch.stack(clip, 0).permute(1, 0, 2, 3)
 
-        target = self.data[index]['label']
+        target = self.data[index]
         if self.target_transform is not None:
             target = self.target_transform(target)
 

@@ -3,7 +3,6 @@ from torch.autograd import Variable
 import time
 import sys
 
-from kinetics import Kinetics
 from utils import AverageMeter, calculate_accuracy
 
 

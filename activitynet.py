@@ -101,7 +101,8 @@ def modify_frame_indices(video_dir_path, frame_indices):
         modified_indices.append(i)
     return modified_indices
 
-def make_dataset(root_path, annotation_path, subset, n_samples_for_each_video):
+def make_dataset(root_path, annotation_path, subset,
+                 n_samples_for_each_video, sample_duration):
     data = load_annotation_data(annotation_path)
     video_names, annotations = get_video_names_and_annotations(data, subset)
     class_to_idx = get_class_labels(data)
@@ -132,32 +133,33 @@ def make_dataset(root_path, annotation_path, subset, n_samples_for_each_video):
                 'video': video_path,
                 'segment': [begin_t, end_t],
                 'fps': fps,
-                'video_id': video_names[i][:-15]
+                'video_id': video_names[i][2:]
             }
             if len(annotations) != 0:
                 sample['label'] = class_to_idx[annotation['label']]
             else:
                 sample['label'] = -1
 
-            if n_samples_for_each_video > 1:
-                step = n_frames // n_samples_for_each_video
-                if step == 0:
-                    step = 1
-                for j in range(1, n_frames, step):
-                    sample_j = copy.deepcopy(sample)
-                    frame_indices = list(range(j, n_frames + 1))
-                    frame_indices = modify_frame_indices(sample_j['video'], frame_indices)
-                    if len(frame_indices) < 16:
-                        continue
-                    sample_j['frame_indices'] = frame_indices
-                    dataset.append(sample_j)
-            else:
+            if n_samples_for_each_video == 1:
                 frame_indices = list(range(1, n_frames + 1))
                 frame_indices = modify_frame_indices(sample['video'], frame_indices)
                 if len(frame_indices) < 16:
                     continue
                 sample['frame_indices'] = frame_indices
                 dataset.append(sample)
+            else:
+                if n_samples_for_each_video > 1:
+                    step = max(1, math.ceil((n_frames - 1 - sample_duration) / (n_samples_for_each_video - 1)))
+                else:
+                    step = sample_duration
+                for j in range(1, (n_frames - sample_duration + 1), step):
+                    sample_j = copy.deepcopy(sample)
+                    frame_indices = list(range(j, j + sample_duration))
+                    frame_indices = modify_frame_indices(sample_j['video'], frame_indices)
+                    if len(frame_indices) < 16:
+                        continue
+                    sample_j['frame_indices'] = frame_indices
+                    dataset.append(sample_j)
 
     return dataset, idx_to_class
 
@@ -181,9 +183,9 @@ class ActivityNet(data.Dataset):
 
     def __init__(self, root_path, annotation_path, subset, n_samples_for_each_video=1,
                  spatial_transform=None, temporal_transform=None, target_transform=None,
-                 get_loader=get_default_video_loader):
+                 sample_duration=16, get_loader=get_default_video_loader):
         self.data, self.class_names = make_dataset(root_path, annotation_path, subset,
-                                                   n_samples_for_each_video)
+                                                   n_samples_for_each_video, sample_duration)
 
         self.spatial_transform = spatial_transform
         self.temporal_transform = temporal_transform
@@ -208,7 +210,7 @@ class ActivityNet(data.Dataset):
             clip = [self.spatial_transform(img) for img in clip]
         clip = torch.stack(clip, 0).permute(1, 0, 2, 3)
 
-        target = self.data[index]['label']
+        target = self.data[index]
         if self.target_transform is not None:
             target = self.target_transform(target)
 

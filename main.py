@@ -12,12 +12,15 @@ from model import generate_model
 from mean import get_mean
 from spatial_transforms import (Compose, Normalize, Scale, CenterCrop,
                                 MultiScaleCornerCrop, RandomHorizontalFlip, ToTensor)
-from temporal_transforms import TemporalRandomCrop, TemporalBeginCrop
+from temporal_transforms import LoopPadding, TemporalRandomCrop
+from target_transforms import ClassLabel, VideoID
+from target_transforms import Compose as TargetCompose
 from kinetics import Kinetics
 from activitynet import ActivityNet
 from utils import Logger
 from train import train_epoch
 from validation import val_epoch
+import test
 
 if __name__=="__main__":
     opt = parse_opts()
@@ -40,6 +43,9 @@ if __name__=="__main__":
 
     model = generate_model(opt)
     print(model)
+    criterion = nn.CrossEntropyLoss()
+    if not opt.no_cuda:
+        criterion = criterion.cuda()
 
     if not opt.no_train:
         spatial_transform = Compose([MultiScaleCornerCrop(opt.scales, opt.sample_size),
@@ -47,24 +53,23 @@ if __name__=="__main__":
                                      ToTensor(opt.norm_value),
                                      Normalize(opt.mean, [1, 1, 1])])
         temporal_transform = TemporalRandomCrop(opt.sample_duration)
+        target_transform = ClassLabel()
         if opt.dataset == 'kinetics':
             training_data = Kinetics(opt.video_path, opt.annotation_path, 'training',
                                      spatial_transform=spatial_transform,
-                                     temporal_transform=temporal_transform)
+                                     temporal_transform=temporal_transform,
+                                     target_transform=target_transform)
         else:
             training_data = ActivityNet(opt.video_path, opt.annotation_path, 'training',
                                         spatial_transform=spatial_transform,
-                                        temporal_transform=temporal_transform)
+                                        temporal_transform=temporal_transform,
+                                        target_transform=target_transform)
         train_loader = torch.utils.data.DataLoader(training_data, batch_size=opt.batch_size,
                                                    shuffle=True, num_workers=opt.n_threads, pin_memory=True)
         train_logger = Logger(os.path.join(opt.result_path, 'train.log'),
                               ['epoch', 'loss', 'acc', 'lr'])
         train_batch_logger = Logger(os.path.join(opt.result_path, 'train_batch.log'),
                                     ['epoch', 'batch', 'iter', 'loss', 'acc', 'lr'])
-
-        criterion = nn.CrossEntropyLoss()
-        if not opt.no_cuda:
-            criterion = criterion.cuda()
 
         if opt.nesterov:
             dampening = 0
@@ -79,13 +84,16 @@ if __name__=="__main__":
                                      CenterCrop(opt.sample_size),
                                      ToTensor(opt.norm_value),
                                      Normalize(opt.mean, [1, 1, 1])])
-        temporal_transform = TemporalBeginCrop(opt.sample_duration)
+        temporal_transform = LoopPadding(opt.sample_duration)
+        target_transform = ClassLabel()
         if opt.dataset == 'kinetics':
             validation_data = Kinetics(opt.video_path, opt.annotation_path, 'validation', opt.n_val_samples,
-                                       spatial_transform, temporal_transform)
+                                       spatial_transform, temporal_transform, target_transform,
+                                       sample_duration=opt.sample_duration)
         else:
             validation_data = ActivityNet(opt.video_path, opt.annotation_path, 'validation', opt.n_val_samples,
-                                          spatial_transform, temporal_transform)
+                                          spatial_transform, temporal_transform, target_transform,
+                                          sample_duration=opt.sample_duration)
         val_loader = torch.utils.data.DataLoader(validation_data, batch_size=opt.batch_size,
                                                  shuffle=False, num_workers=opt.n_threads, pin_memory=True)
         val_logger = Logger(os.path.join(opt.result_path, 'val.log'),
@@ -102,7 +110,7 @@ if __name__=="__main__":
             optimizer.load_state_dict(checkpoint['optimizer'])
 
     print('run')
-    for i in range(opt.begin_epoch, opt.n_epochs):
+    for i in range(opt.begin_epoch, opt.n_epochs + 1):
         if not opt.no_train:
             train_epoch(i, train_loader, model, criterion, optimizer,
                         opt, train_logger, train_batch_logger)
@@ -111,3 +119,28 @@ if __name__=="__main__":
 
         if not opt.no_train and not opt.no_val:
             scheduler.step(validation_loss)
+
+    if opt.test:
+        spatial_transform = Compose([Scale(opt.sample_size),
+                                     CenterCrop(opt.sample_size),
+                                     ToTensor(opt.norm_value),
+                                     Normalize(opt.mean, [1, 1, 1])])
+        temporal_transform = LoopPadding(opt.sample_duration)
+        target_transform = VideoID()
+
+        assert opt.test_subset in ['val', 'test']
+        if opt.test_subset == 'val':
+            subset = 'validation'
+        elif opt.test_subset == 'test':
+            subset = 'testing'
+        if opt.dataset == 'kinetics':
+            test_data = Kinetics(opt.video_path, opt.annotation_path, subset, 0,
+                                 spatial_transform, temporal_transform, target_transform,
+                                                                        sample_duration=opt.sample_duration)
+        else:
+            test_data = ActivityNet(opt.video_path, opt.annotation_path, subset, 0,
+                                    spatial_transform, temporal_transform, target_transform,
+                                    sample_duration=opt.sample_duration)
+        test_loader = torch.utils.data.DataLoader(test_data, batch_size=opt.batch_size,
+                                                  shuffle=False, num_workers=opt.n_threads, pin_memory=True)
+        test.test(test_loader, model, opt, test_data.class_names)

@@ -1,11 +1,11 @@
 import torch
 from torch import nn
 
-from models import resnet, pre_act_resnet, densenet
+from models import resnet, pre_act_resnet, wide_resnet, resnext, densenet
 
 
 def generate_model(opt):
-    assert opt.model in ['resnet', 'preresnet', 'densenet']
+    assert opt.model in ['resnet', 'preresnet', 'wideresnet', 'resnext', 'densenet']
 
     if opt.model == 'resnet':
         assert opt.model_depth in [18, 34, 50, 101]
@@ -18,6 +18,17 @@ def generate_model(opt):
             model = resnet.resnet50(num_classes=opt.n_classes, shortcut_type=opt.resnet_shortcut)
         elif opt.model_depth == 101:
             model = resnet.resnet101(num_classes=opt.n_classes, shortcut_type=opt.resnet_shortcut)
+    elif opt.model == 'wideresnet':
+        assert opt.model_depth in [50]
+
+        if opt.model_depth == 50:
+            model = wide_resnet.resnet50(num_classes=opt.n_classes, shortcut_type=opt.resnet_shortcut, k=opt.wide_resnet_k)
+    elif opt.model == 'resnext':
+        assert opt.model_depth in [50, 101]
+        if opt.model_depth == 50:
+            model = resnext.resnet50(num_classes=opt.n_classes, shortcut_type=opt.resnet_shortcut, cardinality=opt.resnext_cardinality)
+        elif opt.model_depth == 101:
+            model = resnext.resnet101(num_classes=opt.n_classes, shortcut_type=opt.resnet_shortcut, cardinality=opt.resnext_cardinality)
     elif opt.model == 'preresnet':
         assert opt.model_depth in [18, 34, 50, 101]
 

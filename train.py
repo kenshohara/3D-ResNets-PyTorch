@@ -4,7 +4,6 @@ import time
 import os
 import sys
 
-from kinetics import Kinetics
 from utils import AverageMeter, calculate_accuracy
 
 
