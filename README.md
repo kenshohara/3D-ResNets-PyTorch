@@ -40,6 +40,18 @@ cd ./ffmpeg-3.3.3-64bit-static/; sudo cp ffmpeg ffprobe /usr/local/bin;
 * Python 3
 
 ## Preparation
+### ActivityNet
+* Download datasets using official crawler codes
+* Convert from avi to jpg files using ```utils/video_jpg.py```
+```
+python utils/video_jpg.py avi_video_directory jpg_video_directory
+```
+* Generate fps files using ```utils/fps.py```
+```
+python utils/fps.py avi_video_directory jpg_video_directory
+```
+
+### Kinetics
 * Download the Kinetics dataset using official crawler codes
   * Locate test set in ```video_directory/test```.
 * Convert from avi to jpg files using ```utils/video_jpg_kinetics.py```
@@ -89,6 +101,6 @@ python main.py --root_path ~/data --video_path kinetics_videos/jpg --annotation_
 Continue Training from epoch 101. (~/data/results/save_100.pth is loaded.)
 ```
 python main.py --root_path ~/data --video_path kinetics_videos/jpg --annotation_path kinetics.json \
---result_path results --dataset kinetics --begin_epoch 101 \
+--result_path results --dataset kinetics --resume_path results/save_100.pth \
 --batch_size 128 --n_threads 4 --checkpoint 5
 ```
