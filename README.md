@@ -9,7 +9,7 @@ The paper will appear in ICCV 2017 Workshop (Chalearn).
 
 This code includes only training and testing on the Kinetics dataset.  
 **If you want to classify your videos using our pretrained models,
-use [this code](https://github.com/kenshohara/video-classification-3d-cnn).**
+use [this code](https://github.com/kenshohara/video-classification-3d-cnn-pytorch).**
 
 ## Citation
 If you use this code or pre-trained models, please cite the following:
