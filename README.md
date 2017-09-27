@@ -1,5 +1,5 @@
 # 3D ResNets for Action Recognition
-This is the PyTorch code for the following paper:
+This is the PyTorch code for [the following paper](https://arxiv.org/abs/1708.07632):
 
 Kensho Hara, Hirokatsu Kataoka, and Yutaka Satoh,  
 "Learning Spatio-Temporal Features with 3D Residual Networks for Action Recognition",  
