@@ -19,6 +19,7 @@ def pil_loader(path):
 
 def accimage_loader(path):
     try:
+        import accimage
         return accimage.Image(path)
     except IOError:
         # Potentially a decoding problem, fall back to PIL.Image
@@ -28,7 +29,6 @@ def accimage_loader(path):
 def get_default_image_loader():
     from torchvision import get_image_backend
     if get_image_backend() == 'accimage':
-        import accimage
         return accimage_loader
     else:
         return pil_loader
