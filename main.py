@@ -78,7 +78,7 @@ if __name__=="__main__":
         optimizer = optim.SGD(model.parameters(), lr=opt.learning_rate,
                               momentum=opt.momentum, dampening=dampening,
                               weight_decay=opt.weight_decay, nesterov=opt.nesterov)
-        scheduler = lr_scheduler.ReduceLROnPlateau(optimizer, 'min')
+        scheduler = lr_scheduler.ReduceLROnPlateau(optimizer, 'min', patience=opt.lr_patience)
     if not opt.no_val:
         spatial_transform = Compose([Scale(opt.sample_size),
                                      CenterCrop(opt.sample_size),
