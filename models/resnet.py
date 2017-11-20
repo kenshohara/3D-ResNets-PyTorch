@@ -5,7 +5,7 @@ from torch.autograd import Variable
 import math
 from functools import partial
 
-__all__ = ['ResNet', 'resnet18', 'resnet34', 'resnet50', 'resnet101']
+__all__ = ['ResNet', 'resnet10', 'resnet18', 'resnet34', 'resnet50', 'resnet101', 'resnet152', 'resnet200']
 
 
 def conv3x3x3(in_planes, out_planes, stride=1):
@@ -187,6 +187,12 @@ def get_fine_tuning_parameters(model, ft_begin_index):
     return parameters
 
 
+def resnet10(**kwargs):
+    """Constructs a ResNet-18 model.
+    """
+    model = ResNet(BasicBlock, [1, 1, 1, 1], **kwargs)
+    return model
+
 def resnet18(**kwargs):
     """Constructs a ResNet-18 model.
     """
@@ -199,7 +205,6 @@ def resnet34(**kwargs):
     model = ResNet(BasicBlock, [3, 4, 6, 3], **kwargs)
     return model
 
-
 def resnet50(**kwargs):
     """Constructs a ResNet-50 model.
     """
@@ -210,4 +215,16 @@ def resnet101(**kwargs):
     """Constructs a ResNet-101 model.
     """
     model = ResNet(Bottleneck, [3, 4, 23, 3], **kwargs)
+    return model
+
+def resnet152(**kwargs):
+    """Constructs a ResNet-101 model.
+    """
+    model = ResNet(Bottleneck, [3, 8, 36, 3], **kwargs)
+    return model
+
+def resnet200(**kwargs):
+    """Constructs a ResNet-101 model.
+    """
+    model = ResNet(Bottleneck, [3, 24, 36, 3], **kwargs)
     return model
