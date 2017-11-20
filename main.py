@@ -108,8 +108,9 @@ if __name__ == '__main__':
             scheduler.step(validation_loss)
 
     if opt.test:
-        spatial_transform = Compose([Scale(opt.sample_size),
-                                     CenterCrop(opt.sample_size),
+        spatial_transform = Compose([Scale(int(opt.sample_size / opt.scale_in_test)),
+                                     CornerCrop(opt.sample_size, 
+                                                opt.crop_position_in_test),
                                      ToTensor(opt.norm_value),
                                      Normalize(opt.mean, [1, 1, 1])])
         temporal_transform = LoopPadding(opt.sample_duration)
