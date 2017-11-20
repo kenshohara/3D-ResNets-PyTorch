@@ -19,7 +19,7 @@ def parse_opts():
     parser.add_argument('--nesterov', action='store_true', help='Nesterov momentum')
     parser.set_defaults(nesterov=False)
     parser.add_argument('--optimizer', default='sgd', type=str, help='Currently only support SGD')
-    parser.add_argument('--batch_size', default=40, type=int, help='Batch Size')
+    parser.add_argument('--batch_size', default=128, type=int, help='Batch Size')
     parser.add_argument('--n_epochs', default=200, type=int, help='Number of total epochs to run')
     parser.add_argument('--begin_epoch', default=1, type=int, help='Training begins at this epoch. Previous trained model indicated by resume_path is loaded.')
     parser.add_argument('--n_val_samples', default=3, type=int, help='Number of validation samples for each activity')
