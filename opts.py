@@ -7,7 +7,7 @@ def parse_opts():
     parser.add_argument('--annotation_path', default='kinetics.json', type=str, help='Annotation file path')
     parser.add_argument('--result_path', default='results', type=str, help='Result directory path')
     parser.add_argument('--dataset', default='kinetics', type=str, help='Used dataset (activitynet | kinetics | ucf101 | hmdb51)')
-    parser.add_argument('--n_classes', default=400, type=int, help='Number of classes (activitynet: 200, kinetics: 400)')
+    parser.add_argument('--n_classes', default=400, type=int, help='Number of classes (activitynet: 200, kinetics: 400, ucf101: 101, hmdb51: 51)')
     parser.add_argument('--sample_size', default=112, type=int, help='Height and width of inputs')
     parser.add_argument('--sample_duration', default=16, type=int, help='Temporal duration of inputs')
     parser.add_argument('--initial_scale', default=1.0, type=float, help='Initial scale for multiscale cropping')
