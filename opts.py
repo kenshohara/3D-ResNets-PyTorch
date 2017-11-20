@@ -32,6 +32,8 @@ def parse_opts():
     parser.add_argument('--test', action='store_true', help='If true, test is performed.')
     parser.set_defaults(test=False)
     parser.add_argument('--test_subset', default='val', type=str, help='Used subset in test (val | test)')
+    parser.add_argument('--no_softmax_in_test', action='store_true', help='If true, output for each clip is not normalized using softmax.')
+    parser.set_defaults(no_softmax_in_test=False)
     parser.add_argument('--no_cuda', action='store_true', help='If true, cuda is not used.')
     parser.set_defaults(no_cuda=False)
     parser.add_argument('--n_threads', default=4, type=int, help='Number of threads for multi-thread loading')
