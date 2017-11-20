@@ -41,7 +41,7 @@ if __name__=="__main__":
 
     torch.manual_seed(opt.manual_seed)
 
-    model = generate_model(opt)
+    model, parameters = generate_model(opt)
     print(model)
     criterion = nn.CrossEntropyLoss()
     if not opt.no_cuda:
@@ -75,7 +75,7 @@ if __name__=="__main__":
             dampening = 0
         else:
             dampening = opt.momentum
-        optimizer = optim.SGD(model.parameters(), lr=opt.learning_rate,
+        optimizer = optim.SGD(parameters, lr=opt.learning_rate,
                               momentum=opt.momentum, dampening=dampening,
                               weight_decay=opt.weight_decay, nesterov=opt.nesterov)
         scheduler = lr_scheduler.ReduceLROnPlateau(optimizer, 'min', patience=opt.lr_patience)
