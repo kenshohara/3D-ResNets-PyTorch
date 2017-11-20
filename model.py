@@ -11,15 +11,19 @@ def generate_model(opt):
         assert opt.model_depth in [18, 34, 50, 101]
 
         from models.resnet import get_fine_tuning_parameters
-        
+
         if opt.model_depth == 18:
-            model = resnet.resnet18(num_classes=opt.n_classes, shortcut_type=opt.resnet_shortcut)
+            model = resnet.resnet18(num_classes=opt.n_classes, shortcut_type=opt.resnet_shortcut,
+                                    sample_size=opt.sample_size, sample_duration=opt.sample_duration)
         elif opt.model_depth == 34:
-            model = resnet.resnet34(num_classes=opt.n_classes, shortcut_type=opt.resnet_shortcut)
+            model = resnet.resnet34(num_classes=opt.n_classes, shortcut_type=opt.resnet_shortcut,
+                                    sample_size=opt.sample_size, sample_duration=opt.sample_duration)
         elif opt.model_depth == 50:
-            model = resnet.resnet50(num_classes=opt.n_classes, shortcut_type=opt.resnet_shortcut)
+            model = resnet.resnet50(num_classes=opt.n_classes, shortcut_type=opt.resnet_shortcut,
+                                    sample_size=opt.sample_size, sample_duration=opt.sample_duration)
         elif opt.model_depth == 101:
-            model = resnet.resnet101(num_classes=opt.n_classes, shortcut_type=opt.resnet_shortcut)
+            model = resnet.resnet101(num_classes=opt.n_classes, shortcut_type=opt.resnet_shortcut,
+                                     sample_size=opt.sample_size, sample_duration=opt.sample_duration)
 
     if not opt.no_cuda:
         model = model.cuda()
