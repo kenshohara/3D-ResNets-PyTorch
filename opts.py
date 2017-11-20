@@ -45,9 +45,11 @@ def parse_opts():
     parser.add_argument('--no_hflip', action='store_true', help='If true holizontal flipping is not performed.')
     parser.set_defaults(no_hflip=False)
     parser.add_argument('--norm_value', default=1, type=int, help='If 1, range of inputs is [0-255]. If 255, range of inputs is [0-1].')
-    parser.add_argument('--model', default='resnet', type=str, help='Currently only support resnet')
+    parser.add_argument('--model', default='resnet', type=str, help='(resnet | preresnet | wideresnet | resnext | densenet | ')
     parser.add_argument('--model_depth', default=18, type=int, help='Depth of resnet (10 | 18 | 34 | 50 | 101)')
     parser.add_argument('--resnet_shortcut', default='B', type=str, help='Shortcut type of resnet (A | B)')
+    parser.add_argument('--wide_resnet_k', default=2, type=int, help='Wide resnet k')
+    parser.add_argument('--resnext_cardinality', default=32, type=int, help='ResNeXt cardinality')
     parser.add_argument('--manual_seed', default=1, type=int, help='Manually set random seed')
 
     args = parser.parse_args()

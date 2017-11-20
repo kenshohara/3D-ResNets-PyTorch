@@ -33,7 +33,7 @@ def generate_model(opt):
         elif opt.model_depth == 200:
             model = resnet.resnet200(num_classes=opt.n_classes, shortcut_type=opt.resnet_shortcut,
                                      sample_size=opt.sample_size, sample_duration=opt.sample_duration)
-        elif opt.model == 'wideresnet':
+    elif opt.model == 'wideresnet':
         assert opt.model_depth in [50]
 
         from models.wide_resnet import get_fine_tuning_parameters
