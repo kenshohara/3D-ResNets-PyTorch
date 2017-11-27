@@ -5,7 +5,7 @@ from models import resnet, pre_act_resnet, wide_resnet, resnext, densenet
 
 
 def generate_model(opt):
-    assert opt.model in ['resnet']
+    assert opt.model in ['resnet', 'preresnet', 'wideresnet', 'resnext', 'densenet']
 
     if opt.model == 'resnet':
         assert opt.model_depth in [10, 18, 34, 50, 101, 152, 200]
