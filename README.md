@@ -48,7 +48,7 @@ If you use this code or pre-trained models, please cite the following:
 ```
 
 ## Pre-trained models
-Pre-trained models are available at [releases](https://github.com/kenshohara/3D-ResNets-PyTorch/releases/tag/1.0).
+Pre-trained models are available at [releases](https://github.com/kenshohara/3D-ResNets-PyTorch/releases).
 
 ## Requirements
 * [PyTorch](http://pytorch.org/)
