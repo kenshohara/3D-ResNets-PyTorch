@@ -48,7 +48,24 @@ If you use this code or pre-trained models, please cite the following:
 ```
 
 ## Pre-trained models
-Pre-trained models are available at [releases](https://github.com/kenshohara/3D-ResNets-PyTorch/releases).
+Pre-trained models are available [here](https://drive.google.com/drive/folders/14KRBqT8ySfPtFSuLsFS2U4I-ihTDs0Y9?usp=sharing).  
+All models are trained on Kinetics.  
+```
+resnet-18-kinetics.pth: --model resnet --model_depth 18 --resnet_shortcut A
+resnet-34-kinetics.pth: --model resnet --model_depth 34 --resnet_shortcut A
+resnet-34-kinetics-cpu.pth: CPU ver. of resnet-34-kinetics.pth
+resnet-50-kinetics.pth: --model resnet --model_depth 50 --resnet_shortcut B
+resnet-101-kinetics.pth: --model resnet --model_depth 101 --resnet_shortcut B
+resnet-152-kinetics.pth: --model resnet --model_depth 152 --resnet_shortcut B
+resnet-200-kinetics.pth: --model resnet --model_depth 200 --resnet_shortcut B
+preresnet-200-kinetics.pth: --model preresnet --model_depth 200 --resnet_shortcut B
+wideresnet-50-kinetics.pth: --model wideresnet --model_depth 50 --resnet_shortcut B --wide_resnet_k 2
+resnet-101-kinetics.pth: --model resnext --model_depth 101 --resnet_shortcut B --resnext_cardinality 32
+densenet-121-kinetics.pth: --model densenet --model_depth 121
+densenet-201-kinetics.pth: --model densenet --model_depth 201
+```
+Fine-tuned models on UCF-101 or HMDB-51 will be also available.
+
 
 ## Requirements
 * [PyTorch](http://pytorch.org/)
