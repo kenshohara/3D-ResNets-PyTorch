@@ -83,7 +83,7 @@ cd ./ffmpeg-3.3.3-64bit-static/; sudo cp ffmpeg ffprobe /usr/local/bin;
 
 ## Preparation
 ### ActivityNet
-* Download datasets using official crawler codes
+* Download videos using [the official crawler](https://github.com/activitynet/ActivityNet/tree/master/Crawler).
 * Convert from avi to jpg files using ```utils/video_jpg.py```
 ```
 python utils/video_jpg.py avi_video_directory jpg_video_directory
@@ -94,7 +94,7 @@ python utils/fps.py avi_video_directory jpg_video_directory
 ```
 
 ### Kinetics
-* Download the Kinetics dataset using official crawler codes
+* Download videos using [the official crawler](https://github.com/activitynet/ActivityNet/tree/master/Crawler/Kinetics).
   * Locate test set in ```video_directory/test```.
 * Convert from avi to jpg files using ```utils/video_jpg_kinetics.py```
 ```
@@ -105,8 +105,41 @@ python utils/video_jpg_kinetics.py avi_video_directory jpg_video_directory
 python utils/n_frames_kinetics.py jpg_video_directory
 ```
 * Generate annotation file in json format similar to ActivityNet using ```utils/kinetics_json.py```
+  * The CSV files (kinetics_{train, val, test}.csv) are included in the crawler.
 ```
-python utils/kinetics_json.py train_csv_path val_csv_path test_csv_path json_path
+python utils/kinetics_json.py train_csv_path val_csv_path test_csv_path dst_json_path
+```
+
+### UCF-101
+* Download videos and train/test splits [here](http://crcv.ucf.edu/data/UCF101.php).
+* Convert from avi to jpg files using ```utils/video_jpg_ucf101_hmdb51.py```
+```
+python utils/video_jpg_ucf101_hmdb51.py avi_video_directory jpg_video_directory
+```
+* Generate n_frames files using ```utils/n_frames_ucf101_hmdb51.py```
+```
+python utils/n_frames_ucf101_hmdb51.py jpg_video_directory
+```
+* Generate annotation file in json format similar to ActivityNet using ```utils/ucf101_json.py```
+  * ```annotation_dir_path``` includes classInd.txt, trainlist0{1, 2, 3}.txt, testlist0{1, 2, 3}.txt
+```
+python utils/ucf101_json.py annotation_dir_path
+```
+
+### HMDB-51
+* Download videos and train/test splits [here](http://serre-lab.clps.brown.edu/resource/hmdb-a-large-human-motion-database/).
+* Convert from avi to jpg files using ```utils/video_jpg_ucf101_hmdb51.py```
+```
+python utils/video_jpg_ucf101_hmdb51.py avi_video_directory jpg_video_directory
+```
+* Generate n_frames files using ```utils/n_frames_ucf101_hmdb51.py```
+```
+python utils/n_frames_ucf101_hmdb51.py jpg_video_directory
+```
+* Generate annotation file in json format similar to ActivityNet using ```utils/hmdb51_json.py```
+  * ```annotation_dir_path``` includes brush_hair_test_split1.txt, ...
+```
+python utils/hmdb51_json.py annotation_dir_path
 ```
 
 ## Running the code
