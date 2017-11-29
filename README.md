@@ -126,7 +126,7 @@ Continue Training from epoch 101. (~/data/results/save_100.pth is loaded.)
 ```
 python main.py --root_path ~/data --video_path kinetics_videos/jpg --annotation_path kinetics.json \
 --result_path results --dataset kinetics --resume_path results/save_100.pth \
---batch_size 128 --n_threads 4 --checkpoint 5
+--model_depth 34 --n_classes 400 --batch_size 128 --n_threads 4 --checkpoint 5
 ```
 
 Fine-tuning conv5_x and fc layers of a pretrained model (~/data/models/resnet-34-kinetics.pth) on UCF-101.
@@ -134,5 +134,5 @@ Fine-tuning conv5_x and fc layers of a pretrained model (~/data/models/resnet-34
 python main.py --root_path ~/data --video_path ucf101_videos/jpg --annotation_path ucf101_01.json \
 --result_path results --dataset ucf101 --n_classes 400 --n_finetune_classes 101 \
 --pretrain_path models/resnet-34-kinetics.pth --ft_begin_index 4 \
---batch_size 128 --n_threads 4 --checkpoint 5
+--model resnet --model_depth 34 --resnet_shortcut A --batch_size 128 --n_threads 4 --checkpoint 5
 ```
