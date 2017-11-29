@@ -50,6 +50,7 @@ If you use this code or pre-trained models, please cite the following:
 ## Pre-trained models
 Pre-trained models are available [here](https://drive.google.com/drive/folders/14KRBqT8ySfPtFSuLsFS2U4I-ihTDs0Y9?usp=sharing).  
 All models are trained on Kinetics.  
+ResNeXt-101 achieved the best performance in our experiments. (See [paper](https://arxiv.org/abs/1711.09577) in details)
 ```
 resnet-18-kinetics.pth: --model resnet --model_depth 18 --resnet_shortcut A
 resnet-34-kinetics.pth: --model resnet --model_depth 34 --resnet_shortcut A
@@ -60,7 +61,7 @@ resnet-152-kinetics.pth: --model resnet --model_depth 152 --resnet_shortcut B
 resnet-200-kinetics.pth: --model resnet --model_depth 200 --resnet_shortcut B
 preresnet-200-kinetics.pth: --model preresnet --model_depth 200 --resnet_shortcut B
 wideresnet-50-kinetics.pth: --model wideresnet --model_depth 50 --resnet_shortcut B --wide_resnet_k 2
-resnet-101-kinetics.pth: --model resnext --model_depth 101 --resnet_shortcut B --resnext_cardinality 32
+resnext-101-kinetics.pth: --model resnext --model_depth 101 --resnet_shortcut B --resnext_cardinality 32
 densenet-121-kinetics.pth: --model densenet --model_depth 121
 densenet-201-kinetics.pth: --model densenet --model_depth 201
 ```
