@@ -55,7 +55,7 @@ def convert_hmdb51_csv_to_activitynet_json(csv_dir_path, split_index, dst_json_p
 
 if __name__ == '__main__':
     csv_dir_path = sys.argv[1]
-    dst_json_path = sys.argv[2]
 
     for split_index in range(1, 4):
+        dst_json_path = os.path.join(csv_dir_path, 'hmdb51_{}.json'.format(split_index))
         convert_hmdb51_csv_to_activitynet_json(csv_dir_path, split_index, dst_json_path)
