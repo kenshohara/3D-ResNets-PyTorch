@@ -50,7 +50,7 @@ If you use this code or pre-trained models, please cite the following:
 ## Pre-trained models
 Pre-trained models are available [here](https://drive.google.com/drive/folders/14KRBqT8ySfPtFSuLsFS2U4I-ihTDs0Y9?usp=sharing).  
 All models are trained on Kinetics.  
-ResNeXt-101 achieved the best performance in our experiments. (See [paper](https://arxiv.org/abs/1711.09577) in details)
+ResNeXt-101 achieved the best performance in our experiments. (See [paper](https://arxiv.org/abs/1711.09577) in details.)
 ```
 resnet-18-kinetics.pth: --model resnet --model_depth 18 --resnet_shortcut A
 resnet-34-kinetics.pth: --model resnet --model_depth 34 --resnet_shortcut A
