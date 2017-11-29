@@ -50,10 +50,13 @@ def convert_ucf101_csv_to_activitynet_json(label_csv_path, train_csv_path,
         json.dump(dst_data, dst_file)
 
 if __name__ == '__main__':
-    label_csv_path = sys.argv[1]
-    train_csv_path = sys.argv[2]
-    val_csv_path = sys.argv[3]
-    dst_json_path = sys.argv[4]
+    csv_dir_path = sys.argv[1]
 
-    convert_ucf101_csv_to_activitynet_json(label_csv_path, train_csv_path,
-                                           val_csv_path, dst_json_path)
+    for split_index in range(1, 4):
+        label_csv_path = os.path.join(csv_dir_path, classInd.txt)
+        train_csv_path = os.path.join(csv_dir_path, 'trainlist0{}.txt'.format(split_index))
+        val_csv_path = os.path.join(csv_dir_path, 'testlist0{}.txt'.format(split_index))
+        dst_json_path = os.path.join(csv_dir_path, 'ucf101_0{}.json'.format(split_index))
+
+        convert_ucf101_csv_to_activitynet_json(label_csv_path, train_csv_path,
+                                               val_csv_path, dst_json_path)
