@@ -9,7 +9,7 @@ from torch.optim import lr_scheduler
 
 from opts import parse_opts
 from model import generate_model
-from mean import get_mean
+from mean import get_mean, get_std
 from spatial_transforms import (Compose, Normalize, Scale, CenterCrop, CornerCrop,
                                 MultiScaleCornerCrop, MultiScaleRandomCrop,
                                 RandomHorizontalFlip, ToTensor)
@@ -36,7 +36,8 @@ if __name__ == '__main__':
     for i in range(1, opt.n_scales):
         opt.scales.append(opt.scales[-1] * opt.scale_step)
     opt.arch = '{}-{}'.format(opt.model, opt.model_depth)
-    opt.mean = get_mean(opt.norm_value)
+    opt.mean = get_mean(opt.norm_value, dataset=opt.mean_dataset)
+    opt.std = get_std(opt.norm_value)
     print(opt)
     with open(os.path.join(opt.result_path, 'opts.json'), 'w') as opt_file:
         json.dump(vars(opt), opt_file)
@@ -48,6 +49,13 @@ if __name__ == '__main__':
     criterion = nn.CrossEntropyLoss()
     if not opt.no_cuda:
         criterion = criterion.cuda()
+
+    if opt.no_mean_norm and not opt.std_norm:
+        norm_method = Normalize([0, 0, 0], [1, 1, 1])
+    elif opt.std_norm:
+        norm_method = Normalize(opt.mean, [1, 1, 1])
+    else
+        norm_method = Normalize(opt.mean, opt.std)
 
     if not opt.no_train:
         assert opt.train_crop in ['random', 'corner', 'center']
@@ -61,7 +69,7 @@ if __name__ == '__main__':
         spatial_transform = Compose([crop_method,
                                      RandomHorizontalFlip(),
                                      ToTensor(opt.norm_value),
-                                     Normalize(opt.mean, [1, 1, 1])])
+                                     norm_method])
         temporal_transform = TemporalRandomCrop(opt.sample_duration)
         target_transform = ClassLabel()
         training_data = get_training_set(opt, spatial_transform,
@@ -85,7 +93,7 @@ if __name__ == '__main__':
         spatial_transform = Compose([Scale(opt.sample_size),
                                      CenterCrop(opt.sample_size),
                                      ToTensor(opt.norm_value),
-                                     Normalize(opt.mean, [1, 1, 1])])
+                                     norm_method])
         temporal_transform = LoopPadding(opt.sample_duration)
         target_transform = ClassLabel()        
         validation_data = get_validation_set(opt, spatial_transform,
@@ -121,7 +129,7 @@ if __name__ == '__main__':
                                      CornerCrop(opt.sample_size, 
                                                 opt.crop_position_in_test),
                                      ToTensor(opt.norm_value),
-                                     Normalize(opt.mean, [1, 1, 1])])
+                                     norm_method])
         temporal_transform = LoopPadding(opt.sample_duration)
         target_transform = VideoID()
 
