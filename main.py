@@ -67,7 +67,7 @@ if __name__ == '__main__':
         if opt.nesterov:
             dampening = 0
         else:
-            dampening = opt.momentum
+            dampening = opt.dampening
         optimizer = optim.SGD(parameters, lr=opt.learning_rate,
                               momentum=opt.momentum, dampening=dampening,
                               weight_decay=opt.weight_decay, nesterov=opt.nesterov)
