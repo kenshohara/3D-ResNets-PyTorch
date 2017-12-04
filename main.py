@@ -11,7 +11,8 @@ from opts import parse_opts
 from model import generate_model
 from mean import get_mean
 from spatial_transforms import (Compose, Normalize, Scale, CenterCrop, CornerCrop,
-                                MultiScaleCornerCrop, RandomHorizontalFlip, ToTensor)
+                                MultiScaleCornerCrop, MultiScaleRandomCrop,
+                                RandomHorizontalFlip, ToTensor)
 from temporal_transforms import LoopPadding, TemporalRandomCrop
 from target_transforms import ClassLabel, VideoID
 from target_transforms import Compose as TargetCompose
@@ -49,7 +50,12 @@ if __name__ == '__main__':
         criterion = criterion.cuda()
 
     if not opt.no_train:
-        spatial_transform = Compose([MultiScaleCornerCrop(opt.scales, opt.sample_size),
+        assert opt.train_crop in ['random', 'corner']
+        if opt.train_crop == 'random':
+            crop_method = MultiScaleRandomCrop(opt.scales, opt.sample_size)
+        elif opt.train_crop == 'corner':
+            crop_method = MultiScaleCornerCrop(opt.scales, opt.sample_size)
+        spatial_transform = Compose([crop_method,
                                      RandomHorizontalFlip(),
                                      ToTensor(opt.norm_value),
                                      Normalize(opt.mean, [1, 1, 1])])
