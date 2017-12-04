@@ -50,11 +50,14 @@ if __name__ == '__main__':
         criterion = criterion.cuda()
 
     if not opt.no_train:
-        assert opt.train_crop in ['random', 'corner']
+        assert opt.train_crop in ['random', 'corner', 'center']
         if opt.train_crop == 'random':
             crop_method = MultiScaleRandomCrop(opt.scales, opt.sample_size)
         elif opt.train_crop == 'corner':
             crop_method = MultiScaleCornerCrop(opt.scales, opt.sample_size)
+        elif opt.train_crop == 'center':
+            crop_method = MultiScaleCornerCrop(opt.scales, opt.sample_size,
+                                               crop_positions=['c'])
         spatial_transform = Compose([crop_method,
                                      RandomHorizontalFlip(),
                                      ToTensor(opt.norm_value),

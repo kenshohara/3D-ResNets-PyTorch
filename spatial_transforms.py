@@ -274,12 +274,13 @@ class MultiScaleCornerCrop(object):
         interpolation: Default: PIL.Image.BILINEAR
     """
 
-    def __init__(self, scales, size, interpolation=Image.BILINEAR):
+    def __init__(self, scales, size, interpolation=Image.BILINEAR,
+                 crop_positions=['c', 'tl', 'tr', 'bl', 'br']):
         self.scales = scales
         self.size = size
         self.interpolation = interpolation
 
-        self.crop_positions = ['c', 'tl', 'tr', 'bl', 'br']
+        self.crop_positions = crop_positions
 
     def __call__(self, img):
         min_length = min(img.size[0], img.size[1])
