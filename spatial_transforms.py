@@ -327,7 +327,6 @@ class MultiScaleCornerCrop(object):
 
 
 class MultiScaleRandomCrop(object):
-
     def __init__(self, scales, size, interpolation=Image.BILINEAR):
         self.scales = scales
         self.size = size
