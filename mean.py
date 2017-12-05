@@ -1,9 +1,9 @@
 def get_mean(norm_value=255, dataset='activitynet'):
     assert dataset in ['activitynet', 'kinetics']
-    
+
     if dataset == 'activitynet':
         return [114.7748 / norm_value, 107.7354 / norm_value, 99.4750 / norm_value]
-    elif dataset == 'kinetics'
+    elif dataset == 'kinetics':
         # Kinetics (10 videos for each class)
         return [110.63666788 / norm_value, 103.16065604 / norm_value, 96.29023126 / norm_value]
 
