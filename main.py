@@ -54,7 +54,7 @@ if __name__ == '__main__':
         norm_method = Normalize([0, 0, 0], [1, 1, 1])
     elif opt.std_norm:
         norm_method = Normalize(opt.mean, [1, 1, 1])
-    else
+    else:
         norm_method = Normalize(opt.mean, opt.std)
 
     if not opt.no_train:
