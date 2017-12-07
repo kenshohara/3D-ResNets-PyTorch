@@ -110,3 +110,41 @@ class TemporalRandomCrop(object):
             out.append(index)
 
         return out
+
+
+class TemporalMultiscaleRandomCrop(object):
+    """
+    Args:
+        scales: integers (1, 2, 3, ...) and their inverses can be used.
+    """
+    def __init__(self, scales, size):
+        self.scales = scales
+        self.size = size
+
+    def __call__(self, frame_indices):
+        """
+        Args:
+            frame_indices (list): frame indices to be cropped.
+        Returns:
+            list: Cropped frame indices.
+        """
+
+        scale_index = random.randint(0, len(self.scales))
+        crop_size = int(self.size * self.scales[scale_index])
+        rand_end = max(0, len(frame_indices) - crop_size - 1)
+        begin_index = random.randint(0, rand_end)
+        end_index = min(begin_index + crop_size, len(frame_indices))
+
+        if crop_size >= self.size:
+            step = int(crop_size / self.size)
+            out = frame_indices[begin_index:end_index:step]
+        else:
+            loop = self.size / crop_size
+            out = [index for index in frame_indices for l in range(loop)]
+
+        for index in out:
+            if len(out) >= self.size:
+                break
+            out.append(index)
+
+        return out
