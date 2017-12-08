@@ -53,7 +53,7 @@ if __name__ == '__main__':
     csv_dir_path = sys.argv[1]
 
     for split_index in range(1, 4):
-        label_csv_path = os.path.join(csv_dir_path, classInd.txt)
+        label_csv_path = os.path.join(csv_dir_path, 'classInd.txt')
         train_csv_path = os.path.join(csv_dir_path, 'trainlist0{}.txt'.format(split_index))
         val_csv_path = os.path.join(csv_dir_path, 'testlist0{}.txt'.format(split_index))
         dst_json_path = os.path.join(csv_dir_path, 'ucf101_0{}.json'.format(split_index))
