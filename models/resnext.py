@@ -140,7 +140,7 @@ def get_fine_tuning_parameters(model, ft_begin_index):
 
     ft_module_names = []
     for i in range(ft_begin_index, 5):
-        ft_module_names.append('layer{}'.format(ft_begin_index))
+        ft_module_names.append('layer{}'.format(i))
     ft_module_names.append('fc')
 
     parameters = []
