@@ -69,6 +69,7 @@ Fine-tuned models on UCF-101 or HMDB-51 will be also available.
 
 ### Performance of the models on Kinetics
 This table shows the averaged accuracies over top-1 and top-5 on Kinetics.
+
 | Method | Accuracies |
 |:---|:---:|
 | ResNet-18 | 66.1 |
