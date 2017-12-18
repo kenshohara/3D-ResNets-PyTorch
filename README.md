@@ -68,8 +68,9 @@ densenet-201-kinetics.pth: --model densenet --model_depth 201
 Fine-tuned models on UCF-101 or HMDB-51 will be also available.
 
 ### Performance of the models on Kinetics
-|Method|Average (Top-1 and Top-5 Accuracies)|
-|:---|:---|:---|
+This table shows the averaged accuracies over top-1 and top-5 on Kinetics.
+|Method|Accuracies|
+|:---|:---:|
 |ResNet-18|66.1|
 |ResNet-34|71.0|
 |ResNet-50|72.2|
