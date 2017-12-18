@@ -67,6 +67,21 @@ densenet-201-kinetics.pth: --model densenet --model_depth 201
 ```
 Fine-tuned models on UCF-101 or HMDB-51 will be also available.
 
+### Performance of the models on Kinetics
+|Method|Average (Top-1 and Top-5 Accuracies)|
+|:---|:---|:---|
+|ResNet-18|66.1|
+|ResNet-34|71.0|
+|ResNet-50|72.2|
+|ResNet-101|73.3|
+|ResNet-152|73.7|
+|ResNet-200|73.7|
+|ResNet-200 (pre-act)|73.4|
+|Wide ResNet-50|74.7|
+|ResNeXt-101|75.4|
+|DenseNet-121|70.8|
+|DenseNet-201|72.3|
+
 
 ## Requirements
 * [PyTorch](http://pytorch.org/)
