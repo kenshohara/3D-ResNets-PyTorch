@@ -13,7 +13,7 @@ from mean import get_mean, get_std
 from spatial_transforms import (Compose, Normalize, Scale, CenterCrop, CornerCrop,
                                 MultiScaleCornerCrop, MultiScaleRandomCrop,
                                 RandomHorizontalFlip, ToTensor)
-from temporal_transforms import LoopPadding, TemporalRandomCrop
+from temporal_transforms import LoopPadding, TemporalRandomCrop, TemporalMultiscaleRandomCrop
 from target_transforms import ClassLabel, VideoID
 from target_transforms import Compose as TargetCompose
 from dataset import get_training_set, get_validation_set, get_test_set
@@ -35,6 +35,10 @@ if __name__ == '__main__':
     opt.scales = [opt.initial_scale]
     for i in range(1, opt.n_scales):
         opt.scales.append(opt.scales[-1] * opt.scale_step)
+    opt.t_scales = [opt.max_t_scale, 1.0 / opt.max_t_scale]
+    for i in range(opt.max_t_scale - 1, 0, -1):
+        opt.t_scales.append(i)
+        opt.t_scales.append(1.0 / i)
     opt.arch = '{}-{}'.format(opt.model, opt.model_depth)
     opt.mean = get_mean(opt.norm_value, dataset=opt.mean_dataset)
     opt.std = get_std(opt.norm_value)
@@ -70,7 +74,10 @@ if __name__ == '__main__':
                                      RandomHorizontalFlip(),
                                      ToTensor(opt.norm_value),
                                      norm_method])
-        temporal_transform = TemporalRandomCrop(opt.sample_duration)
+        if opt.train_t_crop == 'single':
+            temporal_transform = TemporalRandomCrop(opt.sample_duration)
+        elif opt.train_t_crop == 'multi':
+            temporal_transform = TemporalMultiscaleRandomCrop(opt.t_scales, opt.sample_duration)
         target_transform = ClassLabel()
         training_data = get_training_set(opt, spatial_transform,
                                          temporal_transform, target_transform)

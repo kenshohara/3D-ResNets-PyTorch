@@ -15,6 +15,8 @@ def parse_opts():
     parser.add_argument('--n_scales', default=5, type=int, help='Number of scales for multiscale cropping')
     parser.add_argument('--scale_step', default=0.84089641525, type=float, help='Scale step for multiscale cropping')
     parser.add_argument('--train_crop', default='corner', type=str, help='Spatial cropping method in training. random is uniform. corner is selection from 4 corners and 1 center.  (random | corner | center)')
+    parser.add_argument('--train_t_crop', default='single', type=str, help='Temporal cropping method in training. single is single-scale crop. multi is multi-scale crop. (single | multi)')
+    parser.add_argument('--max_t_scale', default=3, type=int, help='Max temporal scale for multiscale cropping')
     parser.add_argument('--learning_rate', default=0.1, type=float, help='Initial learning rate (divided by 10 while training by lr scheduler)')
     parser.add_argument('--momentum', default=0.9, type=float, help='Momentum')
     parser.add_argument('--dampening', default=0.9, type=float, help='dampening of SGD')
