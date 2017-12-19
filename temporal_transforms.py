@@ -140,7 +140,8 @@ class TemporalMultiscaleRandomCrop(object):
             out = frame_indices[begin_index:end_index:step]
         else:
             loop = int(self.size / crop_size)
-            out = [index for index in frame_indices for l in range(loop)]
+            out = [index for index in frame_indices[begin_index:end_index]
+                   for l in range(loop)]
 
         for index in out:
             if len(out) >= self.size:
