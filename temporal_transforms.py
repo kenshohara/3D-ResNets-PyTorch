@@ -129,7 +129,7 @@ class TemporalMultiscaleRandomCrop(object):
             list: Cropped frame indices.
         """
 
-        scale_index = random.randint(0, len(self.scales))
+        scale_index = random.randint(0, len(self.scales) - 1)
         crop_size = int(self.size * self.scales[scale_index])
         rand_end = max(0, len(frame_indices) - crop_size - 1)
         begin_index = random.randint(0, rand_end)
