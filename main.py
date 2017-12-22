@@ -10,9 +10,9 @@ from torch.optim import lr_scheduler
 from opts import parse_opts
 from model import generate_model
 from mean import get_mean, get_std
-from spatial_transforms import (Compose, Normalize, Scale, CenterCrop, CornerCrop,
-                                MultiScaleCornerCrop, MultiScaleRandomCrop,
-                                RandomHorizontalFlip, ToTensor)
+from spatial_transforms import (
+    Compose, Normalize, Scale, CenterCrop, CornerCrop, MultiScaleCornerCrop,
+    MultiScaleRandomCrop, RandomHorizontalFlip, ToTensor)
 from temporal_transforms import LoopPadding, TemporalRandomCrop, TemporalMultiscaleRandomCrop
 from target_transforms import ClassLabel, VideoID
 from target_transforms import Compose as TargetCompose
@@ -68,47 +68,65 @@ if __name__ == '__main__':
         elif opt.train_crop == 'corner':
             crop_method = MultiScaleCornerCrop(opt.scales, opt.sample_size)
         elif opt.train_crop == 'center':
-            crop_method = MultiScaleCornerCrop(opt.scales, opt.sample_size,
-                                               crop_positions=['c'])
-        spatial_transform = Compose([crop_method,
-                                     RandomHorizontalFlip(),
-                                     ToTensor(opt.norm_value),
-                                     norm_method])
+            crop_method = MultiScaleCornerCrop(
+                opt.scales, opt.sample_size, crop_positions=['c'])
+        spatial_transform = Compose([
+            crop_method,
+            RandomHorizontalFlip(),
+            ToTensor(opt.norm_value), norm_method
+        ])
         if opt.train_t_crop == 'single':
             temporal_transform = TemporalRandomCrop(opt.sample_duration)
         elif opt.train_t_crop == 'multi':
-            temporal_transform = TemporalMultiscaleRandomCrop(opt.t_scales, opt.sample_duration)
+            temporal_transform = TemporalMultiscaleRandomCrop(
+                opt.t_scales, opt.sample_duration)
         target_transform = ClassLabel()
         training_data = get_training_set(opt, spatial_transform,
                                          temporal_transform, target_transform)
-        train_loader = torch.utils.data.DataLoader(training_data, batch_size=opt.batch_size,
-                                                   shuffle=True, num_workers=opt.n_threads, pin_memory=True)
-        train_logger = Logger(os.path.join(opt.result_path, 'train.log'),
-                              ['epoch', 'loss', 'acc', 'lr'])
-        train_batch_logger = Logger(os.path.join(opt.result_path, 'train_batch.log'),
-                                    ['epoch', 'batch', 'iter', 'loss', 'acc', 'lr'])
+        train_loader = torch.utils.data.DataLoader(
+            training_data,
+            batch_size=opt.batch_size,
+            shuffle=True,
+            num_workers=opt.n_threads,
+            pin_memory=True)
+        train_logger = Logger(
+            os.path.join(opt.result_path, 'train.log'),
+            ['epoch', 'loss', 'acc', 'lr'])
+        train_batch_logger = Logger(
+            os.path.join(opt.result_path, 'train_batch.log'),
+            ['epoch', 'batch', 'iter', 'loss', 'acc', 'lr'])
 
         if opt.nesterov:
             dampening = 0
         else:
             dampening = opt.dampening
-        optimizer = optim.SGD(parameters, lr=opt.learning_rate,
-                              momentum=opt.momentum, dampening=dampening,
-                              weight_decay=opt.weight_decay, nesterov=opt.nesterov)
-        scheduler = lr_scheduler.ReduceLROnPlateau(optimizer, 'min', patience=opt.lr_patience)
+        optimizer = optim.SGD(
+            parameters,
+            lr=opt.learning_rate,
+            momentum=opt.momentum,
+            dampening=dampening,
+            weight_decay=opt.weight_decay,
+            nesterov=opt.nesterov)
+        scheduler = lr_scheduler.ReduceLROnPlateau(
+            optimizer, 'min', patience=opt.lr_patience)
     if not opt.no_val:
-        spatial_transform = Compose([Scale(opt.sample_size),
-                                     CenterCrop(opt.sample_size),
-                                     ToTensor(opt.norm_value),
-                                     norm_method])
+        spatial_transform = Compose([
+            Scale(opt.sample_size),
+            CenterCrop(opt.sample_size),
+            ToTensor(opt.norm_value), norm_method
+        ])
         temporal_transform = LoopPadding(opt.sample_duration)
-        target_transform = ClassLabel()        
-        validation_data = get_validation_set(opt, spatial_transform,
-                                             temporal_transform, target_transform)
-        val_loader = torch.utils.data.DataLoader(validation_data, batch_size=opt.batch_size,
-                                                 shuffle=False, num_workers=opt.n_threads, pin_memory=True)
-        val_logger = Logger(os.path.join(opt.result_path, 'val.log'),
-                            ['epoch', 'loss', 'acc'])
+        target_transform = ClassLabel()
+        validation_data = get_validation_set(
+            opt, spatial_transform, temporal_transform, target_transform)
+        val_loader = torch.utils.data.DataLoader(
+            validation_data,
+            batch_size=opt.batch_size,
+            shuffle=False,
+            num_workers=opt.n_threads,
+            pin_memory=True)
+        val_logger = Logger(
+            os.path.join(opt.result_path, 'val.log'), ['epoch', 'loss', 'acc'])
 
     if opt.resume_path:
         print('loading checkpoint {}'.format(opt.resume_path))
@@ -123,25 +141,30 @@ if __name__ == '__main__':
     print('run')
     for i in range(opt.begin_epoch, opt.n_epochs + 1):
         if not opt.no_train:
-            train_epoch(i, train_loader, model, criterion, optimizer,
-                        opt, train_logger, train_batch_logger)
+            train_epoch(i, train_loader, model, criterion, optimizer, opt,
+                        train_logger, train_batch_logger)
         if not opt.no_val:
-            validation_loss = val_epoch(i, val_loader, model, criterion, opt, val_logger)
+            validation_loss = val_epoch(i, val_loader, model, criterion, opt,
+                                        val_logger)
 
         if not opt.no_train and not opt.no_val:
             scheduler.step(validation_loss)
 
     if opt.test:
-        spatial_transform = Compose([Scale(int(opt.sample_size / opt.scale_in_test)),
-                                     CornerCrop(opt.sample_size, 
-                                                opt.crop_position_in_test),
-                                     ToTensor(opt.norm_value),
-                                     norm_method])
+        spatial_transform = Compose([
+            Scale(int(opt.sample_size / opt.scale_in_test)),
+            CornerCrop(opt.sample_size, opt.crop_position_in_test),
+            ToTensor(opt.norm_value), norm_method
+        ])
         temporal_transform = LoopPadding(opt.sample_duration)
         target_transform = VideoID()
 
-        test_data = get_test_set(opt, spatial_transform,
-                                 temporal_transform, target_transform)
-        test_loader = torch.utils.data.DataLoader(test_data, batch_size=opt.batch_size,
-                                                  shuffle=False, num_workers=opt.n_threads, pin_memory=True)
+        test_data = get_test_set(opt, spatial_transform, temporal_transform,
+                                 target_transform)
+        test_loader = torch.utils.data.DataLoader(
+            test_data,
+            batch_size=opt.batch_size,
+            shuffle=False,
+            num_workers=opt.n_threads,
+            pin_memory=True)
         test.test(test_loader, model, opt, test_data.class_names)

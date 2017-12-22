@@ -58,7 +58,8 @@ class ToTensor(object):
             return img.float().div(self.norm_value)
 
         if accimage is not None and isinstance(pic, accimage.Image):
-            nppic = np.zeros([pic.channels, pic.height, pic.width], dtype=np.float32)
+            nppic = np.zeros(
+                [pic.channels, pic.height, pic.width], dtype=np.float32)
             pic.copyto(nppic)
             return torch.from_numpy(nppic)
 
@@ -133,7 +134,9 @@ class Scale(object):
     """
 
     def __init__(self, size, interpolation=Image.BILINEAR):
-        assert isinstance(size, int) or (isinstance(size, collections.Iterable) and len(size) == 2)
+        assert isinstance(size,
+                          int) or (isinstance(size, collections.Iterable) and
+                                   len(size) == 2)
         self.size = size
         self.interpolation = interpolation
 
@@ -195,6 +198,7 @@ class CenterCrop(object):
 
 
 class CornerCrop(object):
+
     def __init__(self, size, crop_position=None):
         self.size = size
         if crop_position is None:
@@ -241,8 +245,9 @@ class CornerCrop(object):
 
     def randomize_parameters(self):
         if self.randomize:
-            self.crop_position = self.crop_positions[
-                random.randint(0, len(self.crop_positions) - 1)]
+            self.crop_position = self.crop_positions[random.randint(
+                0,
+                len(self.crop_positions) - 1)]
 
 
 class RandomHorizontalFlip(object):
@@ -274,7 +279,10 @@ class MultiScaleCornerCrop(object):
         interpolation: Default: PIL.Image.BILINEAR
     """
 
-    def __init__(self, scales, size, interpolation=Image.BILINEAR,
+    def __init__(self,
+                 scales,
+                 size,
+                 interpolation=Image.BILINEAR,
                  crop_positions=['c', 'tl', 'tr', 'bl', 'br']):
         self.scales = scales
         self.size = size
@@ -324,10 +332,13 @@ class MultiScaleCornerCrop(object):
 
     def randomize_parameters(self):
         self.scale = self.scales[random.randint(0, len(self.scales) - 1)]
-        self.crop_position = self.crop_positions[random.randint(0, len(self.scales) - 1)]
+        self.crop_position = self.crop_positions[random.randint(
+            0,
+            len(self.scales) - 1)]
 
 
 class MultiScaleRandomCrop(object):
+
     def __init__(self, scales, size, interpolation=Image.BILINEAR):
         self.scales = scales
         self.size = size

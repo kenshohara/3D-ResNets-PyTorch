@@ -3,6 +3,7 @@ import math
 
 
 class LoopPadding(object):
+
     def __init__(self, size):
         self.size = size
 
@@ -76,7 +77,6 @@ class TemporalCenterCrop(object):
         return out
 
 
-
 class TemporalRandomCrop(object):
     """Temporally crop the given frame indices at a random location.
 
@@ -117,6 +117,7 @@ class TemporalMultiscaleRandomCrop(object):
     Args:
         scales: integers (1, 2, 3, ...) and their inverses can be used.
     """
+
     def __init__(self, scales, size):
         self.scales = scales
         self.size = size
