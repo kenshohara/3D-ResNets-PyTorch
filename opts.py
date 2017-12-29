@@ -226,6 +226,11 @@ def parse_opts():
         type=int,
         help='Depth of resnet (10 | 18 | 34 | 50 | 101)')
     parser.add_argument(
+        '--conv1_t_size',
+        default=7,
+        type=int,
+        help='Kernel size of conv1. Currently only support for ResNet.')
+    parser.add_argument(
         '--resnet_shortcut',
         default='B',
         type=str,

@@ -113,6 +113,7 @@ class ResNet(nn.Module):
                  layers,
                  sample_size,
                  sample_duration,
+                 conv1_t_size=7,
                  shortcut_type='B',
                  num_classes=400):
         self.inplanes = 64
@@ -120,9 +121,9 @@ class ResNet(nn.Module):
         self.conv1 = nn.Conv3d(
             3,
             64,
-            kernel_size=7,
+            kernel_size=(conv1_t_size, 7, 7),
             stride=(1, 2, 2),
-            padding=(3, 3, 3),
+            padding=(int(conv1_t_size / 2), 3, 3),
             bias=False)
         self.bn1 = nn.BatchNorm3d(64)
         self.relu = nn.ReLU(inplace=True)
