@@ -108,8 +108,7 @@ def get_test_set(opt, spatial_transform, temporal_transform, target_transform):
             spatial_transform,
             temporal_transform,
             target_transform,
-            sample_duration=opt.sample_duration,
-            sample_stride=opt.sample_stride)
+            sample_duration=opt.sample_duration)
     elif opt.dataset == 'activitynet':
         test_data = ActivityNet(
             opt.video_path,
