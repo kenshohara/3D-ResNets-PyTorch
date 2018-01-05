@@ -13,7 +13,11 @@ from mean import get_mean, get_std
 from spatial_transforms import (
     Compose, Normalize, Scale, CenterCrop, CornerCrop, MultiScaleCornerCrop,
     MultiScaleRandomCrop, RandomHorizontalFlip, ToTensor)
+<<<<<<< HEAD
 from temporal_transforms import LoopPadding, TemporalRandomCrop, TemporalMultiscaleRandomCrop
+=======
+from temporal_transforms import LoopPadding, TemporalRandomCrop
+>>>>>>> master
 from target_transforms import ClassLabel, VideoID
 from target_transforms import Compose as TargetCompose
 from dataset import get_training_set, get_validation_set, get_test_set
@@ -75,11 +79,15 @@ if __name__ == '__main__':
             RandomHorizontalFlip(),
             ToTensor(opt.norm_value), norm_method
         ])
+<<<<<<< HEAD
         if opt.train_t_crop == 'single':
             temporal_transform = TemporalRandomCrop(opt.sample_duration)
         elif opt.train_t_crop == 'multi':
             temporal_transform = TemporalMultiscaleRandomCrop(
                 opt.t_scales, opt.sample_duration)
+=======
+        temporal_transform = TemporalRandomCrop(opt.sample_duration)
+>>>>>>> master
         target_transform = ClassLabel()
         training_data = get_training_set(opt, spatial_transform,
                                          temporal_transform, target_transform)

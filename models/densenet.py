@@ -51,8 +51,8 @@ def get_fine_tuning_parameters(model, ft_begin_index):
 
     ft_module_names = []
     for i in range(ft_begin_index, 5):
-        ft_module_names.append('denseblock{}'.format(ft_begin_index))
-        ft_module_names.append('transition{}'.format(ft_begin_index))
+        ft_module_names.append('denseblock{}'.format(i))
+        ft_module_names.append('transition{}'.format(i))
     ft_module_names.append('norm5')
     ft_module_names.append('classifier')
 
@@ -198,8 +198,8 @@ class DenseNet(nn.Module):
     def forward(self, x):
         features = self.features(x)
         out = F.relu(features, inplace=True)
-        last_duration = math.ceil(self.sample_duration / 16)
-        last_size = math.floor(self.sample_size / 32)
+        last_duration = int(math.ceil(self.sample_duration / 16))
+        last_size = int(math.floor(self.sample_size / 32))
         out = F.avg_pool3d(
             out, kernel_size=(last_duration, last_size, last_size)).view(
                 features.size(0), -1)

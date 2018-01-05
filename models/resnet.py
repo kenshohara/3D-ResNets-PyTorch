@@ -135,8 +135,8 @@ class ResNet(nn.Module):
             block, 256, layers[2], shortcut_type, stride=2)
         self.layer4 = self._make_layer(
             block, 512, layers[3], shortcut_type, stride=2)
-        last_duration = math.ceil(sample_duration / 16)
-        last_size = math.ceil(sample_size / 32)
+        last_duration = int(math.ceil(sample_duration / 16))
+        last_size = int(math.ceil(sample_size / 32))
         self.avgpool = nn.AvgPool3d(
             (last_duration, last_size, last_size), stride=1)
         self.fc = nn.Linear(512 * block.expansion, num_classes)
@@ -199,7 +199,7 @@ def get_fine_tuning_parameters(model, ft_begin_index):
 
     ft_module_names = []
     for i in range(ft_begin_index, 5):
-        ft_module_names.append('layer{}'.format(ft_begin_index))
+        ft_module_names.append('layer{}'.format(i))
     ft_module_names.append('fc')
 
     parameters = []
