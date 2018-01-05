@@ -54,8 +54,13 @@ def train_epoch(epoch, data_loader, model, criterion, optimizer, opt,
               'Data {data_time.val:.3f} ({data_time.avg:.3f})\t'
               'Loss {loss.val:.4f} ({loss.avg:.4f})\t'
               'Acc {acc.val:.3f} ({acc.avg:.3f})'.format(
-                  epoch, i + 1, len(data_loader), batch_time=batch_time,
-                  data_time=data_time, loss=losses, acc=accuracies))
+                  epoch,
+                  i + 1,
+                  len(data_loader),
+                  batch_time=batch_time,
+                  data_time=data_time,
+                  loss=losses,
+                  acc=accuracies))
 
     epoch_logger.log({
         'epoch': epoch,
@@ -65,11 +70,12 @@ def train_epoch(epoch, data_loader, model, criterion, optimizer, opt,
     })
 
     if epoch % opt.checkpoint == 0:
-        save_file_path = os.path.join(opt.result_path, 'save_{}.pth'.format(epoch))
+        save_file_path = os.path.join(opt.result_path,
+                                      'save_{}.pth'.format(epoch))
         states = {
             'epoch': epoch + 1,
             'arch': opt.arch,
             'state_dict': model.state_dict(),
-            'optimizer' : optimizer.state_dict(),
+            'optimizer': optimizer.state_dict(),
         }
         torch.save(states, save_file_path)

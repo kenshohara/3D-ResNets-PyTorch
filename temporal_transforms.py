@@ -3,6 +3,7 @@ import math
 
 
 class LoopPadding(object):
+
     def __init__(self, size):
         self.size = size
 
@@ -74,7 +75,6 @@ class TemporalCenterCrop(object):
             out.append(index)
 
         return out
-
 
 
 class TemporalRandomCrop(object):

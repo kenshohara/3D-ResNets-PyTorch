@@ -3,6 +3,7 @@ import math
 
 
 class Compose(object):
+
     def __init__(self, transforms):
         self.transforms = transforms
 
@@ -14,10 +15,12 @@ class Compose(object):
 
 
 class ClassLabel(object):
+
     def __call__(self, target):
         return target['label']
 
 
 class VideoID(object):
+
     def __call__(self, target):
         return target['video_id']
