@@ -40,6 +40,7 @@ if __name__ == '__main__':
         opt.t_scales.append(i)
         opt.t_scales.append(1.0 / i)
     opt.arch = '{}-{}'.format(opt.model, opt.model_depth)
+    opt.begin_epoch = 1
     opt.mean = get_mean(opt.norm_value, dataset=opt.mean_dataset)
     opt.std = get_std(opt.norm_value)
     print(opt)
