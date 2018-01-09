@@ -52,7 +52,7 @@ if __name__ == '__main__':
 
     if opt.no_mean_norm and not opt.std_norm:
         norm_method = Normalize([0, 0, 0], [1, 1, 1])
-    elif opt.std_norm:
+    elif not opt.std_norm:
         norm_method = Normalize(opt.mean, [1, 1, 1])
     else:
         norm_method = Normalize(opt.mean, opt.std)
@@ -109,6 +109,7 @@ if __name__ == '__main__':
         ])
         temporal_transform = LoopPadding(opt.sample_duration)
         target_transform = ClassLabel()
+<<<<<<< HEAD
         validation_data = get_validation_set(
             opt, spatial_transform, temporal_transform, target_transform)
         val_loader = torch.utils.data.DataLoader(
@@ -119,6 +120,14 @@ if __name__ == '__main__':
             pin_memory=True)
         val_logger = Logger(
             os.path.join(opt.result_path, 'val.log'), ['epoch', 'loss', 'acc'])
+=======
+        validation_data = get_validation_set(opt, spatial_transform,
+                                             temporal_transform, target_transform)
+        val_loader = torch.utils.data.DataLoader(validation_data, batch_size=opt.batch_size,
+                                                 shuffle=False, num_workers=opt.n_threads, pin_memory=True)
+        val_logger = Logger(os.path.join(opt.result_path, 'val.log'),
+                            ['epoch', 'loss', 'acc'])
+>>>>>>> e0a96428dbd4c0dff3c63b816c350eccf62b86ba
 
     if opt.resume_path:
         print('loading checkpoint {}'.format(opt.resume_path))
@@ -143,11 +152,19 @@ if __name__ == '__main__':
             scheduler.step(validation_loss)
 
     if opt.test:
+<<<<<<< HEAD
         spatial_transform = Compose([
             Scale(int(opt.sample_size / opt.scale_in_test)),
             CornerCrop(opt.sample_size, opt.crop_position_in_test),
             ToTensor(opt.norm_value), norm_method
         ])
+=======
+        spatial_transform = Compose([Scale(int(opt.sample_size / opt.scale_in_test)),
+                                     CornerCrop(opt.sample_size,
+                                                opt.crop_position_in_test),
+                                     ToTensor(opt.norm_value),
+                                     norm_method])
+>>>>>>> e0a96428dbd4c0dff3c63b816c350eccf62b86ba
         temporal_transform = LoopPadding(opt.sample_duration)
         target_transform = VideoID()
 

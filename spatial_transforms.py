@@ -353,8 +353,8 @@ class MultiScaleRandomCrop(object):
 
         x1 = self.tl_x * (image_width - crop_size)
         y1 = self.tl_y * (image_height - crop_size)
-        x2 = x1 + image_width
-        y2 = y1 + image_height
+        x2 = x1 + crop_size
+        y2 = y1 + crop_size
 
         img = img.crop((x1, y1, x2, y2))
 
