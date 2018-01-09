@@ -52,7 +52,7 @@ if __name__ == '__main__':
 
     if opt.no_mean_norm and not opt.std_norm:
         norm_method = Normalize([0, 0, 0], [1, 1, 1])
-    elif opt.std_norm:
+    elif not opt.std_norm:
         norm_method = Normalize(opt.mean, [1, 1, 1])
     else:
         norm_method = Normalize(opt.mean, opt.std)
@@ -95,7 +95,7 @@ if __name__ == '__main__':
                                      ToTensor(opt.norm_value),
                                      norm_method])
         temporal_transform = LoopPadding(opt.sample_duration)
-        target_transform = ClassLabel()        
+        target_transform = ClassLabel()
         validation_data = get_validation_set(opt, spatial_transform,
                                              temporal_transform, target_transform)
         val_loader = torch.utils.data.DataLoader(validation_data, batch_size=opt.batch_size,
@@ -126,7 +126,7 @@ if __name__ == '__main__':
 
     if opt.test:
         spatial_transform = Compose([Scale(int(opt.sample_size / opt.scale_in_test)),
-                                     CornerCrop(opt.sample_size, 
+                                     CornerCrop(opt.sample_size,
                                                 opt.crop_position_in_test),
                                      ToTensor(opt.norm_value),
                                      norm_method])
