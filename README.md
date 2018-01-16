@@ -1,4 +1,11 @@
 # 3D ResNets for Action Recognition
+## Update (2018/01/16)
+We uploaded some of fine-tuned models on UCF-101 and HMDB-51.
+* ResNeXt-101 fine-tuned on UCF-101 (split1)
+* ResNeXt-101 (64 frame inputs) fine-tuned on UCF-101 (split1)
+* ResNeXt-101 fine-tuned on HMDB-51 (split1)
+* ResNeXt-101 (64 frame inputs) fine-tuned on HMDB-51 (split1)
+
 ## Update (2017/11/27)
 We published [a new paper](https://arxiv.org/abs/1711.09577) on arXiv.  
 We also added the following new models and their Kinetics pretrained models in this repository.  
@@ -65,7 +72,13 @@ resnext-101-kinetics.pth: --model resnext --model_depth 101 --resnet_shortcut B 
 densenet-121-kinetics.pth: --model densenet --model_depth 121
 densenet-201-kinetics.pth: --model densenet --model_depth 201
 ```
-Fine-tuned models on UCF-101 or HMDB-51 will be also available.
+Some of fine-tuned models on UCF-101 and HMDB-51 (split 1) are also available.
+```
+resnext-101-kinetics-ucf101_split1.pth: --model resnext --model_depth 101 --resnet_shortcut B --resnext_cardinality 32
+resnext-101-64f-kinetics-ucf101_split1.pth: --model resnext --model_depth 101 --resnet_shortcut B --resnext_cardinality 32 --sample_duration 64
+resnext-101-kinetics-hmdb51_split1.pth: --model resnext --model_depth 101 --resnet_shortcut B --resnext_cardinality 32
+resnext-101-64f-kinetics-hmdb51_split1.pth: --model resnext --model_depth 101 --resnet_shortcut B --resnext_cardinality 32 --sample_duration 64
+```
 
 ### Performance of the models on Kinetics
 This table shows the averaged accuracies over top-1 and top-5 on Kinetics.
