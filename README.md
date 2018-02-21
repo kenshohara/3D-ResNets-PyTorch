@@ -1,5 +1,10 @@
 # 3D ResNets for Action Recognition
 
+## Update (2018/2/21)
+
+Our paper "Can Spatiotemporal 3D CNNs Retrace the History of 2D CNNs and ImageNet?" is accepted to CVPR2018!  
+We update the paper information.
+
 ## Update (2018/01/16)
 
 We uploaded some of fine-tuned models on UCF-101 and HMDB-51.
@@ -34,7 +39,7 @@ This is the PyTorch code for the following papers:
 [
 Kensho Hara, Hirokatsu Kataoka, and Yutaka Satoh,  
 "Can Spatiotemporal 3D CNNs Retrace the History of 2D CNNs and ImageNet?",  
-arXiv preprint, arXiv:1711.09577, 2017.
+arXiv preprint, arXiv:1711.09577, 2017. (accepted to CVPR2018)
 ](https://arxiv.org/abs/1711.09577)
 
 [
