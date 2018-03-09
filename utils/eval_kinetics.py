@@ -4,8 +4,13 @@ import urllib2
 import numpy as np
 import pandas as pd
 
-from utils import get_blocked_videos
-from utils import interpolated_prec_rec
+API = 'http://ec2-52-11-11-89.us-west-2.compute.amazonaws.com/challenge17/api.py'
+
+def get_blocked_videos(api=API):
+    api_url = '{}?action=get_blocked'.format(api)
+    req = urllib2.Request(api_url)
+    response = urllib2.urlopen(req)
+    return json.loads(response.read())
 
 class KINETICSclassification(object):
     GROUND_TRUTH_FIELDS = ['database', 'labels']
@@ -121,24 +126,11 @@ class KINETICSclassification(object):
                                    'score': score_lst})
         return prediction
 
-    def wrapper_compute_average_precision(self):
-        """Computes average precision for each class in the subset.
-        """
-        ap = np.zeros(len(self.activity_index.items()))
-        for activity, cidx in self.activity_index.iteritems():
-            gt_idx = self.ground_truth['label'] == cidx
-            pred_idx = self.prediction['label'] == cidx
-            ap[cidx] = compute_average_precision_classification(
-                self.ground_truth.loc[gt_idx].reset_index(drop=True),
-                self.prediction.loc[pred_idx].reset_index(drop=True))
-        return ap
-
     def evaluate(self):
         """Evaluates a prediction file. For the detection task we measure the
         interpolated mean average precision to measure the performance of a
         method.
         """
-        # ap = self.wrapper_compute_average_precision()
         hit_at_k = compute_video_hit_at_k(self.ground_truth,
                                           self.prediction, top_k=self.top_k)
         # avg_hit_at_k = compute_video_hit_at_k(
@@ -156,58 +148,6 @@ class KINETICSclassification(object):
 ################################################################################
 # Metrics
 ################################################################################
-
-def compute_average_precision_classification(ground_truth, prediction):
-    """Compute average precision (classification task) between ground truth and
-    predictions data frames. If multiple predictions occurs for the same
-    predicted segment, only the one with highest score is matched as
-    true positive. This code is greatly inspired by Pascal VOC devkit.
-
-    Parameters
-    ----------
-    ground_truth : df
-        Data frame containing the ground truth instances.
-        Required fields: ['video-id']
-    prediction : df
-        Data frame containing the prediction instances.
-        Required fields: ['video-id, 'score']
-
-    Outputs
-    -------
-    ap : float
-        Average precision score.
-    """
-    npos = float(len(ground_truth))
-    lock_gt = np.ones(len(ground_truth)) * -1
-    # Sort predictions by decreasing score order.
-    sort_idx = prediction['score'].values.argsort()[::-1]
-    prediction = prediction.loc[sort_idx].reset_index(drop=True)
-
-    # Initialize true positive and false positive vectors.
-    tp = np.zeros(len(prediction))
-    fp = np.zeros(len(prediction))
-
-    # Assigning true positive to truly grount truth instances.
-    for idx in range(len(prediction)):
-        this_pred = prediction.loc[idx]
-        gt_idx = ground_truth['video-id'] == this_pred['video-id']
-        # Check if there is at least one ground truth in the video associated.
-        if not gt_idx.any():
-            fp[idx] = 1
-            continue
-        this_gt = ground_truth.loc[gt_idx].reset_index()
-        if lock_gt[this_gt['index']] >= 0:
-            fp[idx] = 1
-        else:
-            tp[idx] = 1
-            lock_gt[this_gt['index']] = idx
-
-    # Computing prec-rec
-    tp = np.cumsum(tp).astype(np.float)
-    fp = np.cumsum(fp).astype(np.float)
-    rec = tp / npos
-    prec = tp / (tp + fp)
-    return interpolated_prec_rec(prec, rec)
 
 def compute_video_hit_at_k(ground_truth, prediction, top_k=3, avg=False):
     """Compute accuracy at k prediction between ground truth and

@@ -3,9 +3,6 @@ import json
 import numpy as np
 import pandas as pd
 
-from utils import get_blocked_videos
-from utils import interpolated_prec_rec
-
 class UCFclassification(object):
 
     def __init__(self, ground_truth_filename=None, prediction_filename=None,
