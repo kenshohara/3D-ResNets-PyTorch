@@ -169,12 +169,11 @@ def make_dataset(root_path, annotation_path, subset, n_samples_for_each_video,
     return dataset, idx_to_class
 
 
-def get_last_exist_frame_index(video_dir_path, n_video_frames):
-    for i in range(n_video_frames, 0, -1):
-        if frame_file_exist(video_dir_path, i):
-            return i
-    else:
-        return 0
+def get_end_t(video_path):
+    file_names = os.listdir(video_path)
+    image_file_names = [x for x in file_names if 'image' in x]
+    image_file_names.sort(reverse=True)
+    return int(image_file_names[0][6:11])
 
 
 def make_untrimmed_dataset(root_path, annotation_path, subset,
@@ -198,11 +197,9 @@ def make_untrimmed_dataset(root_path, annotation_path, subset,
         fps_file_path = os.path.join(video_path, 'fps')
         fps = load_value_file(fps_file_path)
 
-        n_video_frames = math.ceil(info[i]['duration'] * fps)
-        n_video_frames = get_last_exist_frame_index(video_path, n_video_frames)
-
         begin_t = 1
-        end_t = n_video_frames + 1
+        end_t = get_end_t(video_path)
+        n_frames = end_t - begin_t
 
         sample = {
             'video': video_path,
@@ -213,7 +210,7 @@ def make_untrimmed_dataset(root_path, annotation_path, subset,
 
         if n_samples_for_each_video >= 1:
             step = max(1,
-                       math.ceil((n_video_frames - 1 - sample_duration) /
+                       math.ceil((n_frames - 1 - sample_duration) /
                                  (n_samples_for_each_video - 1)))
         else:
             step = sample_duration
