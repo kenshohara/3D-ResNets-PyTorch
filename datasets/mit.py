@@ -67,6 +67,7 @@ def get_class_labels(data):
 
 def get_video_names_and_annotations(data, subset):
     video_names = []
+    video_ids = []
     annotations = []
 
     for key, value in data['database'].items():
@@ -74,18 +75,21 @@ def get_video_names_and_annotations(data, subset):
         if this_subset == subset:
             if subset == 'testing':
                 video_names.append('test/{}'.format(key))
+                video_ids.append(key)
             else:
                 label = value['annotations']['label']
                 video_names.append('{}/{}'.format(label, key))
+                video_ids.append(key)
                 annotations.append(value['annotations'])
 
-    return video_names, annotations
+    return video_names, video_ids, annotations
 
 
 def make_dataset(root_path, annotation_path, subset, n_samples_for_each_video,
                  sample_duration):
     data = load_annotation_data(annotation_path)
-    video_names, annotations = get_video_names_and_annotations(data, subset)
+    video_names, video_ids, annotations = get_video_names_and_annotations(
+        data, subset)
     class_to_idx = get_class_labels(data)
     idx_to_class = {}
     for name, label in class_to_idx.items():
@@ -111,7 +115,7 @@ def make_dataset(root_path, annotation_path, subset, n_samples_for_each_video,
             'video': video_path,
             'segment': [begin_t, end_t],
             'n_frames': n_frames,
-            'video_id': video_names[i][:-14].split('/')[1]
+            'video_id': video_ids[i]
         }
         if len(annotations) != 0:
             sample['label'] = class_to_idx[annotations[i]['label']]
