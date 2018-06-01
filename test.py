@@ -68,6 +68,11 @@ def test(data_loader, model, opt, class_names):
                   len(data_loader),
                   batch_time=batch_time,
                   data_time=data_time))
+
+    if output_buffer:
+        calculate_video_results(output_buffer, previous_video_id, test_results,
+                                class_names)
+
     with open(
             os.path.join(opt.result_path, '{}.json'.format(opt.test_subset)),
             'w') as f:

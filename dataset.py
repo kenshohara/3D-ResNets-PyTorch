@@ -113,7 +113,7 @@ def get_validation_set(opt, spatial_transform, temporal_transform,
 
 
 def get_test_set(opt, spatial_transform, temporal_transform, target_transform):
-    assert opt.dataset in ['kinetics', 'activitynet', 'ucf101', 'hmdb51']
+    assert opt.dataset in ['kinetics', 'activitynet', 'ucf101', 'hmdb51', 'mit']
     assert opt.test_subset in ['val', 'test']
 
     if opt.test_subset == 'val':
@@ -162,11 +162,11 @@ def get_test_set(opt, spatial_transform, temporal_transform, target_transform):
             target_transform,
             sample_duration=opt.sample_duration)
     elif opt.dataset == 'mit':
-        validation_data = MiT(
+        test_data = MiT(
             opt.video_path,
             opt.annotation_path,
-            'validation',
-            opt.n_val_samples,
+            subset,
+            0,
             spatial_transform,
             temporal_transform,
             target_transform,
