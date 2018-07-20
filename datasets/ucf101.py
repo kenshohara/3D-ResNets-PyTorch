@@ -6,6 +6,7 @@ import math
 import functools
 import json
 import copy
+import random
 
 from utils import load_value_file
 
@@ -41,6 +42,7 @@ def video_loader(video_dir_path, frame_indices, image_loader):
         if os.path.exists(image_path):
             video.append(image_loader(image_path))
         else:
+            print(frame_indices)
             return video
 
     return video
@@ -80,7 +82,7 @@ def get_video_names_and_annotations(data, subset):
 
 
 def make_dataset(root_path, annotation_path, subset, n_samples_for_each_video,
-                 sample_duration):
+                 sample_duration, sample_stride):
     data = load_annotation_data(annotation_path)
     video_names, annotations = get_video_names_and_annotations(data, subset)
     class_to_idx = get_class_labels(data)
@@ -108,29 +110,41 @@ def make_dataset(root_path, annotation_path, subset, n_samples_for_each_video,
             'video': video_path,
             'segment': [begin_t, end_t],
             'n_frames': n_frames,
-            'video_id': video_names[i].split('/')[1]
+            'video_id': video_names[i].split('/')[1],
+            'frame_indices': []
         }
         if len(annotations) != 0:
             sample['label'] = class_to_idx[annotations[i]['label']]
         else:
             sample['label'] = -1
 
-        if n_samples_for_each_video == 1:
-            sample['frame_indices'] = list(range(1, n_frames + 1))
-            dataset.append(sample)
+        clip_length = sample_duration * sample_stride
+        # print('='*80)
+        if n_samples_for_each_video <= 0:
+            n_samples_for_cur_video = math.ceil(n_frames/clip_length) # sample times for current video
         else:
-            if n_samples_for_each_video > 1:
-                step = max(1,
-                           math.ceil((n_frames - 1 - sample_duration) /
-                                     (n_samples_for_each_video - 1)))
+           n_samples_for_cur_video = n_samples_for_each_video
+        
+        if n_samples_for_cur_video == 1:
+            step = n_frames
+        else:
+            step = max( 1, 
+                        (n_frames-clip_length)/(n_samples_for_cur_video-1) )
+        
+        for i in range(n_samples_for_cur_video):
+            sample_i = copy.deepcopy(sample)
+            if step < clip_length:
+                random_offset = random.randint(0, sample_stride-1)
             else:
-                step = sample_duration
-            for j in range(1, n_frames, step):
-                sample_j = copy.deepcopy(sample)
-                sample_j['frame_indices'] = list(
-                    range(j, min(n_frames + 1, j + sample_duration)))
-                dataset.append(sample_j)
+                random_offset = random.randint(0, math.floor(step-clip_length+sample_stride-1))
 
+            start_frame = math.floor(i*step+random_offset)
+            for j in range(sample_duration):
+                sample_i['frame_indices'].append(start_frame % n_frames + 1)
+                start_frame += sample_stride
+            dataset.append(sample_i)
+            # print('sample:', video_path, n_frames, sample_i['frame_indices'][0], len(sample_i['frame_indices']) )
+    print('total samples:', len(dataset))
     return dataset, idx_to_class
 
 
@@ -159,11 +173,12 @@ class UCF101(data.Dataset):
                  spatial_transform=None,
                  temporal_transform=None,
                  target_transform=None,
-                 sample_duration=16,
+                 sample_duration=8,
+                 sample_stride=8,
                  get_loader=get_default_video_loader):
         self.data, self.class_names = make_dataset(
             root_path, annotation_path, subset, n_samples_for_each_video,
-            sample_duration)
+            sample_duration, sample_stride)
 
         self.spatial_transform = spatial_transform
         self.temporal_transform = temporal_transform
@@ -196,3 +211,56 @@ class UCF101(data.Dataset):
 
     def __len__(self):
         return len(self.data)
+
+def unittest():
+    root_path = '/home/dxx/UCF101/'
+    video_path = os.path.join(root_path, 'UCF-101_frm')
+    annotation_path=os.path.join(root_path, 'ucfTrainTestlist', 'ucf101_01.json')
+    subset='training'
+    n_samples_for_each_video = 2
+    sample_duration=8
+    sample_stride=8
+    dataset = UCF101( root_path=video_path, 
+                      annotation_path=annotation_path,
+                      subset=subset,
+                      n_samples_for_each_video=n_samples_for_each_video,
+                      sample_duration=sample_duration,
+                      sample_stride=sample_stride
+                    )
+
+    def _check(a, b):
+        assert a == b, \
+            '{} vs {}'.format(a, b)
+    
+    videos = 9537 if subset=='training' else 3783
+    _check(len(dataset), videos*n_samples_for_each_video)
+
+    d = {}
+    for sample in dataset.data:
+        _check(len(sample['frame_indices']), sample_duration)
+        
+        try:
+            fisrt_frm = sample['frame_indices'][0]
+            last_frm = sample['frame_indices'][-1]
+            _check( (fisrt_frm+sample_duration*(sample_stride-1))%sample['n_frames'], \
+                    last_frm )
+        except AssertionError:
+            raise AssertionError("{} vs {}".format(fisrt_frm, last_frm))
+        
+        video_id = sample['video']
+        if not video_id in d:
+            d[video_id] = 0
+        d[video_id] += 1
+
+    _check(len(d), videos)
+    
+    for v_id in d:
+        try:
+            _check(d[v_id], n_samples_for_each_video)
+        except AssertionError:
+            raise AssertionError('{}:{} vs {}'.format(v_id, d[v_id], n_samples_for_each_video))
+
+   # TODO: check if image exists 
+
+if __name__ == '__main__':
+    unittest()
