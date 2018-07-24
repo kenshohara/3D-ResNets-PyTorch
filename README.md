@@ -39,8 +39,8 @@ This is the PyTorch code for the following papers:
 [
 Kensho Hara, Hirokatsu Kataoka, and Yutaka Satoh,  
 "Can Spatiotemporal 3D CNNs Retrace the History of 2D CNNs and ImageNet?",  
-arXiv preprint, arXiv:1711.09577, 2017. (accepted to CVPR2018)
-](https://arxiv.org/abs/1711.09577)
+Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition, pp. 6546-6555, 2018.
+](http://openaccess.thecvf.com/content_cvpr_2018/html/Hara_Can_Spatiotemporal_3D_CVPR_2018_paper.html)
 
 [
 Kensho Hara, Hirokatsu Kataoka, and Yutaka Satoh,  
@@ -60,12 +60,12 @@ Note that the Torch version only includes ResNet-18, 34, 50, 101, and 152.
 If you use this code or pre-trained models, please cite the following:
 
 ```bibtex
-@article{hara3dcnns,
+@inproceedings{hara3dcnns,
   author={Kensho Hara and Hirokatsu Kataoka and Yutaka Satoh},
   title={Can Spatiotemporal 3D CNNs Retrace the History of 2D CNNs and ImageNet?},
-  journal={arXiv preprint},
-  volume={arXiv:1711.09577},
-  year={2017},
+  booktitle={Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition (CVPR)},
+  pages={6546--6555},
+  year={2018},
 }
 ```
 
