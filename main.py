@@ -1,6 +1,7 @@
 import os
 import sys
 import json
+import random
 import numpy as np
 import torch
 from torch import nn
@@ -47,6 +48,8 @@ if __name__ == '__main__':
     with open(os.path.join(opt.result_path, 'opts.json'), 'w') as opt_file:
         json.dump(vars(opt), opt_file)
 
+    random.seed(opt.manual_seed)
+    np.random.seed(opt.manual_seed)
     torch.manual_seed(opt.manual_seed)
 
     model, parameters = generate_model(opt)
