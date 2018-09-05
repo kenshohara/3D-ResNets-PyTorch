@@ -71,7 +71,7 @@ If you use this code or pre-trained models, please cite the following:
 
 ## Pre-trained models
 
-Pre-trained models are available [here](https://drive.google.com/drive/folders/14KRBqT8ySfPtFSuLsFS2U4I-ihTDs0Y9?usp=sharing).  
+Pre-trained models are available [here](https://drive.google.com/drive/folders/1zvl89AgFAApbH0At-gMuZSeQB_LpNP-M?usp=sharing).  
 All models are trained on Kinetics.  
 ResNeXt-101 achieved the best performance in our experiments. (See [paper](https://arxiv.org/abs/1711.09577) in details.)
 
