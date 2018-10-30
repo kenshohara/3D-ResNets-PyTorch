@@ -33,7 +33,6 @@ if __name__ == '__main__':
             opt.resume_path = os.path.join(opt.root_path, opt.resume_path)
         if opt.pretrain_path:
             opt.pretrain_path = os.path.join(opt.root_path, opt.pretrain_path)
-    opt.device = torch.device('cpu' if opt.no_cuda else 'cuda')
     opt.scales = [opt.initial_scale]
     for i in range(1, opt.n_scales):
         opt.scales.append(opt.scales[-1] * opt.scale_step)
@@ -48,6 +47,8 @@ if __name__ == '__main__':
     print(opt)
     with open(os.path.join(opt.result_path, 'opts.json'), 'w') as opt_file:
         json.dump(vars(opt), opt_file)
+
+    opt.device = torch.device('cpu' if opt.no_cuda else 'cuda')
 
     random.seed(opt.manual_seed)
     np.random.seed(opt.manual_seed)
