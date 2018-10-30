@@ -63,16 +63,16 @@ def test(data_loader, model, opt, class_names):
             end_time = time.time()
 
             print('[{}/{}]\t'
-                'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
-                'Data {data_time.val:.3f} ({data_time.avg:.3f})\t'.format(
-                    i + 1,
-                    len(data_loader),
-                    batch_time=batch_time,
-                    data_time=data_time))
+                  'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
+                  'Data {data_time.val:.3f} ({data_time.avg:.3f})\t'.format(
+                      i + 1,
+                      len(data_loader),
+                      batch_time=batch_time,
+                      data_time=data_time))
 
         if output_buffer:
-            calculate_video_results(output_buffer, previous_video_id, test_results,
-                                    class_names)
+            calculate_video_results(output_buffer, previous_video_id,
+                                    test_results, class_names)
 
     with open(
             os.path.join(opt.result_path, '{}.json'.format(opt.test_subset)),
