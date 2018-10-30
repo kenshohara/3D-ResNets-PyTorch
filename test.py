@@ -1,5 +1,4 @@
 import torch
-from torch.autograd import Variable
 import torch.nn.functional as F
 import time
 import os
@@ -36,42 +35,44 @@ def test(data_loader, model, opt, class_names):
     output_buffer = []
     previous_video_id = ''
     test_results = {'results': {}}
-    for i, (inputs, targets) in enumerate(data_loader):
-        data_time.update(time.time() - end_time)
 
-        inputs = Variable(inputs, volatile=True)
-        outputs = model(inputs)
-        if not opt.no_softmax_in_test:
-            outputs = F.softmax(outputs)
+    with torch.no_grad():
+        for i, (inputs, targets) in enumerate(data_loader):
+            data_time.update(time.time() - end_time)
 
-        for j in range(outputs.size(0)):
-            if not (i == 0 and j == 0) and targets[j] != previous_video_id:
-                calculate_video_results(output_buffer, previous_video_id,
-                                        test_results, class_names)
-                output_buffer = []
-            output_buffer.append(outputs[j].data.cpu())
-            previous_video_id = targets[j]
+            inputs = inputs.to(opt.device, non_blocking=True)
+            outputs = model(inputs)
+            if not opt.no_softmax_in_test:
+                outputs = F.softmax(outputs)
 
-        if (i % 100) == 0:
-            with open(
-                    os.path.join(opt.result_path, '{}.json'.format(
-                        opt.test_subset)), 'w') as f:
-                json.dump(test_results, f)
+            for j in range(outputs.size(0)):
+                if not (i == 0 and j == 0) and targets[j] != previous_video_id:
+                    calculate_video_results(output_buffer, previous_video_id,
+                                            test_results, class_names)
+                    output_buffer = []
+                output_buffer.append(outputs[j].data.cpu())
+                previous_video_id = targets[j]
 
-        batch_time.update(time.time() - end_time)
-        end_time = time.time()
+            if (i % 100) == 0:
+                with open(
+                        os.path.join(opt.result_path, '{}.json'.format(
+                            opt.test_subset)), 'w') as f:
+                    json.dump(test_results, f)
 
-        print('[{}/{}]\t'
-              'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
-              'Data {data_time.val:.3f} ({data_time.avg:.3f})\t'.format(
-                  i + 1,
-                  len(data_loader),
-                  batch_time=batch_time,
-                  data_time=data_time))
+            batch_time.update(time.time() - end_time)
+            end_time = time.time()
 
-    if output_buffer:
-        calculate_video_results(output_buffer, previous_video_id, test_results,
-                                class_names)
+            print('[{}/{}]\t'
+                'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
+                'Data {data_time.val:.3f} ({data_time.avg:.3f})\t'.format(
+                    i + 1,
+                    len(data_loader),
+                    batch_time=batch_time,
+                    data_time=data_time))
+
+        if output_buffer:
+            calculate_video_results(output_buffer, previous_video_id, test_results,
+                                    class_names)
 
     with open(
             os.path.join(opt.result_path, '{}.json'.format(opt.test_subset)),
