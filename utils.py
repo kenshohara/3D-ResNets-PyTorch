@@ -1,4 +1,6 @@
 import csv
+import random
+import numpy as np
 
 
 class AverageMeter(object):
@@ -58,3 +60,8 @@ def calculate_accuracy(outputs, targets):
     n_correct_elems = correct.float().sum().item()
 
     return n_correct_elems / batch_size
+
+
+def worker_init_fn(worker_id):
+    random.seed(torch.initial_seed() + worker_id)
+    numpy.random.seed(torch.initial_seed() + worker_id)

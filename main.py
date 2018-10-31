@@ -18,7 +18,7 @@ from temporal_transforms import LoopPadding, TemporalRandomCrop, TemporalMultisc
 from target_transforms import ClassLabel, VideoID
 from target_transforms import Compose as TargetCompose
 from dataset import get_training_set, get_validation_set, get_test_set
-from utils import Logger
+from utils import Logger, worker_init_fn
 from train import train_epoch
 from validation import val_epoch
 import test
@@ -94,7 +94,8 @@ if __name__ == '__main__':
             batch_size=opt.batch_size,
             shuffle=True,
             num_workers=opt.n_threads,
-            pin_memory=True)
+            pin_memory=True,
+            worker_init_fn=worker_init_fn)
         train_logger = Logger(
             os.path.join(opt.result_path, 'train.log'),
             ['epoch', 'loss', 'acc', 'lr'])
@@ -130,7 +131,8 @@ if __name__ == '__main__':
             batch_size=opt.batch_size,
             shuffle=False,
             num_workers=opt.n_threads,
-            pin_memory=True)
+            pin_memory=True,
+            worker_init_fn=worker_init_fn)
         val_logger = Logger(
             os.path.join(opt.result_path, 'val.log'), ['epoch', 'loss', 'acc'])
 
@@ -172,5 +174,6 @@ if __name__ == '__main__':
             batch_size=opt.batch_size,
             shuffle=False,
             num_workers=opt.n_threads,
-            pin_memory=True)
+            pin_memory=True,
+            worker_init_fn=worker_init_fn)
         test.test(test_loader, model, opt, test_data.class_names)
