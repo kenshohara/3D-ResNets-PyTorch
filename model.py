@@ -186,11 +186,12 @@ def generate_model(opt):
     else:
         tmp_model = model.module
     if opt.model == 'densenet':
-        tmp_model.classifier = nn.Linear(tmp_model.classifier.in_features,
-                                         opt.n_finetune_classes)
+        tmp_model.classifier = nn.Linear(
+            tmp_model.classifier.in_features,
+            opt.n_finetune_classes).to(opt.device)
     else:
         tmp_model.fc = nn.Linear(tmp_model.fc.in_features,
-                                 opt.n_finetune_classes)
+                                 opt.n_finetune_classes).to(opt.device)
 
     parameters = get_fine_tuning_parameters(model, opt.ft_begin_index)
     return model, parameters
