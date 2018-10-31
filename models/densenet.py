@@ -74,23 +74,25 @@ class _DenseLayer(nn.Sequential):
         super(_DenseLayer, self).__init__()
         self.add_module('norm.1', nn.BatchNorm3d(num_input_features))
         self.add_module('relu.1', nn.ReLU(inplace=True))
-        self.add_module('conv.1',
-                        nn.Conv3d(
-                            num_input_features,
-                            bn_size * growth_rate,
-                            kernel_size=1,
-                            stride=1,
-                            bias=False))
+        self.add_module(
+            'conv.1',
+            nn.Conv3d(
+                num_input_features,
+                bn_size * growth_rate,
+                kernel_size=1,
+                stride=1,
+                bias=False))
         self.add_module('norm.2', nn.BatchNorm3d(bn_size * growth_rate))
         self.add_module('relu.2', nn.ReLU(inplace=True))
-        self.add_module('conv.2',
-                        nn.Conv3d(
-                            bn_size * growth_rate,
-                            growth_rate,
-                            kernel_size=3,
-                            stride=1,
-                            padding=1,
-                            bias=False))
+        self.add_module(
+            'conv.2',
+            nn.Conv3d(
+                bn_size * growth_rate,
+                growth_rate,
+                kernel_size=3,
+                stride=1,
+                padding=1,
+                bias=False))
         self.drop_rate = drop_rate
 
     def forward(self, x):
@@ -118,13 +120,14 @@ class _Transition(nn.Sequential):
         super(_Transition, self).__init__()
         self.add_module('norm', nn.BatchNorm3d(num_input_features))
         self.add_module('relu', nn.ReLU(inplace=True))
-        self.add_module('conv',
-                        nn.Conv3d(
-                            num_input_features,
-                            num_output_features,
-                            kernel_size=1,
-                            stride=1,
-                            bias=False))
+        self.add_module(
+            'conv',
+            nn.Conv3d(
+                num_input_features,
+                num_output_features,
+                kernel_size=1,
+                stride=1,
+                bias=False))
         self.add_module('pool', nn.AvgPool3d(kernel_size=2, stride=2))
 
 
@@ -192,15 +195,18 @@ class DenseNet(nn.Module):
         # Final batch norm
         self.features.add_module('norm5', nn.BatchNorm2d(num_features))
 
-        for m in self.modules():
-            if isinstance(m, nn.Conv3d):
-                m.weight = nn.init.kaiming_normal(m.weight, mode='fan_out')
-            elif isinstance(m, nn.BatchNorm3d) or isinstance(m, nn.BatchNorm2d):
-                m.weight.data.fill_(1)
-                m.bias.data.zero_()
-
         # Linear layer
         self.classifier = nn.Linear(num_features, num_classes)
+
+        for m in self.modules():
+            if isinstance(m, nn.Conv3d):
+                m.weight = nn.init.kaiming_normal_(
+                    m.weight, mode='fan_out', nonlinearity='relu')
+            elif isinstance(m, nn.BatchNorm3d):
+                nn.init.constant_(m.weight, 1)
+                nn.init.constant_(m.bias, 0)
+            elif isinstance(m, nn.Linear):
+                nn.init.constant_(m.bias, 0)
 
     def forward(self, x):
         features = self.features(x)
