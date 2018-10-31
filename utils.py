@@ -1,6 +1,7 @@
 import csv
 import random
 import numpy as np
+import torch
 
 
 class AverageMeter(object):
@@ -63,5 +64,10 @@ def calculate_accuracy(outputs, targets):
 
 
 def worker_init_fn(worker_id):
-    random.seed(torch.initial_seed() + worker_id)
-    numpy.random.seed(torch.initial_seed() + worker_id)
+    torch_seed = torch.initial_seed()
+
+    random.seed(torch_seed() + worker_id)
+
+    if torch_seed() >= 2**32:
+        torch_seed = torch_seed() % 2**32
+    np.random.seed(torch_seed + worker_id)
