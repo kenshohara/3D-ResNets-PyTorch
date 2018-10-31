@@ -94,7 +94,7 @@ def parse_opts():
         'Initial learning rate (divided by 10 while training by lr scheduler)')
     parser.add_argument('--momentum', default=0.9, type=float, help='Momentum')
     parser.add_argument(
-        '--dampening', default=0.9, type=float, help='dampening of SGD')
+        '--dampening', default=0.0, type=float, help='dampening of SGD')
     parser.add_argument(
         '--weight_decay', default=1e-3, type=float, help='Weight Decay')
     parser.add_argument(
