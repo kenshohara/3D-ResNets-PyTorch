@@ -68,6 +68,6 @@ def worker_init_fn(worker_id):
 
     random.seed(torch_seed() + worker_id)
 
-    if torch_seed() >= 2**32:
+    if torch_seed >= 2**32:
         torch_seed = torch_seed() % 2**32
     np.random.seed(torch_seed + worker_id)
