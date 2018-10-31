@@ -7,6 +7,7 @@ import torch
 from torch import nn
 from torch import optim
 from torch.optim import lr_scheduler
+from torch.backends import cudnn
 
 from opts import parse_opts
 from model import generate_model
@@ -49,6 +50,8 @@ if __name__ == '__main__':
         json.dump(vars(opt), opt_file)
 
     opt.device = torch.device('cpu' if opt.no_cuda else 'cuda')
+    if not opt.no_cuda:
+        cudnn.benchmark = True
 
     random.seed(opt.manual_seed)
     np.random.seed(opt.manual_seed)
