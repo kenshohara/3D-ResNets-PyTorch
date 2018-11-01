@@ -13,8 +13,8 @@ from opts import parse_opts
 from model import generate_model
 from mean import get_mean, get_std
 from spatial_transforms import (
-    Compose, Normalize, Scale, CenterCrop, CornerCrop, MultiScaleCornerCrop,
-    MultiScaleRandomCrop, RandomHorizontalFlip, ToTensor)
+    Compose, Normalize, Resize, CenterCrop, CornerCrop, MultiScaleCornerCrop,
+    RandomResizedCrop, RandomHorizontalFlip, ToTensor)
 from temporal_transforms import LoopPadding, TemporalRandomCrop, TemporalMultiscaleRandomCrop
 from target_transforms import ClassLabel, VideoID
 from target_transforms import Compose as TargetCompose
@@ -71,19 +71,15 @@ if __name__ == '__main__':
         norm_method = Normalize(opt.mean, opt.std)
 
     if not opt.no_train:
-        assert opt.train_crop in ['random', 'corner', 'center']
+        assert opt.train_crop in ['random', 'corner']
         if opt.train_crop == 'random':
-            crop_method = MultiScaleRandomCrop(opt.scales, opt.sample_size)
+            crop_method = RandomResizedCrop(opt.sample_size)
         elif opt.train_crop == 'corner':
-            crop_method = MultiScaleCornerCrop(opt.scales, opt.sample_size)
-        elif opt.train_crop == 'center':
-            crop_method = MultiScaleCornerCrop(
-                opt.scales, opt.sample_size, crop_positions=['c'])
-        spatial_transform = Compose([
-            crop_method,
-            RandomHorizontalFlip(),
-            ToTensor(opt.norm_value), norm_method
-        ])
+            crop_method = MultiScaleCornerCrop(opt.sample_size, opt.scales)
+        spatial_transform = Compose(
+            [crop_method,
+             RandomHorizontalFlip(),
+             ToTensor(), norm_method])
         if opt.train_t_crop == 'single':
             temporal_transform = TemporalRandomCrop(opt.sample_duration)
         elif opt.train_t_crop == 'multi':
@@ -121,9 +117,9 @@ if __name__ == '__main__':
             optimizer, 'min', patience=opt.lr_patience)
     if not opt.no_val:
         spatial_transform = Compose([
-            Scale(opt.sample_size),
+            Resize(opt.sample_size),
             CenterCrop(opt.sample_size),
-            ToTensor(opt.norm_value), norm_method
+            ToTensor(), norm_method
         ])
         temporal_transform = LoopPadding(opt.sample_duration)
         target_transform = ClassLabel()
@@ -163,9 +159,9 @@ if __name__ == '__main__':
 
     if opt.test:
         spatial_transform = Compose([
-            Scale(int(opt.sample_size / opt.scale_in_test)),
+            Resize(int(opt.sample_size / opt.scale_in_test)),
             CornerCrop(opt.sample_size, opt.crop_position_in_test),
-            ToTensor(opt.norm_value), norm_method
+            ToTensor(), norm_method
         ])
         temporal_transform = LoopPadding(opt.sample_duration)
         target_transform = VideoID()
