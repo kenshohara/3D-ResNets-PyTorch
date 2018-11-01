@@ -38,7 +38,7 @@ class PreActivationBasicBlock(nn.Module):
     expansion = 1
 
     def __init__(self, inplanes, planes, stride=1, downsample=None):
-        super(PreActivationBasicBlock, self).__init__()
+        super().__init__()
         self.bn1 = nn.BatchNorm3d(inplanes)
         self.conv1 = conv3x3x3(inplanes, planes, stride)
         self.bn2 = nn.BatchNorm3d(planes)
@@ -70,7 +70,7 @@ class PreActivationBottleneck(nn.Module):
     expansion = 4
 
     def __init__(self, inplanes, planes, stride=1, downsample=None):
-        super(PreActivationBottleneck, self).__init__()
+        super().__init__()
         self.bn1 = nn.BatchNorm3d(inplanes)
         self.conv1 = nn.Conv3d(inplanes, planes, kernel_size=1, bias=False)
         self.bn2 = nn.BatchNorm3d(planes)
@@ -115,7 +115,7 @@ class PreActivationResNet(nn.Module):
                  shortcut_type='B',
                  num_classes=400):
         self.inplanes = 64
-        super(PreActivationResNet, self).__init__()
+        super().__init__()
         self.conv1 = nn.Conv3d(
             3,
             64,

@@ -71,7 +71,7 @@ def get_fine_tuning_parameters(model, ft_begin_index):
 class _DenseLayer(nn.Sequential):
 
     def __init__(self, num_input_features, growth_rate, bn_size, drop_rate):
-        super(_DenseLayer, self).__init__()
+        super().__init__()
         self.add_module('norm.1', nn.BatchNorm3d(num_input_features))
         self.add_module('relu.1', nn.ReLU(inplace=True))
         self.add_module(
@@ -96,7 +96,7 @@ class _DenseLayer(nn.Sequential):
         self.drop_rate = drop_rate
 
     def forward(self, x):
-        new_features = super(_DenseLayer, self).forward(x)
+        new_features = super().forward(x)
         if self.drop_rate > 0:
             new_features = F.dropout(
                 new_features, p=self.drop_rate, training=self.training)
@@ -107,7 +107,7 @@ class _DenseBlock(nn.Sequential):
 
     def __init__(self, num_layers, num_input_features, bn_size, growth_rate,
                  drop_rate):
-        super(_DenseBlock, self).__init__()
+        super().__init__()
         for i in range(num_layers):
             layer = _DenseLayer(num_input_features + i * growth_rate,
                                 growth_rate, bn_size, drop_rate)
@@ -117,7 +117,7 @@ class _DenseBlock(nn.Sequential):
 class _Transition(nn.Sequential):
 
     def __init__(self, num_input_features, num_output_features):
-        super(_Transition, self).__init__()
+        super().__init__()
         self.add_module('norm', nn.BatchNorm3d(num_input_features))
         self.add_module('relu', nn.ReLU(inplace=True))
         self.add_module(
@@ -153,7 +153,7 @@ class DenseNet(nn.Module):
                  drop_rate=0,
                  num_classes=1000):
 
-        super(DenseNet, self).__init__()
+        super().__init__()
 
         self.sample_size = sample_size
         self.sample_duration = sample_duration

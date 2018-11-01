@@ -35,7 +35,7 @@ class WideBottleneck(nn.Module):
     expansion = 2
 
     def __init__(self, inplanes, planes, stride=1, downsample=None):
-        super(WideBottleneck, self).__init__()
+        super().__init__()
         self.conv1 = nn.Conv3d(inplanes, planes, kernel_size=1, bias=False)
         self.bn1 = nn.BatchNorm3d(planes)
         self.conv2 = nn.Conv3d(
@@ -82,7 +82,7 @@ class WideResNet(nn.Module):
                  shortcut_type='B',
                  num_classes=400):
         self.inplanes = 64
-        super(WideResNet, self).__init__()
+        super().__init__()
         self.conv1 = nn.Conv3d(
             3,
             64,
