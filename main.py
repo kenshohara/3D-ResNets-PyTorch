@@ -83,7 +83,7 @@ def get_train_utils(opt):
         [crop_method,
          RandomHorizontalFlip(),
          ToTensor(),
-         get_norm_method()])
+         get_norm_method(opt)])
     if opt.train_t_crop == 'single':
         temporal_transform = TemporalRandomCrop(opt.sample_duration)
     elif opt.train_t_crop == 'multi':
@@ -126,7 +126,7 @@ def get_val_utils(opt):
         Resize(opt.sample_size),
         CenterCrop(opt.sample_size),
         ToTensor(),
-        get_norm_method()
+        get_norm_method(opt)
     ])
     temporal_transform = LoopPadding(opt.sample_duration)
     target_transform = ClassLabel()
@@ -149,7 +149,7 @@ def get_test_utils(opt):
         Resize(int(opt.sample_size / opt.scale_in_test)),
         CornerCrop(opt.sample_size, opt.crop_position_in_test),
         ToTensor(),
-        get_norm_method()
+        get_norm_method(opt)
     ])
     temporal_transform = LoopPadding(opt.sample_duration)
     target_transform = VideoID()
