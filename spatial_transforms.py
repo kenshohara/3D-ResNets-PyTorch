@@ -1,17 +1,8 @@
 import random
-import math
-import numbers
-import collections
 
-import torch
 from torchvision.transforms import transforms
 from torchvision.transforms import functional as F
-import numpy as np
 from PIL import Image
-try:
-    import accimage
-except ImportError:
-    accimage = None
 
 
 class Compose(transforms.Compose):
