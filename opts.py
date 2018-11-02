@@ -53,10 +53,10 @@ def parse_opts():
         help='Temporal duration of inputs')
     parser.add_argument(
         '--train_crop',
-        default='corner',
+        default='random',
         type=str,
         help=
-        'Spatial cropping method in training. random is uniform. corner is selection from 4 corners and 1 center.  (random | corner | center)'
+        'Spatial cropping method in training. random is uniform. corner is selection from 4 corners and 1 center.  (random | corner)'
     )
     parser.add_argument(
         '--learning_rate',
