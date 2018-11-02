@@ -32,16 +32,16 @@ def json_serial(obj):
 def get_opts():
     opt = parse_opts()
 
-    if opt.root_path:
+    if opt.root_path is not None:
         opt.video_path = opt.root_path / opt.video_path
         opt.annotation_path = opt.root_path / opt.annotation_path
         opt.result_path = opt.root_path / opt.result_path
-        if opt.resume_path:
+        if opt.resume_path is not None:
             opt.resume_path = opt.root_path / opt.resume_path
-        if opt.pretrain_path:
+        if opt.pretrain_path is not None:
             opt.pretrain_path = opt.root_path / opt.pretrain_path
 
-    if opt.pretrain_path:
+    if opt.pretrain_path is not None:
         opt.n_finetune_classes = opt.n_classes
         opt.n_classes = opt.n_pretrain_classes
 
@@ -201,7 +201,7 @@ if __name__ == '__main__':
     if not opt.no_val:
         val_loader, val_logger = get_val_utils(opt)
 
-    if opt.resume_path:
+    if opt.resume_path is not None:
         if not opt.no_train:
             resume(opt, model, optimizer, scheduler)
         else:

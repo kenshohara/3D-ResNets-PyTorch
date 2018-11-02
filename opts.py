@@ -5,13 +5,19 @@ from pathlib import Path
 def parse_opts():
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        '--root_path', default='', type=Path, help='Root directory path')
+        '--root_path', default=None, type=Path, help='Root directory path')
     parser.add_argument(
-        '--video_path', default='', type=Path, help='Directory path of videos')
+        '--video_path',
+        default=None,
+        type=Path,
+        help='Directory path of videos')
     parser.add_argument(
-        '--annotation_path', default='', type=Path, help='Annotation file path')
+        '--annotation_path',
+        default=None,
+        type=Path,
+        help='Annotation file path')
     parser.add_argument(
-        '--result_path', default='', type=Path, help='Result directory path')
+        '--result_path', default=None, type=Path, help='Result directory path')
     parser.add_argument(
         '--dataset',
         default='kinetics',
@@ -33,7 +39,7 @@ def parse_opts():
     )
     parser.add_argument(
         '--pretrain_path',
-        default='',
+        default=None,
         type=Path,
         help='Pretrained model path (.pth).')
     parser.add_argument(
@@ -123,7 +129,7 @@ def parse_opts():
         help='Number of validation samples for each activity')
     parser.add_argument(
         '--resume_path',
-        default='',
+        default=None,
         type=Path,
         help='Save data (.pth) of previous training')
     parser.add_argument(
