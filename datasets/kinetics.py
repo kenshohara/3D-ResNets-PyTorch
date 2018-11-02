@@ -50,11 +50,11 @@ def make_dataset(root_path, annotation_path, subset, n_samples_for_each_video,
         if i % 1000 == 0:
             print('dataset loading [{}/{}]'.format(i, len(video_names)))
 
-        video_path = os.path.join(root_path, video_names[i])
-        if not os.path.exists(video_path):
+        video_path = root_path / video_names[i]
+        if not video_path.exists():
             continue
 
-        n_frames_file_path = os.path.join(video_path, 'n_frames')
+        n_frames_file_path = video_path / 'n_frames'
         n_frames = int(load_value_file(n_frames_file_path))
         if n_frames <= 0:
             continue

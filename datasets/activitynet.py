@@ -1,6 +1,5 @@
 import torch
 import torch.utils.data as data
-from PIL import Image
 import os
 import functools
 import json
@@ -49,8 +48,8 @@ def get_video_names_and_annotations(data, subset):
 def modify_frame_indices(video_dir_path, frame_indices):
     modified_indices = []
     for i in frame_indices:
-        image_path = os.path.join(video_dir_path, 'image_{:05d}.jpg'.format(i))
-        if not os.path.exists(image_path):
+        image_path = video_dir_path / 'image_{:05d}.jpg'.format(i)
+        if not image_path.exists():
             return modified_indices
         modified_indices.append(i)
     return modified_indices
@@ -70,11 +69,11 @@ def make_dataset(root_path, annotation_path, subset, n_samples_for_each_video,
         if i % 1000 == 0:
             print('dataset loading [{}/{}]'.format(i, len(video_names)))
 
-        video_path = os.path.join(root_path, video_names[i])
-        if not os.path.exists(video_path):
+        video_path = root_path / video_names[i]
+        if not video_path.exists():
             continue
 
-        fps_file_path = os.path.join(video_path, 'fps')
+        fps_file_path = video_path / 'fps'
         fps = load_value_file(fps_file_path)
 
         for annotation in annotations[i]:
@@ -125,8 +124,7 @@ def make_dataset(root_path, annotation_path, subset, n_samples_for_each_video,
 
 
 def get_end_t(video_path):
-    file_names = os.listdir(video_path)
-    image_file_names = [x for x in file_names if 'image' in x]
+    image_file_names = [x for x in video_path.iterdir() if 'image' in x.name]
     image_file_names.sort(reverse=True)
     return int(image_file_names[0][6:11])
 
@@ -145,11 +143,11 @@ def make_untrimmed_dataset(root_path, annotation_path, subset,
         if i % 1000 == 0:
             print('dataset loading [{}/{}]'.format(i, len(video_names)))
 
-        video_path = os.path.join(root_path, video_names[i])
-        if not os.path.exists(video_path):
+        video_path = root_path / video_names[i]
+        if not video_path.exists():
             continue
 
-        fps_file_path = os.path.join(video_path, 'fps')
+        fps_file_path = video_path / 'fps'
         fps = load_value_file(fps_file_path)
 
         begin_t = 1
