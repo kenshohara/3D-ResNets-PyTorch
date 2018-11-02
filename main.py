@@ -15,7 +15,7 @@ from mean import get_mean, get_std
 from spatial_transforms import (
     Compose, Normalize, Resize, CenterCrop, CornerCrop, MultiScaleCornerCrop,
     RandomResizedCrop, RandomHorizontalFlip, ToTensor)
-from temporal_transforms import LoopPadding, TemporalRandomCrop, TemporalMultiscaleRandomCrop
+from temporal_transforms import LoopPadding, TemporalRandomCrop
 from target_transforms import ClassLabel, VideoID
 from dataset import get_training_set, get_validation_set, get_test_set
 from utils import Logger, worker_init_fn
