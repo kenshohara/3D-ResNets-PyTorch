@@ -1,9 +1,11 @@
-from PIL import Image
 import os
 import functools
 import json
 import copy
 import math
+
+from PIL import Image
+import torchvision
 
 
 def pil_loader(path):
