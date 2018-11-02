@@ -59,6 +59,7 @@ class TemporalRandomCrop(object):
 
     def __init__(self, size):
         self.size = size
+        self.loop = LoopPadding(size)
 
     def __call__(self, frame_indices):
 
@@ -68,10 +69,8 @@ class TemporalRandomCrop(object):
 
         out = frame_indices[begin_index:end_index]
 
-        for index in out:
-            if len(out) >= self.size:
-                break
-            out.append(index)
+        if len(out) < self.size:
+            out = self.loop(out)
 
         return out
 
