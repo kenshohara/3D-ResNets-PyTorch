@@ -24,6 +24,11 @@ from validation import val_epoch
 import test
 
 
+def json_serial(obj):
+    if isinstance(obj, Path):
+        return str(obj)
+
+
 def get_opts():
     opt = parse_opts()
 
@@ -46,7 +51,7 @@ def get_opts():
     opt.std = get_std(opt.norm_value)
     print(opt)
     with open(opt.result_path / 'opts.json', 'w') as opt_file:
-        json.dump(vars(opt), opt_file)
+        json.dump(vars(opt), opt_file, default=json_serial)
 
     return opt
 
