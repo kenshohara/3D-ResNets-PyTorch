@@ -68,7 +68,6 @@ def make_dataset(root_path, annotation_path, subset):
         sample = {
             'video': video_path,
             'segment': [begin_t, end_t],
-            'n_frames': n_frames,
             'frame_indices': list(range(1, n_frames + 1)),
             'video_id': video_ids[i],
             'label': label_id
