@@ -229,6 +229,11 @@ def parse_opts():
         help='ResNeXt cardinality')
     parser.add_argument(
         '--manual_seed', default=1, type=int, help='Manually set random seed')
+    parser.add_argument(
+        '--accimage',
+        action='store_true',
+        help='If true, accimage is used to load images.')
+    parser.set_defaults(accimage=False)
 
     args = parser.parse_args()
 
