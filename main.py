@@ -1,13 +1,13 @@
 from pathlib import Path
 import json
 import random
+
 import numpy as np
 import torch
-import torchvision
-from torch import nn
-from torch import optim
-from torch.optim import lr_scheduler
+from torch.nn import CrossEntropyLoss
+from torch.optim import SGD, lr_scheduler
 from torch.backends import cudnn
+import torchvision
 
 from opts import parse_opts
 from model import generate_model
@@ -17,7 +17,6 @@ from spatial_transforms import (
     RandomResizedCrop, RandomHorizontalFlip, ToTensor)
 from temporal_transforms import LoopPadding, TemporalRandomCrop, TemporalMultiscaleRandomCrop
 from target_transforms import ClassLabel, VideoID
-from target_transforms import Compose as TargetCompose
 from dataset import get_training_set, get_validation_set, get_test_set
 from utils import Logger, worker_init_fn
 from train import train_epoch
@@ -108,7 +107,7 @@ def get_train_utils(opt):
         dampening = 0
     else:
         dampening = opt.dampening
-    optimizer = optim.SGD(
+    optimizer = SGD(
         parameters,
         lr=opt.learning_rate,
         momentum=opt.momentum,
@@ -181,7 +180,7 @@ if __name__ == '__main__':
 
     model, parameters = generate_model(opt)
     print(model)
-    criterion = nn.CrossEntropyLoss().to(opt.device)
+    criterion = CrossEntropyLoss().to(opt.device)
 
     if not opt.no_train:
         (train_loader, train_logger, train_batch_logger, optimizer,
