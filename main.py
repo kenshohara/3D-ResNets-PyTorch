@@ -51,7 +51,7 @@ def get_opts():
     return opt
 
 
-def resume(opt, model):
+def resume(opt, model, optimizer=None, scheduler=None):
     print('loading checkpoint {}'.format(opt.resume_path))
     checkpoint = torch.load(opt.resume_path)
     assert opt.arch == checkpoint['arch']
@@ -59,7 +59,10 @@ def resume(opt, model):
     opt.begin_epoch = checkpoint['epoch']
     model.load_state_dict(checkpoint['state_dict'])
     if not opt.no_train:
-        optimizer.load_state_dict(checkpoint['optimizer'])
+        if 'optimizer' in checkpoint.keys():
+            optimizer.load_state_dict(checkpoint['optimizer'])
+        if 'scheduler' in checkpoint.keys():
+            scheduler.load_state_dict(checkpoint['scheduler'])
 
 
 def get_norm_method(opt):
@@ -135,7 +138,7 @@ def get_val_utils(opt):
                                          temporal_transform, target_transform)
     val_loader = torch.utils.data.DataLoader(
         validation_data,
-        batch_size=opt.batch_size,
+        batch_size=(opt.batch_size // opt.n_val_samples),
         shuffle=False,
         num_workers=opt.n_threads,
         pin_memory=True,
@@ -191,12 +194,15 @@ if __name__ == '__main__':
         val_loader, val_logger = get_val_utils(opt)
 
     if opt.resume_path:
-        resume(opt, model)
+        if not opt.no_train:
+            resume(opt, model, optimizer, scheduler)
+        else:
+            resume(opt, model)
 
     for i in range(opt.begin_epoch, opt.n_epochs + 1):
         if not opt.no_train:
-            train_epoch(i, train_loader, model, criterion, optimizer, opt,
-                        train_logger, train_batch_logger)
+            train_epoch(i, train_loader, model, criterion, optimizer, scheduler,
+                        opt, train_logger, train_batch_logger)
         if not opt.no_val:
             validation_loss = val_epoch(i, val_loader, model, criterion, opt,
                                         val_logger)
