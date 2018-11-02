@@ -73,6 +73,16 @@ def make_dataset(root_path, annotation_path, subset):
     return dataset, idx_to_class
 
 
+def multi_clips_collate_fn(batch):
+    batch_clips, batch_targets = zip(*batch)
+    batch_clips = [clip for multi_clips in batch_clips for clip in multi_clips]
+    batch_targets = [
+        target for multi_targets in batch_targets for target in multi_targets
+    ]
+
+    return data.dataloader.default_collate(zip(batch_clips, batch_targets))
+
+
 class VideoDataset(data.Dataset):
 
     def __init__(self,
@@ -91,23 +101,37 @@ class VideoDataset(data.Dataset):
         self.target_transform = target_transform
         self.loader = get_loader()
 
-    def __getitem__(self, index):
-        path = self.data[index]['video']
-
-        frame_indices = self.data[index]['frame_indices']
-        if self.temporal_transform is not None:
-            frame_indices = self.temporal_transform(frame_indices)
+    def loading(self, path, frame_indices):
         clip = self.loader(path, frame_indices)
         if self.spatial_transform is not None:
             self.spatial_transform.randomize_parameters()
             clip = [self.spatial_transform(img) for img in clip]
         clip = torch.stack(clip, 0).permute(1, 0, 2, 3)
 
+        return clip
+
+    def __getitem__(self, index):
+        path = self.data[index]['video']
+
         target = self.data[index]
         if self.target_transform is not None:
             target = self.target_transform(target)
 
-        return clip, target
+        frame_indices = self.data[index]['frame_indices']
+        if self.temporal_transform is not None:
+            frame_indices = self.temporal_transform(frame_indices)
+
+        if isinstance(frame_indices[0], list):
+            clips = []
+            for one_frame_indices in frame_indices:
+                clips.append(self.loading(path, one_frame_indices))
+
+            return clips, [target for _ in range(len(clips))]
+
+        else:
+            clip = self.loading(path, frame_indices)
+
+            return clip, target
 
     def __len__(self):
         return len(self.data)

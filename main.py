@@ -93,15 +93,16 @@ def get_train_utils(opt):
          get_norm_method(opt)])
     temporal_transform = TemporalRandomCrop(opt.sample_duration)
     target_transform = ClassLabel()
-    training_data = get_training_set(opt, spatial_transform, temporal_transform,
-                                     target_transform)
+    training_data, collate_fn = get_training_set(
+        opt, spatial_transform, temporal_transform, target_transform)
     train_loader = torch.utils.data.DataLoader(
         training_data,
         batch_size=opt.batch_size,
         shuffle=True,
         num_workers=opt.n_threads,
         pin_memory=True,
-        worker_init_fn=worker_init_fn)
+        worker_init_fn=worker_init_fn,
+        collate_fn=collate_fn)
     train_logger = Logger(opt.result_path / 'train.log',
                           ['epoch', 'loss', 'acc', 'lr'])
     train_batch_logger = Logger(opt.result_path / 'train_batch.log',
@@ -134,15 +135,16 @@ def get_val_utils(opt):
     temporal_transform = TemporalEvenCrop(opt.sample_duration,
                                           opt.n_val_samples)
     target_transform = ClassLabel()
-    validation_data = get_validation_set(opt, spatial_transform,
-                                         temporal_transform, target_transform)
+    validation_data, collate_fn = get_validation_set(
+        opt, spatial_transform, temporal_transform, target_transform)
     val_loader = torch.utils.data.DataLoader(
         validation_data,
         batch_size=(opt.batch_size // opt.n_val_samples),
         shuffle=False,
         num_workers=opt.n_threads,
         pin_memory=True,
-        worker_init_fn=worker_init_fn)
+        worker_init_fn=worker_init_fn,
+        collate_fn=collate_fn)
     val_logger = Logger(opt.result_path / 'val.log', ['epoch', 'loss', 'acc'])
 
     return val_loader, val_logger
@@ -158,15 +160,16 @@ def get_test_utils(opt):
     temporal_transform = LoopPadding(opt.sample_duration)
     target_transform = VideoID()
 
-    test_data = get_test_set(opt, spatial_transform, temporal_transform,
-                             target_transform)
+    test_data, collate_fn = get_test_set(opt, spatial_transform,
+                                         temporal_transform, target_transform)
     test_loader = torch.utils.data.DataLoader(
         test_data,
         batch_size=opt.batch_size,
         shuffle=False,
         num_workers=opt.n_threads,
         pin_memory=True,
-        worker_init_fn=worker_init_fn)
+        worker_init_fn=worker_init_fn,
+        collate_fn=collate_fn)
 
     return test_loader, test_data.class_names
 
