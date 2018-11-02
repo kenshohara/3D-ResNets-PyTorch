@@ -22,15 +22,25 @@ def parse_opts():
         default=400,
         type=int,
         help=
-        'Number of classes (activitynet: 200, kinetics: 400, ucf101: 101, hmdb51: 51)'
+        'Number of classes (activitynet: 200, kinetics: 400 or 600, ucf101: 101, hmdb51: 51)'
     )
     parser.add_argument(
-        '--n_finetune_classes',
-        default=400,
+        '--n_pretrain_classes',
+        default=0,
         type=int,
         help=
-        'Number of classes for fine-tuning. n_classes is set to the number when pretraining.'
+        'Number of classes of pretraining task. When using --pretrain_path, this must be set.'
     )
+    parser.add_argument(
+        '--pretrain_path',
+        default='',
+        type=Path,
+        help='Pretrained model path (.pth).')
+    parser.add_argument(
+        '--ft_begin_index',
+        default=0,
+        type=int,
+        help='Begin block index of fine-tuning')
     parser.add_argument(
         '--sample_size',
         default=112,
@@ -133,16 +143,6 @@ def parse_opts():
         default='',
         type=Path,
         help='Save data (.pth) of previous training')
-    parser.add_argument(
-        '--pretrain_path',
-        default='',
-        type=Path,
-        help='Pretrained model (.pth)')
-    parser.add_argument(
-        '--ft_begin_index',
-        default=0,
-        type=int,
-        help='Begin block index of fine-tuning')
     parser.add_argument(
         '--no_train',
         action='store_true',

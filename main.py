@@ -26,6 +26,7 @@ import test
 
 def get_opts():
     opt = parse_opts()
+
     if opt.root_path:
         opt.video_path = opt.root_path / opt.video_path
         opt.annotation_path = opt.root_path / opt.annotation_path
@@ -34,6 +35,7 @@ def get_opts():
             opt.resume_path = opt.root_path / opt.resume_path
         if opt.pretrain_path:
             opt.pretrain_path = opt.root_path / opt.pretrain_path
+
     opt.scales = [opt.initial_scale]
     for i in range(1, opt.n_scales):
         opt.scales.append(opt.scales[-1] * opt.scale_step)
@@ -41,6 +43,11 @@ def get_opts():
     for i in range(opt.max_t_scale - 1, 0, -1):
         opt.t_scales.append(i)
         opt.t_scales.append(1.0 / i)
+
+    if opt.pretrain_path:
+        opt.n_finetune_classes = opt.n_classes
+        opt.n_classes = opt.n_pretrain_classes
+
     opt.arch = '{}-{}'.format(opt.model, opt.model_depth)
     opt.begin_epoch = 1
     opt.mean = get_mean(opt.norm_value, dataset=opt.mean_dataset)
