@@ -59,6 +59,16 @@ def parse_opts():
         'Spatial cropping method in training. random is uniform. corner is selection from 4 corners and 1 center.  (random | corner)'
     )
     parser.add_argument(
+        '--train_crop_min_scale',
+        default=0.5,
+        type=float,
+        help='Min scale for random cropping in training')
+    parser.add_argument(
+        '--train_crop_min_ratio',
+        default=0.75,
+        type=float,
+        help='Min aspect ratio for random cropping in training')
+    parser.add_argument(
         '--learning_rate',
         default=0.1,
         type=float,

@@ -74,7 +74,9 @@ def get_norm_method(opt):
 def get_train_utils(opt):
     assert opt.train_crop in ['random', 'corner']
     if opt.train_crop == 'random':
-        crop_method = RandomResizedCrop(opt.sample_size)
+        crop_method = RandomResizedCrop(
+            opt.sample_size, (opt.train_crop_min_scale, 1.0),
+            (opt.train_crop_min_ratio, 1.0 / opt.train_crop_min_ratio))
     elif opt.train_crop == 'corner':
         scales = [1.0]
         scale_step = 1 / (2**(1 / 4))
