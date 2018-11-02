@@ -3,6 +3,7 @@ import json
 import random
 import numpy as np
 import torch
+import torchvision
 from torch import nn
 from torch import optim
 from torch.optim import lr_scheduler
@@ -51,6 +52,8 @@ if __name__ == '__main__':
     opt.device = torch.device('cpu' if opt.no_cuda else 'cuda')
     if not opt.no_cuda:
         cudnn.benchmark = True
+    if opt.accimage:
+        torchvision.set_image_backend('accimage')
 
     random.seed(opt.manual_seed)
     np.random.seed(opt.manual_seed)
