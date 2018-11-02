@@ -80,7 +80,8 @@ def multi_clips_collate_fn(batch):
         target for multi_targets in batch_targets for target in multi_targets
     ]
 
-    return data.dataloader.default_collate(zip(batch_clips, batch_targets))
+    return data.dataloader.default_collate(
+        list(zip(batch_clips, batch_targets)))
 
 
 class VideoDataset(data.Dataset):
