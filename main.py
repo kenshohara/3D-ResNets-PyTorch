@@ -66,11 +66,11 @@ def resume(opt, model):
 
 def get_norm_method(opt):
     if opt.no_mean_norm and not opt.std_norm:
-        norm_method = Normalize([0, 0, 0], [1, 1, 1])
+        return Normalize([0, 0, 0], [1, 1, 1])
     elif not opt.std_norm:
-        norm_method = Normalize(opt.mean, [1, 1, 1])
+        return Normalize(opt.mean, [1, 1, 1])
     else:
-        norm_method = Normalize(opt.mean, opt.std)
+        return Normalize(opt.mean, opt.std)
 
 
 def get_train_utils(opt):
