@@ -52,21 +52,6 @@ def parse_opts():
         type=int,
         help='Temporal duration of inputs')
     parser.add_argument(
-        '--initial_scale',
-        default=1.0,
-        type=float,
-        help='Initial scale for multiscale cropping')
-    parser.add_argument(
-        '--n_scales',
-        default=5,
-        type=int,
-        help='Number of scales for multiscale cropping')
-    parser.add_argument(
-        '--scale_step',
-        default=0.84089641525,
-        type=float,
-        help='Scale step for multiscale cropping')
-    parser.add_argument(
         '--train_crop',
         default='corner',
         type=str,

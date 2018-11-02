@@ -36,10 +36,6 @@ def get_opts():
         if opt.pretrain_path:
             opt.pretrain_path = opt.root_path / opt.pretrain_path
 
-    opt.scales = [opt.initial_scale]
-    for i in range(1, opt.n_scales):
-        opt.scales.append(opt.scales[-1] * opt.scale_step)
-
     if opt.pretrain_path:
         opt.n_finetune_classes = opt.n_classes
         opt.n_classes = opt.n_pretrain_classes
@@ -80,7 +76,11 @@ def get_train_utils(opt):
     if opt.train_crop == 'random':
         crop_method = RandomResizedCrop(opt.sample_size)
     elif opt.train_crop == 'corner':
-        crop_method = MultiScaleCornerCrop(opt.sample_size, opt.scales)
+        scales = [1.0]
+        scale_step = 1 / (2**(1 / 4))
+        for _ in range(1, 5):
+            scales.append(scales[-1] * scale_step)
+        crop_method = MultiScaleCornerCrop(opt.sample_size, scales)
     spatial_transform = Compose(
         [crop_method,
          RandomHorizontalFlip(),
