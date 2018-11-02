@@ -1,5 +1,4 @@
-import os
-import sys
+from pathlib import Path
 import json
 import random
 import numpy as np
@@ -26,14 +25,14 @@ import test
 
 if __name__ == '__main__':
     opt = parse_opts()
-    if opt.root_path != '':
-        opt.video_path = os.path.join(opt.root_path, opt.video_path)
-        opt.annotation_path = os.path.join(opt.root_path, opt.annotation_path)
-        opt.result_path = os.path.join(opt.root_path, opt.result_path)
+    if opt.root_path:
+        opt.video_path = opt.root_path / opt.video_path
+        opt.annotation_path = opt.root_path / opt.annotation_path
+        opt.result_path = opt.root_path / opt.result_path
         if opt.resume_path:
-            opt.resume_path = os.path.join(opt.root_path, opt.resume_path)
+            opt.resume_path = opt.root_path / opt.resume_path
         if opt.pretrain_path:
-            opt.pretrain_path = os.path.join(opt.root_path, opt.pretrain_path)
+            opt.pretrain_path = opt.root_path / opt.pretrain_path
     opt.scales = [opt.initial_scale]
     for i in range(1, opt.n_scales):
         opt.scales.append(opt.scales[-1] * opt.scale_step)
@@ -46,7 +45,7 @@ if __name__ == '__main__':
     opt.mean = get_mean(opt.norm_value, dataset=opt.mean_dataset)
     opt.std = get_std(opt.norm_value)
     print(opt)
-    with open(os.path.join(opt.result_path, 'opts.json'), 'w') as opt_file:
+    with open(opt.result_path / 'opts.json', 'w') as opt_file:
         json.dump(vars(opt), opt_file)
 
     opt.device = torch.device('cpu' if opt.no_cuda else 'cuda')
@@ -95,11 +94,10 @@ if __name__ == '__main__':
             num_workers=opt.n_threads,
             pin_memory=True,
             worker_init_fn=worker_init_fn)
-        train_logger = Logger(
-            os.path.join(opt.result_path, 'train.log'),
-            ['epoch', 'loss', 'acc', 'lr'])
+        train_logger = Logger(opt.result_path / 'train.log',
+                              ['epoch', 'loss', 'acc', 'lr'])
         train_batch_logger = Logger(
-            os.path.join(opt.result_path, 'train_batch.log'),
+            opt.result_path / 'train_batch.log',
             ['epoch', 'batch', 'iter', 'loss', 'acc', 'lr'])
 
         if opt.nesterov:
@@ -132,8 +130,8 @@ if __name__ == '__main__':
             num_workers=opt.n_threads,
             pin_memory=True,
             worker_init_fn=worker_init_fn)
-        val_logger = Logger(
-            os.path.join(opt.result_path, 'val.log'), ['epoch', 'loss', 'acc'])
+        val_logger = Logger(opt.result_path / 'val.log',
+                            ['epoch', 'loss', 'acc'])
 
     if opt.resume_path:
         print('loading checkpoint {}'.format(opt.resume_path))

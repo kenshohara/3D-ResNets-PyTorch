@@ -54,9 +54,8 @@ def test(data_loader, model, opt, class_names):
                 previous_video_id = targets[j]
 
             if (i % 100) == 0:
-                with open(
-                        os.path.join(opt.result_path, '{}.json'.format(
-                            opt.test_subset)), 'w') as f:
+                with open(opt.result_path / '{}.json'.format(opt.test_subset),
+                          'w') as f:
                     json.dump(test_results, f)
 
             batch_time.update(time.time() - end_time)
@@ -74,7 +73,5 @@ def test(data_loader, model, opt, class_names):
             calculate_video_results(output_buffer, previous_video_id,
                                     test_results, class_names)
 
-    with open(
-            os.path.join(opt.result_path, '{}.json'.format(opt.test_subset)),
-            'w') as f:
+    with open(opt.result_path / '{}.json'.format(opt.test_subset), 'w') as f:
         json.dump(test_results, f)
