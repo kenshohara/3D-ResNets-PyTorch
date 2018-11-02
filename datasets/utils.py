@@ -18,7 +18,7 @@ def pil_loader(path):
 def accimage_loader(path):
     try:
         import accimage
-        return accimage.Image(path)
+        return accimage.Image(str(path))
     except IOError:
         # Potentially a decoding problem, fall back to PIL.Image
         return pil_loader(path)
