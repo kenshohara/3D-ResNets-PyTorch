@@ -11,7 +11,6 @@ def get_training_set(opt, spatial_transform, temporal_transform,
             opt.video_path,
             opt.annotation_path,
             'training',
-            False,
             spatial_transform=spatial_transform,
             temporal_transform=temporal_transform,
             target_transform=target_transform)
@@ -32,16 +31,9 @@ def get_validation_set(opt, spatial_transform, temporal_transform,
     assert opt.dataset in ['kinetics', 'activitynet', 'ucf101', 'hmdb51', 'mit']
 
     if opt.dataset == 'activitynet':
-        validation_data = ActivityNet(
-            opt.video_path,
-            opt.annotation_path,
-            'validation',
-            False,
-            opt.n_val_samples,
-            spatial_transform,
-            temporal_transform,
-            target_transform,
-            sample_duration=opt.sample_duration)
+        validation_data = ActivityNet(opt.video_path, opt.annotation_path,
+                                      'validation', spatial_transform,
+                                      temporal_transform, target_transform)
     else:
         validation_data = VideoDataset(
             opt.video_path,
@@ -67,12 +59,10 @@ def get_test_set(opt, spatial_transform, temporal_transform, target_transform):
             opt.video_path,
             opt.annotation_path,
             subset,
-            True,
-            0,
             spatial_transform,
             temporal_transform,
             target_transform,
-            sample_duration=opt.sample_duration)
+            is_untrimmed_setting=True)
     else:
         test_data = VideoDataset(
             opt.video_path,
