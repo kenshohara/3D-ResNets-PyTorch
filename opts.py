@@ -74,13 +74,6 @@ def parse_opts():
         'Spatial cropping method in training. random is uniform. corner is selection from 4 corners and 1 center.  (random | corner | center)'
     )
     parser.add_argument(
-        '--train_t_crop',
-        default='single',
-        type=str,
-        help=
-        'Temporal cropping method in training. single is single-scale crop. multi is multi-scale crop. (single | multi)'
-    )
-    parser.add_argument(
         '--learning_rate',
         default=0.1,
         type=float,

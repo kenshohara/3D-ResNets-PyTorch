@@ -86,11 +86,7 @@ def get_train_utils(opt):
          RandomHorizontalFlip(),
          ToTensor(),
          get_norm_method(opt)])
-    if opt.train_t_crop == 'single':
-        temporal_transform = TemporalRandomCrop(opt.sample_duration)
-    elif opt.train_t_crop == 'multi':
-        temporal_transform = TemporalMultiscaleRandomCrop(
-            opt.t_scales, opt.sample_duration)
+    temporal_transform = TemporalRandomCrop(opt.sample_duration)
     target_transform = ClassLabel()
     training_data = get_training_set(opt, spatial_transform, temporal_transform,
                                      target_transform)
