@@ -39,10 +39,6 @@ def get_opts():
     opt.scales = [opt.initial_scale]
     for i in range(1, opt.n_scales):
         opt.scales.append(opt.scales[-1] * opt.scale_step)
-    opt.t_scales = [opt.max_t_scale, 1.0 / opt.max_t_scale]
-    for i in range(opt.max_t_scale - 1, 0, -1):
-        opt.t_scales.append(i)
-        opt.t_scales.append(1.0 / i)
 
     if opt.pretrain_path:
         opt.n_finetune_classes = opt.n_classes

@@ -81,11 +81,6 @@ def parse_opts():
         'Temporal cropping method in training. single is single-scale crop. multi is multi-scale crop. (single | multi)'
     )
     parser.add_argument(
-        '--max_t_scale',
-        default=3,
-        type=int,
-        help='Max temporal scale for multiscale cropping')
-    parser.add_argument(
         '--learning_rate',
         default=0.1,
         type=float,
