@@ -26,7 +26,7 @@ def prepare_inputs(input_buffer, batch_size):
             dim=0)
         next_begin_index = input_buffer[buffer_index].size(0) - n_over_samples
 
-    if n_oversamples > 0:
+    if n_over_samples > 0:
         input_buffer = [input_buffer[buffer_index][next_begin_index:]
                        ] + input_buffer[(buffer_index + 1):]
     else:
