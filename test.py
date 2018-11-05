@@ -26,8 +26,11 @@ def prepare_inputs(input_buffer, batch_size):
             dim=0)
         next_begin_index = input_buffer[buffer_index].size(0) - n_over_samples
 
-    input_buffer = [input_buffer[buffer_index][next_begin_index:]
-                   ] + input_buffer[(buffer_index + 1):]
+    if n_oversamples > 0:
+        input_buffer = [input_buffer[buffer_index][next_begin_index:]
+                       ] + input_buffer[(buffer_index + 1):]
+    else:
+        input_buffer = input_buffer[(buffer_index + 1):]
 
     return inputs, input_buffer
 
@@ -66,7 +69,7 @@ def test(data_loader, model, opt, class_names):
             n_buffer_samples = sum([x.size(0) for x in input_buffer])
             n_samples = n_buffer_samples + new_inputs.size(0)
             video_id_buffer.append(
-                [new_video_ids[0], n_buffer_samples + 1, n_samples])
+                [new_video_ids[0], n_buffer_samples, n_samples])
             input_buffer.append(new_inputs)
             if n_samples < opt.batch_size:
                 continue
