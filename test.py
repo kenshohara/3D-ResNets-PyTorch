@@ -42,7 +42,7 @@ def test(data_loader, model, opt, class_names):
 
             outputs = model(inputs)
             if not opt.no_softmax_in_test:
-                outputs = F.softmax(outputs)
+                outputs = F.softmax(outputs, dim=1)
 
             for j in range(outputs.size(0)):
                 if not (i == 0 and j == 0) and targets[j] != previous_video_id:
