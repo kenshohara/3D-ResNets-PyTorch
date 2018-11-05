@@ -161,11 +161,6 @@ def parse_opts():
         type=str,
         help='Cropping method (c | tl | tr | bl | br) in test')
     parser.add_argument(
-        '--no_softmax_in_test',
-        action='store_true',
-        help='If true, output for each clip is not normalized using softmax.')
-    parser.set_defaults(no_softmax_in_test=False)
-    parser.add_argument(
         '--no_cuda', action='store_true', help='If true, cuda is not used.')
     parser.set_defaults(no_cuda=False)
     parser.add_argument(
