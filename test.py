@@ -17,7 +17,7 @@ def calculate_video_results(output_buffer, video_id, test_results, class_names):
     for i in range(sorted_scores.size(0)):
         video_results.append({
             'label': class_names[locs[i].item()],
-            'score': sorted_scores[i]
+            'score': sorted_scores[i].item()
         })
 
     test_results['results'][video_id] = video_results
