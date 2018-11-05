@@ -40,7 +40,6 @@ def test(data_loader, model, opt, class_names):
         for i, (inputs, targets) in enumerate(data_loader):
             data_time.update(time.time() - end_time)
 
-            inputs = inputs.to(opt.device, non_blocking=True)
             outputs = model(inputs)
             if not opt.no_softmax_in_test:
                 outputs = F.softmax(outputs)
