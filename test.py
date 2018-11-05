@@ -51,11 +51,6 @@ def test(data_loader, model, opt, class_names):
                 output_buffer.append(outputs[j].data.cpu())
                 previous_video_id = targets[j]
 
-            if (i % 100) == 0:
-                with open(opt.result_path / '{}.json'.format(opt.test_subset),
-                          'w') as f:
-                    json.dump(test_results, f)
-
             batch_time.update(time.time() - end_time)
             end_time = time.time()
 
