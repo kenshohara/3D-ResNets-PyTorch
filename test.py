@@ -37,19 +37,21 @@ def test(data_loader, model, opt, class_names):
     test_results = {'results': {}}
 
     with torch.no_grad():
-        for i, (inputs, targets) in enumerate(data_loader):
+        for i, (inputs, video_ids) in enumerate(data_loader):
+
             data_time.update(time.time() - end_time)
 
             outputs = model(inputs)
             outputs = F.softmax(outputs, dim=1)
 
             for j in range(outputs.size(0)):
-                if not (i == 0 and j == 0) and targets[j] != previous_video_id:
+                if not (i == 0 and
+                        j == 0) and video_ids[j] != previous_video_id:
                     calculate_video_results(output_buffer, previous_video_id,
                                             test_results, class_names)
                     output_buffer = []
                 output_buffer.append(outputs[j].data.cpu())
-                previous_video_id = targets[j]
+                previous_video_id = video_ids[j]
 
             batch_time.update(time.time() - end_time)
             end_time = time.time()
