@@ -24,6 +24,19 @@ class Normalize(transforms.Normalize):
         pass
 
 
+class ScaleValue(object):
+
+    def __init__(self, s):
+        self.s = s
+
+    def __call__(self, tensor):
+        tensor *= self.s
+        return tensor
+
+    def randomize_parameters(self):
+        pass
+
+
 class Resize(transforms.Resize):
 
     def randomize_parameters(self):
