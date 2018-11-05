@@ -169,8 +169,7 @@ def generate_model(opt):
                 sample_duration=opt.sample_duration)
 
     if not opt.no_cuda:
-        model = model.cuda()
-        model = nn.DataParallel(model, device_ids=None)
+        model = nn.DataParallel(model, device_ids=None).cuda()
 
     if not opt.pretrain_path:
         return model, model.parameters()
@@ -186,9 +185,8 @@ def generate_model(opt):
     else:
         tmp_model = model.module
     if opt.model == 'densenet':
-        tmp_model.classifier = nn.Linear(
-            tmp_model.classifier.in_features,
-            opt.n_finetune_classes).to(opt.device)
+        tmp_model.classifier = nn.Linear(tmp_model.classifier.in_features,
+                                         opt.n_finetune_classes).to(opt.device)
     else:
         tmp_model.fc = nn.Linear(tmp_model.fc.in_features,
                                  opt.n_finetune_classes).to(opt.device)
