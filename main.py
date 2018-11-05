@@ -15,7 +15,8 @@ from mean import get_mean, get_std
 from spatial_transforms import (
     Compose, Normalize, Resize, CenterCrop, CornerCrop, MultiScaleCornerCrop,
     RandomResizedCrop, RandomHorizontalFlip, ToTensor, ScaleValue)
-from temporal_transforms import LoopPadding, TemporalRandomCrop, TemporalEvenCrop
+from temporal_transforms import (LoopPadding, TemporalRandomCrop,
+                                 TemporalEvenCrop, SlidingWindow)
 from target_transforms import ClassLabel, VideoID
 from dataset import get_training_set, get_validation_set, get_test_set
 from utils import Logger, worker_init_fn
@@ -162,7 +163,7 @@ def get_test_utils(opt):
         ToTensor(),
         get_norm_method(opt)
     ])
-    temporal_transform = LoopPadding(opt.sample_duration)
+    temporal_transform = SlidingWindow(opt.sample_duration, opt.sample_duration)
     target_transform = VideoID()
 
     test_data, collate_fn = get_test_set(opt, spatial_transform,
