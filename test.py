@@ -33,8 +33,7 @@ def prepare_inputs(input_buffer, batch_size):
 
 
 def calculate_video_results(outputs, video_id, test_results, class_names):
-    video_outputs = torch.stack(outputs)
-    average_scores = torch.mean(video_outputs, dim=0)
+    average_scores = torch.mean(outputs, dim=0)
     sorted_scores, locs = torch.topk(average_scores, k=5)
 
     video_results = []
@@ -72,12 +71,11 @@ def test(data_loader, model, opt, class_names):
             if n_samples < opt.batch_size:
                 continue
 
+            data_time.update(time.time() - end_time)
+
             while True:
                 inputs, input_buffer = prepare_inputs(input_buffer,
                                                       opt.batch_size)
-
-                data_time.update(time.time() - end_time)
-
                 outputs = model(inputs)
                 outputs = F.softmax(outputs, dim=1)
 
