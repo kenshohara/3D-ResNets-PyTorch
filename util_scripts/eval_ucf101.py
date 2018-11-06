@@ -3,13 +3,15 @@ import json
 import numpy as np
 import pandas as pd
 
-from utils import get_blocked_videos
-from utils import interpolated_prec_rec
 
 class UCFclassification(object):
 
-    def __init__(self, ground_truth_filename=None, prediction_filename=None,
-                 subset='validation', verbose=False, top_k=1):
+    def __init__(self,
+                 ground_truth_filename=None,
+                 prediction_filename=None,
+                 subset='validation',
+                 verbose=False,
+                 top_k=1):
         if not ground_truth_filename:
             raise IOError('Please input a valid ground truth file.')
         if not prediction_filename:
@@ -51,7 +53,7 @@ class UCFclassification(object):
             data = json.load(fobj)
         # Checking format
         # if not all([field in data.keys() for field in self.gt_fields]):
-            # raise IOError('Please input a valid ground truth file.')
+        # raise IOError('Please input a valid ground truth file.')
 
         # Initialize data frame
         activity_index, cidx = {}, 0
@@ -65,8 +67,7 @@ class UCFclassification(object):
                 cidx += 1
             video_lst.append(videoid)
             label_lst.append(activity_index[this_label])
-        ground_truth = pd.DataFrame({'video-id': video_lst,
-                                     'label': label_lst})
+        ground_truth = pd.DataFrame({'video-id': video_lst, 'label': label_lst})
         ground_truth = ground_truth.drop_duplicates().reset_index(drop=True)
         return ground_truth, activity_index
 
@@ -88,7 +89,7 @@ class UCFclassification(object):
             data = json.load(fobj)
         # Checking format...
         # if not all([field in data.keys() for field in self.pred_fields]):
-            # raise IOError('Please input a valid prediction file.')
+        # raise IOError('Please input a valid prediction file.')
 
         # Initialize data frame
         video_lst, label_lst, score_lst = [], [], []
@@ -98,9 +99,11 @@ class UCFclassification(object):
                 video_lst.append(videoid)
                 label_lst.append(label)
                 score_lst.append(result['score'])
-        prediction = pd.DataFrame({'video-id': video_lst,
-                                   'label': label_lst,
-                                   'score': score_lst})
+        prediction = pd.DataFrame({
+            'video-id': video_lst,
+            'label': label_lst,
+            'score': score_lst
+        })
         return prediction
 
     def evaluate(self):
@@ -108,14 +111,16 @@ class UCFclassification(object):
         interpolated mean average precision to measure the performance of a
         method.
         """
-        hit_at_k = compute_video_hit_at_k(self.ground_truth,
-                                          self.prediction, top_k=self.top_k)
+        hit_at_k = compute_video_hit_at_k(
+            self.ground_truth, self.prediction, top_k=self.top_k)
         if self.verbose:
-            print ('[RESULTS] Performance on ActivityNet untrimmed video '
-                   'classification task.')
+            print(
+                '[RESULTS] Performance on ActivityNet untrimmed video '
+                'classification task.')
             print '\tError@{}: {}'.format(self.top_k, 1.0 - hit_at_k)
             #print '\tAvg Hit@{}: {}'.format(self.top_k, avg_hit_at_k)
         self.hit_at_k = hit_at_k
+
 
 ################################################################################
 # Metrics
@@ -153,6 +158,6 @@ def compute_video_hit_at_k(ground_truth, prediction, top_k=3):
         pred_label = this_pred['label'].tolist()
         gt_idx = ground_truth['video-id'] == vid
         gt_label = ground_truth.loc[gt_idx]['label'].tolist()
-        avg_hits_per_vid[i] = np.mean([1 if this_label in pred_label else 0
-                                       for this_label in gt_label])
+        avg_hits_per_vid[i] = np.mean(
+            [1 if this_label in pred_label else 0 for this_label in gt_label])
     return float(avg_hits_per_vid.mean())
