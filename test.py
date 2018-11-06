@@ -66,10 +66,10 @@ def test(data_loader, model, opt, class_names):
 
     with torch.no_grad():
         for i, (new_inputs, new_video_ids) in enumerate(data_loader):
-            n_buffer_samples = sum([x.size(0) for x in input_buffer])
-            n_samples = n_buffer_samples + new_inputs.size(0)
+            n_prev_buffer_samples = sum([x.size(0) for x in input_buffer])
+            n_samples = n_prev_buffer_samples + new_inputs.size(0)
             video_id_buffer.append(
-                [new_video_ids[0], n_buffer_samples, n_samples])
+                [new_video_ids[0], n_prev_buffer_samples, n_samples])
             input_buffer.append(new_inputs)
             if n_samples < opt.batch_size:
                 continue
