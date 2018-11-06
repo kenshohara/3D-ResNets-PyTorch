@@ -94,13 +94,15 @@ def test(data_loader, model, opt, class_names):
                         output_buffer = []
                     else:
                         output_buffer.append(outputs[begin_index:].cpu())
+                        n_video_samples = end_index - begin_index
                         video_id_buffer = [[
-                            video_id, 0,
-                            end_index - outputs[begin_index:].size(0)
+                            video_id,
+                            0,
+                            n_video_samples - outputs[begin_index:].size(0),
                         ]]
                         break
-
-                video_id_buffer = video_id_buffer[video_id_index:]
+                else:
+                    video_id_buffer = video_id_buffer[(video_id_index + 1):]
 
                 n_samples -= opt.batch_size
                 if n_samples < opt.batch_size:
