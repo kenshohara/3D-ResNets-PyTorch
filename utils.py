@@ -46,14 +46,16 @@ class Logger(object):
 
 
 def calculate_accuracy(outputs, targets):
-    batch_size = targets.size(0)
+    with torch.no_grad():
 
-    _, pred = outputs.topk(1, 1, largest=True, sorted=True)
-    pred = pred.t()
-    correct = pred.eq(targets.view(1, -1))
-    n_correct_elems = correct.float().sum().item()
+        batch_size = targets.size(0)
 
-    return n_correct_elems / batch_size
+        _, pred = outputs.topk(1, 1, largest=True, sorted=True)
+        pred = pred.t()
+        correct = pred.eq(targets.view(1, -1))
+        n_correct_elems = correct.float().sum().item()
+
+        return n_correct_elems / batch_size
 
 
 def worker_init_fn(worker_id):
