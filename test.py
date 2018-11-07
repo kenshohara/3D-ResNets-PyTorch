@@ -8,6 +8,39 @@ import json
 from utils import AverageMeter
 
 
+def test_in_buffer(model, batch_size, input_buffer, video_id_buffer,
+                   output_buffer, test_results, class_names):
+    while True:
+        n_samples = sum([x.size(0) for x in input_buffer])
+        if n_samples < batch_size:
+            return input_buffer, video_id_buffer, output_buffer, test_results
+
+        inputs, input_buffer = prepare_inputs(input_buffer, batch_size)
+        outputs = model(inputs)
+        outputs = F.softmax(outputs, dim=1)
+
+        rest_video_id_buffer = []
+        for video_id, begin_index, end_index in video_id_buffer:
+            if end_index <= outputs.size(0):
+                current_outputs = outputs[begin_index:end_index].cpu()
+                if output_buffer:
+                    current_outputs = torch.cat(
+                        output_buffer + [current_outputs], dim=0)
+                test_results['results'][video_id] = calculate_video_results(
+                    current_outputs, video_id, class_names)
+                output_buffer = []
+            else:
+                output_buffer.append(outputs[begin_index:].cpu())
+                n_video_samples = end_index - begin_index
+                rest_video_id_buffer.append([
+                    video_id,
+                    0,
+                    n_video_samples - outputs[begin_index:].size(0),
+                ])
+
+        video_id_buffer = rest_video_id_buffer
+
+
 def prepare_inputs(input_buffer, batch_size):
     n_input_samples = 0
     for buffer_index, x in enumerate(input_buffer):
@@ -33,7 +66,7 @@ def prepare_inputs(input_buffer, batch_size):
     return inputs, input_buffer
 
 
-def calculate_video_results(outputs, video_id, test_results, class_names):
+def calculate_video_results(outputs, video_id, class_names):
     average_scores = torch.mean(outputs, dim=0)
     sorted_scores, locs = torch.topk(average_scores, k=5)
 
@@ -44,7 +77,7 @@ def calculate_video_results(outputs, video_id, test_results, class_names):
             'score': sorted_scores[i].item()
         })
 
-    test_results['results'][video_id] = video_results
+    return video_results
 
 
 def test(data_loader, model, opt, class_names):
@@ -58,53 +91,26 @@ def test(data_loader, model, opt, class_names):
     end_time = time.time()
     input_buffer = []
     video_id_buffer = []
-    n_samples = 0
     output_buffer = []
     test_results = {'results': {}}
 
     with torch.no_grad():
         for i, (new_inputs, new_video_ids) in enumerate(data_loader):
-            n_prev_buffer_samples = sum([x.size(0) for x in input_buffer])
-            n_samples = n_prev_buffer_samples + new_inputs.size(0)
-            video_id_buffer.append(
-                [new_video_ids[0], n_prev_buffer_samples, n_samples])
             input_buffer.append(new_inputs)
-            if n_samples < opt.batch_size:
+            n_buffer_samples = sum([x.size(0) for x in input_buffer])
+            begin_buffer_index = n_buffer_samples - new_inputs.size(0)
+            end_buffer_index = n_buffer_samples
+            video_id_buffer.append(
+                [new_video_ids[0], begin_buffer_index, end_buffer_index])
+            if n_buffer_samples < opt.batch_size:
                 continue
 
             data_time.update(time.time() - end_time)
 
-            while True:
-                inputs, input_buffer = prepare_inputs(input_buffer,
-                                                      opt.batch_size)
-                outputs = model(inputs)
-                outputs = F.softmax(outputs, dim=1)
-
-                for video_id_index, (video_id, begin_index,
-                                     end_index) in enumerate(video_id_buffer):
-                    if end_index <= outputs.size(0):
-                        current_outputs = outputs[begin_index:end_index].cpu()
-                        if output_buffer:
-                            current_outputs = torch.cat(
-                                output_buffer + [current_outputs], dim=0)
-                        calculate_video_results(current_outputs, video_id,
-                                                test_results, class_names)
-                        output_buffer = []
-                    else:
-                        output_buffer.append(outputs[begin_index:].cpu())
-                        n_video_samples = end_index - begin_index
-                        video_id_buffer = [[
-                            video_id,
-                            0,
-                            n_video_samples - outputs[begin_index:].size(0),
-                        ]]
-                        break
-                else:
-                    video_id_buffer = video_id_buffer[(video_id_index + 1):]
-
-                n_samples -= opt.batch_size
-                if n_samples < opt.batch_size:
-                    break
+            (input_buffer, video_id_buffer,
+             output_buffer, test_results) = test_in_buffer(
+                 model, opt.batch_size, input_buffer, video_id_buffer,
+                 output_buffer, test_results, class_names)
 
             batch_time.update(time.time() - end_time)
             end_time = time.time()
@@ -116,6 +122,12 @@ def test(data_loader, model, opt, class_names):
                       len(data_loader),
                       batch_time=batch_time,
                       data_time=data_time))
+
+        if input_buffer:
+            n_buffer_samples = sum([x.size(0) for x in input_buffer])
+            _, _, _, test_results = test_in_buffer(
+                model, n_buffer_samples, input_buffer, video_id_buffer,
+                output_buffer, test_results, class_names)
 
     with open(opt.result_path / '{}.json'.format(opt.test_subset), 'w') as f:
         json.dump(test_results, f)
