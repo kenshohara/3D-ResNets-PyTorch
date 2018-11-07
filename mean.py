@@ -1,21 +1,15 @@
-def get_mean(norm_value=255, dataset='activitynet'):
+def get_mean_std(value_scale, dataset):
     assert dataset in ['activitynet', 'kinetics']
 
     if dataset == 'activitynet':
-        return [
-            114.7748 / norm_value, 107.7354 / norm_value, 99.4750 / norm_value
-        ]
+        mean = [0.4477, 0.4209, 0.3906]
+        std = [0.2767, 0.2695, 0.2714]
     elif dataset == 'kinetics':
         # Kinetics (10 videos for each class)
-        return [
-            110.63666788 / norm_value, 103.16065604 / norm_value,
-            96.29023126 / norm_value
-        ]
+        mean = [0.4339, 0.4046, 0.3776]
+        std = [0.1512, 0.1486, 0.1570]
 
+    mean = [x * value_scale for x in mean]
+    std = [x * value_scale for x in std]
 
-def get_std(norm_value=255):
-    # Kinetics (10 videos for each class)
-    return [
-        38.7568578 / norm_value, 37.88248729 / norm_value,
-        40.02898126 / norm_value
-    ]
+    return mean, std

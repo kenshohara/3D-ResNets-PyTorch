@@ -75,6 +75,10 @@ def parse_opts():
         type=float,
         help='Min aspect ratio for random cropping in training')
     parser.add_argument(
+        '--no_hflip',
+        action='store_true',
+        help='If true holizontal flipping is not performed.')
+    parser.add_argument(
         '--learning_rate',
         default=0.1,
         type=float,
@@ -87,7 +91,7 @@ def parse_opts():
         '--weight_decay', default=1e-3, type=float, help='Weight Decay')
     parser.add_argument(
         '--mean_dataset',
-        default='activitynet',
+        default='kinetics',
         type=str,
         help=
         'dataset for mean values of mean subtraction (activitynet | kinetics)')
@@ -95,15 +99,18 @@ def parse_opts():
         '--no_mean_norm',
         action='store_true',
         help='If true, inputs are not normalized by mean.')
-    parser.set_defaults(no_mean_norm=False)
     parser.add_argument(
-        '--std_norm',
+        '--no_std_norm',
         action='store_true',
-        help='If true, inputs are normalized by standard deviation.')
-    parser.set_defaults(std_norm=False)
+        help='If true, inputs are not normalized by standard deviation.')
+    parser.add_argument(
+        '--value_scale',
+        default=1,
+        type=int,
+        help=
+        'If 1, range of inputs is [0-1]. If 255, range of inputs is [0-255].')
     parser.add_argument(
         '--nesterov', action='store_true', help='Nesterov momentum')
-    parser.set_defaults(nesterov=False)
     parser.add_argument(
         '--optimizer',
         default='sgd',
@@ -136,15 +143,12 @@ def parse_opts():
         '--no_train',
         action='store_true',
         help='If true, training is not performed.')
-    parser.set_defaults(no_train=False)
     parser.add_argument(
         '--no_val',
         action='store_true',
         help='If true, validation is not performed.')
-    parser.set_defaults(no_val=False)
     parser.add_argument(
         '--test', action='store_true', help='If true, test is performed.')
-    parser.set_defaults(test=False)
     parser.add_argument(
         '--test_subset',
         default='val',
@@ -152,7 +156,6 @@ def parse_opts():
         help='Used subset in test (val | test)')
     parser.add_argument(
         '--no_cuda', action='store_true', help='If true, cuda is not used.')
-    parser.set_defaults(no_cuda=False)
     parser.add_argument(
         '--n_threads',
         default=4,
@@ -163,17 +166,6 @@ def parse_opts():
         default=10,
         type=int,
         help='Trained model is saved at every this epochs.')
-    parser.add_argument(
-        '--no_hflip',
-        action='store_true',
-        help='If true holizontal flipping is not performed.')
-    parser.set_defaults(no_hflip=False)
-    parser.add_argument(
-        '--norm_value',
-        default=1,
-        type=int,
-        help=
-        'If 1, range of inputs is [0-255]. If 255, range of inputs is [0-1].')
     parser.add_argument(
         '--model',
         default='resnet',
@@ -207,7 +199,6 @@ def parse_opts():
         '--accimage',
         action='store_true',
         help='If true, accimage is used to load images.')
-    parser.set_defaults(accimage=False)
 
     args = parser.parse_args()
 
