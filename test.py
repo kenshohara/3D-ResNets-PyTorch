@@ -15,22 +15,20 @@ def prepare_inputs(input_buffer, batch_size):
         if n_input_samples >= batch_size:
             n_over_samples = n_input_samples - batch_size
             break
+    else:
+        n_over_samples = 0
 
-    if buffer_index == 0:
-        inputs = input_buffer[buffer_index][:batch_size]
-        next_begin_index = batch_size
+    if n_over_samples == 0:
+        inputs = torch.cat(input_buffer[:(buffer_index + 1)], dim=0)
+        input_buffer = input_buffer[(buffer_index + 1):]
     else:
         inputs = torch.cat(
-            [input_buffer[i] for i in range(buffer_index)] +
+            input_buffer[:buffer_index] +
             [input_buffer[buffer_index][:-n_over_samples]],
             dim=0)
         next_begin_index = input_buffer[buffer_index].size(0) - n_over_samples
-
-    if n_over_samples > 0:
         input_buffer = [input_buffer[buffer_index][next_begin_index:]
                        ] + input_buffer[(buffer_index + 1):]
-    else:
-        input_buffer = input_buffer[(buffer_index + 1):]
 
     return inputs, input_buffer
 
