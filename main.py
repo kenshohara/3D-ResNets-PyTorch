@@ -158,8 +158,8 @@ def get_val_utils(opt):
 
 def get_test_utils(opt):
     spatial_transform = Compose([
-        Resize(int(opt.sample_size / opt.scale_in_test)),
-        CornerCrop(opt.sample_size, opt.crop_position_in_test),
+        Resize(int(opt.sample_size)),
+        CenterCrop(opt.sample_size),
         ToTensor(),
         get_norm_method(opt)
     ])

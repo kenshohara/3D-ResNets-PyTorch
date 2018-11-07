@@ -151,16 +151,6 @@ def parse_opts():
         type=str,
         help='Used subset in test (val | test)')
     parser.add_argument(
-        '--scale_in_test',
-        default=1.0,
-        type=float,
-        help='Spatial scale in test')
-    parser.add_argument(
-        '--crop_position_in_test',
-        default='c',
-        type=str,
-        help='Cropping method (c | tl | tr | bl | br) in test')
-    parser.add_argument(
         '--no_cuda', action='store_true', help='If true, cuda is not used.')
     parser.set_defaults(no_cuda=False)
     parser.add_argument(
