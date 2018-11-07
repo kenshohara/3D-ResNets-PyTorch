@@ -11,7 +11,7 @@ import torchvision
 
 from opts import parse_opts
 from model import generate_model
-from mean import get_mean, get_std
+from mean import get_mean_std
 from spatial_transforms import (
     Compose, Normalize, Resize, CenterCrop, CornerCrop, MultiScaleCornerCrop,
     RandomResizedCrop, RandomHorizontalFlip, ToTensor, ScaleValue)
