@@ -8,10 +8,14 @@ def get_fine_tuning_parameters(model, ft_begin_module):
     if not ft_begin_module:
         return model.parameters()
 
+    get_module_name = (
+        lambda x: x.split('.')[1] if x.split('.')[0] == 'features' else x.split('.')[0]
+    )
+
     parameters = []
     add_flag = False
     for k, v in model.named_parameters():
-        if k.split('.')[0] == ft_begin_module:
+        if ft_begin_module == get_module_name(k):
             add_flag = True
 
         if add_flag:
@@ -198,4 +202,5 @@ def generate_model(opt):
                                  opt.n_finetune_classes).to(opt.device)
 
     parameters = get_fine_tuning_parameters(model, opt.ft_begin_module)
+
     return model, parameters
