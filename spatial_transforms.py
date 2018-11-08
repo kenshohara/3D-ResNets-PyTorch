@@ -24,12 +24,6 @@ class Normalize(transforms.Normalize):
         pass
 
 
-class Normalize(transforms.Normalize):
-
-    def randomize_parameters(self):
-        pass
-
-
 class ScaleValue(object):
 
     def __init__(self, s):
