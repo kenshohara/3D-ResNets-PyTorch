@@ -180,7 +180,7 @@ def get_test_utils(opt):
         ToTensor(),
         ScaleValue(opt.value_scale), normalize
     ])
-    temporal_transform = SlidingWindow(opt.sample_duration, opt.sample_duration)
+    temporal_transform = SlidingWindow(opt.sample_duration, opt.test_stride)
     target_transform = VideoID()
 
     test_data, collate_fn = get_test_set(
