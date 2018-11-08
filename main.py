@@ -30,7 +30,7 @@ def json_serial(obj):
         return str(obj)
 
 
-def get_opts():
+def get_opt():
     opt = parse_opts()
 
     if opt.root_path is not None:
@@ -188,7 +188,7 @@ def get_test_utils(opt):
 
 
 if __name__ == '__main__':
-    opt = get_opts()
+    opt = get_opt()
 
     opt.device = torch.device('cpu' if opt.no_cuda else 'cuda')
     if not opt.no_cuda:
