@@ -117,11 +117,16 @@ class ResNet(nn.Module):
                  num_classes=400):
         self.inplanes = 64
         super().__init__()
+
+        if sample_duration >= 32:
+            first_t_stride = 2
+        else:
+            first_t_stride = 1
         self.conv1 = nn.Conv3d(
             3,
             64,
             kernel_size=(conv1_t_size, 7, 7),
-            stride=(1, 2, 2),
+            stride=(first_t_stride, 2, 2),
             padding=(int(conv1_t_size / 2), 3, 3),
             bias=False)
         self.bn1 = nn.BatchNorm3d(64)
@@ -134,8 +139,15 @@ class ResNet(nn.Module):
             block, 256, layers[2], shortcut_type, stride=2)
         self.layer4 = self._make_layer(
             block, 512, layers[3], shortcut_type, stride=2)
-        last_duration = int(math.ceil(sample_duration / 16))
-        last_size = int(math.ceil(sample_size / 32))
+
+        n_spatial_downsampling = 5
+        n_temporal_downsampling = 4
+        if first_t_stride == 2:
+            n_temporal_downsampling += 1
+
+        last_duration = int(
+            math.ceil(sample_duration / 2**n_temporal_downsampling))
+        last_size = int(math.ceil(sample_size / 2**n_spatial_downsampling))
         self.avgpool = nn.AvgPool3d((last_duration, last_size, last_size),
                                     stride=1)
         self.fc = nn.Linear(512 * block.expansion, num_classes)
