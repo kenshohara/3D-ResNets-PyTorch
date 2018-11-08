@@ -5,60 +5,24 @@ from collections import OrderedDict
 import math
 
 
-def densenet121(**kwargs):
-    model = DenseNet(
-        num_init_features=64,
-        growth_rate=32,
-        block_config=(6, 12, 24, 16),
-        **kwargs)
-    return model
-
-
-def densenet169(**kwargs):
-    model = DenseNet(
-        num_init_features=64,
-        growth_rate=32,
-        block_config=(6, 12, 32, 32),
-        **kwargs)
-    return model
-
-
-def densenet201(**kwargs):
-    model = DenseNet(
-        num_init_features=64,
-        growth_rate=32,
-        block_config=(6, 12, 48, 32),
-        **kwargs)
-    return model
-
-
-def densenet264(**kwargs):
-    model = DenseNet(
-        num_init_features=64,
-        growth_rate=32,
-        block_config=(6, 12, 64, 48),
-        **kwargs)
-    return model
-
-
 class _DenseLayer(nn.Sequential):
 
     def __init__(self, num_input_features, growth_rate, bn_size, drop_rate):
         super().__init__()
-        self.add_module('norm.1', nn.BatchNorm3d(num_input_features))
-        self.add_module('relu.1', nn.ReLU(inplace=True))
+        self.add_module('norm1', nn.BatchNorm3d(num_input_features))
+        self.add_module('relu1', nn.ReLU(inplace=True))
         self.add_module(
-            'conv.1',
+            'conv1',
             nn.Conv3d(
                 num_input_features,
                 bn_size * growth_rate,
                 kernel_size=1,
                 stride=1,
                 bias=False))
-        self.add_module('norm.2', nn.BatchNorm3d(bn_size * growth_rate))
-        self.add_module('relu.2', nn.ReLU(inplace=True))
+        self.add_module('norm2', nn.BatchNorm3d(bn_size * growth_rate))
+        self.add_module('relu2', nn.ReLU(inplace=True))
         self.add_module(
-            'conv.2',
+            'conv2',
             nn.Conv3d(
                 bn_size * growth_rate,
                 growth_rate,
@@ -191,3 +155,39 @@ class DenseNet(nn.Module):
                 features.size(0), -1)
         out = self.classifier(out)
         return out
+
+
+def densenet121(**kwargs):
+    model = DenseNet(
+        num_init_features=64,
+        growth_rate=32,
+        block_config=(6, 12, 24, 16),
+        **kwargs)
+    return model
+
+
+def densenet169(**kwargs):
+    model = DenseNet(
+        num_init_features=64,
+        growth_rate=32,
+        block_config=(6, 12, 32, 32),
+        **kwargs)
+    return model
+
+
+def densenet201(**kwargs):
+    model = DenseNet(
+        num_init_features=64,
+        growth_rate=32,
+        block_config=(6, 12, 48, 32),
+        **kwargs)
+    return model
+
+
+def densenet264(**kwargs):
+    model = DenseNet(
+        num_init_features=64,
+        growth_rate=32,
+        block_config=(6, 12, 64, 48),
+        **kwargs)
+    return model
