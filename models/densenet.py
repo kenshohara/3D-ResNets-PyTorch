@@ -4,10 +4,6 @@ import torch.nn.functional as F
 from collections import OrderedDict
 import math
 
-__all__ = [
-    'DenseNet', 'densenet121', 'densenet169', 'densenet201', 'densenet264'
-]
-
 
 def densenet121(**kwargs):
     model = DenseNet(
