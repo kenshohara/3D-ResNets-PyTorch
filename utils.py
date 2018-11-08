@@ -66,3 +66,12 @@ def worker_init_fn(worker_id):
     if torch_seed >= 2**32:
         torch_seed = torch_seed % 2**32
     np.random.seed(torch_seed + worker_id)
+
+
+def get_lr(optimizer):
+    lrs = []
+    for param_group in optimizer.param_groups:
+        lr = float(param_group['lr'])
+        lrs.append(lr)
+
+    return max(lrs)

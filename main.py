@@ -19,7 +19,7 @@ from temporal_transforms import (LoopPadding, TemporalRandomCrop,
                                  TemporalEvenCrop, SlidingWindow)
 from target_transforms import ClassLabel, VideoID
 from dataset import get_training_set, get_validation_set, get_test_set
-from utils import Logger, worker_init_fn
+from utils import Logger, worker_init_fn, get_lr
 from train import train_epoch
 from validation import val_epoch
 import test
@@ -240,8 +240,10 @@ if __name__ == '__main__':
 
     for i in range(opt.begin_epoch, opt.n_epochs + 1):
         if not opt.no_train:
+            current_lr = get_lr(optimizer)
             train_epoch(i, train_loader, model, criterion, optimizer,
-                        opt.device, train_logger, train_batch_logger)
+                        opt.device, current_lr, train_logger,
+                        train_batch_logger)
             if i % opt.checkpoint == 0:
                 save_file_path = opt.result_path / 'save_{}.pth'.format(i)
                 save_checkpoint(save_file_path, i, opt.arch, model, optimizer,
