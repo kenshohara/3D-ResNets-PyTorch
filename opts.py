@@ -34,9 +34,8 @@ def parse_opts():
         '--n_pretrain_classes',
         default=0,
         type=int,
-        help=
-        'Number of classes of pretraining task. When using --pretrain_path, this must be set.'
-    )
+        help=('Number of classes of pretraining task.'
+              'When using --pretrain_path, this must be set.'))
     parser.add_argument(
         '--pretrain_path',
         default=None,
@@ -46,9 +45,9 @@ def parse_opts():
         '--ft_begin_module',
         default='',
         type=str,
-        help=
-        'Module name of beginning of fine-tuning (conv1, layer1, ...). The default means all layers are fine-tuned.'
-    )
+        help=('Module name of beginning of fine-tuning'
+              '(conv1, layer1, fc, denseblock1, classifier, ...).'
+              'The default means all layers are fine-tuned.'))
     parser.add_argument(
         '--sample_size',
         default=112,
@@ -63,9 +62,10 @@ def parse_opts():
         '--train_crop',
         default='random',
         type=str,
-        help=
-        'Spatial cropping method in training. random is uniform. corner is selection from 4 corners and 1 center.  (random | corner)'
-    )
+        help=('Spatial cropping method in training.'
+              'random is uniform.'
+              'corner is selection from 4 corners and 1 center.'
+              '(random | corner)'))
     parser.add_argument(
         '--train_crop_min_scale',
         default=0.5,
@@ -84,8 +84,8 @@ def parse_opts():
         '--learning_rate',
         default=0.1,
         type=float,
-        help=
-        'Initial learning rate (divided by 10 while training by lr scheduler)')
+        help=('Initial learning rate'
+              '(divided by 10 while training by lr scheduler)'))
     parser.add_argument('--momentum', default=0.9, type=float, help='Momentum')
     parser.add_argument(
         '--dampening', default=0.0, type=float, help='dampening of SGD')
@@ -95,8 +95,8 @@ def parse_opts():
         '--mean_dataset',
         default='kinetics',
         type=str,
-        help=
-        'dataset for mean values of mean subtraction (activitynet | kinetics)')
+        help=('dataset for mean values of mean subtraction'
+              '(activitynet | kinetics)'))
     parser.add_argument(
         '--no_mean_norm',
         action='store_true',
