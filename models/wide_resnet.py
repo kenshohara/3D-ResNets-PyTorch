@@ -4,8 +4,6 @@ import torch.nn.functional as F
 import math
 from functools import partial
 
-__all__ = ['WideResNet', 'resnet18', 'resnet34', 'resnet50', 'resnet101']
-
 
 def conv3x3x3(in_planes, out_planes, stride=1):
     # 3x3x3 convolution with padding
