@@ -6,7 +6,7 @@ import sys
 from utils import AverageMeter, calculate_accuracy
 
 
-def train_epoch(epoch, data_loader, model, criterion, optimizer, scheduler, opt,
+def train_epoch(epoch, data_loader, model, criterion, optimizer, device,
                 epoch_logger, batch_logger):
     print('train at epoch {}'.format(epoch))
 
@@ -21,7 +21,7 @@ def train_epoch(epoch, data_loader, model, criterion, optimizer, scheduler, opt,
     for i, (inputs, targets) in enumerate(data_loader):
         data_time.update(time.time() - end_time)
 
-        targets = targets.to(opt.device, non_blocking=True)
+        targets = targets.to(device, non_blocking=True)
         outputs = model(inputs)
         loss = criterion(outputs, targets)
         acc = calculate_accuracy(outputs, targets)
@@ -64,14 +64,3 @@ def train_epoch(epoch, data_loader, model, criterion, optimizer, scheduler, opt,
         'acc': accuracies.avg,
         'lr': optimizer.param_groups[0]['lr']
     })
-
-    if epoch % opt.checkpoint == 0:
-        save_file_path = opt.result_path / 'save_{}.pth'.format(epoch)
-        states = {
-            'epoch': epoch + 1,
-            'arch': opt.arch,
-            'state_dict': model.state_dict(),
-            'optimizer': optimizer.state_dict(),
-            'scheduler': scheduler.state_dict()
-        }
-        torch.save(states, save_file_path)

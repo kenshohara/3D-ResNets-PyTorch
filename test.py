@@ -80,7 +80,7 @@ def calculate_video_results(outputs, video_id, class_names):
     return video_results
 
 
-def test(data_loader, model, opt, class_names):
+def test(data_loader, model, batch_size, result_path, class_names):
     print('test')
 
     model.eval()
@@ -102,14 +102,14 @@ def test(data_loader, model, opt, class_names):
             end_buffer_index = n_buffer_samples
             video_id_buffer.append(
                 [new_video_ids[0], begin_buffer_index, end_buffer_index])
-            if n_buffer_samples < opt.batch_size:
+            if n_buffer_samples < batch_size:
                 continue
 
             data_time.update(time.time() - end_time)
 
             (input_buffer, video_id_buffer,
              output_buffer, test_results) = test_in_buffer(
-                 model, opt.batch_size, input_buffer, video_id_buffer,
+                 model, batch_size, input_buffer, video_id_buffer,
                  output_buffer, test_results, class_names)
 
             batch_time.update(time.time() - end_time)
@@ -129,5 +129,5 @@ def test(data_loader, model, opt, class_names):
                 model, n_buffer_samples, input_buffer, video_id_buffer,
                 output_buffer, test_results, class_names)
 
-    with open(opt.result_path / '{}.json'.format(opt.test_subset), 'w') as f:
+    with open(result_path, 'w') as f:
         json.dump(test_results, f)

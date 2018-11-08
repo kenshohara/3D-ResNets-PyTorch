@@ -56,31 +56,35 @@ def get_opt():
     return opt
 
 
-def resume(opt, model, optimizer=None, scheduler=None):
-    print('loading checkpoint {}'.format(opt.resume_path))
-    checkpoint = torch.load(opt.resume_path)
-    assert opt.arch == checkpoint['arch']
+def resume(resume_path,
+           arch,
+           begin_epoch,
+           model,
+           optimizer=None,
+           scheduler=None):
+    print('loading checkpoint {}'.format(resume_path))
+    checkpoint = torch.load(resume_path)
+    assert arch == checkpoint['arch']
 
-    opt.begin_epoch = checkpoint['epoch']
+    begin_epoch = checkpoint['epoch'] + 1
     model.load_state_dict(checkpoint['state_dict'])
-    if not opt.no_train:
-        if 'optimizer' in checkpoint.keys():
-            optimizer.load_state_dict(checkpoint['optimizer'])
-        if 'scheduler' in checkpoint.keys():
-            scheduler.load_state_dict(checkpoint['scheduler'])
+    if optimizer is not None and 'optimizer' in checkpoint.keys():
+        optimizer.load_state_dict(checkpoint['optimizer'])
+    if scheduler is not None and 'scheduler' in checkpoint.keys():
+        scheduler.load_state_dict(checkpoint['scheduler'])
 
 
-def get_norm_method(opt):
-    if opt.no_mean_norm:
-        if opt.no_std_norm:
+def get_normalize_method(mean, std, no_mean_norm, no_std_norm):
+    if no_mean_norm:
+        if no_std_norm:
             return Normalize([0, 0, 0], [1, 1, 1])
         else:
-            return Normalize([0, 0, 0], opt.std)
+            return Normalize([0, 0, 0], std)
     else:
-        if opt.no_std_norm:
-            return Normalize(opt.mean, [1, 1, 1])
+        if no_std_norm:
+            return Normalize(mean, [1, 1, 1])
         else:
-            return Normalize(opt.mean, opt.std)
+            return Normalize(mean, std)
 
 
 def get_train_utils(opt):
@@ -95,17 +99,20 @@ def get_train_utils(opt):
         for _ in range(1, 5):
             scales.append(scales[-1] * scale_step)
         crop_method = MultiScaleCornerCrop(opt.sample_size, scales)
+    normalize = get_normalize_method(opt.mean, opt.std, opt.no_mean_norm,
+                                     opt.no_std_norm)
     spatial_transform = Compose([
         crop_method,
         RandomHorizontalFlip(),
         ToTensor(),
-        ScaleValue(opt.value_scale),
-        get_norm_method(opt)
+        ScaleValue(opt.value_scale), normalize
     ])
     temporal_transform = TemporalRandomCrop(opt.sample_duration)
     target_transform = ClassLabel()
+
     training_data, collate_fn = get_training_set(
-        opt, spatial_transform, temporal_transform, target_transform)
+        opt.video_path, opt.annotation_path, opt.dataset, spatial_transform,
+        temporal_transform, target_transform)
     train_loader = torch.utils.data.DataLoader(
         training_data,
         batch_size=opt.batch_size,
@@ -137,18 +144,20 @@ def get_train_utils(opt):
 
 
 def get_val_utils(opt):
+    normalize = get_normalize_method(opt.mean, opt.std, opt.no_mean_norm,
+                                     opt.no_std_norm)
     spatial_transform = Compose([
         Resize(opt.sample_size),
         CenterCrop(opt.sample_size),
         ToTensor(),
-        ScaleValue(opt.value_scale),
-        get_norm_method(opt)
+        ScaleValue(opt.value_scale), normalize
     ])
     temporal_transform = TemporalEvenCrop(opt.sample_duration,
                                           opt.n_val_samples)
     target_transform = ClassLabel()
     validation_data, collate_fn = get_validation_set(
-        opt, spatial_transform, temporal_transform, target_transform)
+        opt.video_path, opt.annotation_path, opt.dataset, spatial_transform,
+        temporal_transform, target_transform)
     val_loader = torch.utils.data.DataLoader(
         validation_data,
         batch_size=(opt.batch_size // opt.n_val_samples),
@@ -163,18 +172,20 @@ def get_val_utils(opt):
 
 
 def get_test_utils(opt):
+    normalize = get_normalize_method(opt.mean, opt.std, opt.no_mean_norm,
+                                     opt.no_std_norm)
     spatial_transform = Compose([
         Resize(int(opt.sample_size)),
         CenterCrop(opt.sample_size),
         ToTensor(),
-        ScaleValue(opt.value_scale),
-        get_norm_method(opt)
+        ScaleValue(opt.value_scale), normalize
     ])
     temporal_transform = SlidingWindow(opt.sample_duration, opt.sample_duration)
     target_transform = VideoID()
 
-    test_data, collate_fn = get_test_set(opt, spatial_transform,
-                                         temporal_transform, target_transform)
+    test_data, collate_fn = get_test_set(
+        opt.video_path, opt.annotation_path, opt.dataset, opt.test_subset,
+        spatial_transform, temporal_transform, target_transform)
     test_loader = torch.utils.data.DataLoader(
         test_data,
         batch_size=1,
@@ -185,6 +196,17 @@ def get_test_utils(opt):
         collate_fn=collate_fn)
 
     return test_loader, test_data.class_names
+
+
+def save_checkpoint(save_file_path, epoch, arch, model, optimizer, scheduler):
+    save_states = {
+        'epoch': epoch,
+        'arch': arch,
+        'state_dict': model.state_dict(),
+        'optimizer': optimizer.state_dict(),
+        'scheduler': scheduler.state_dict()
+    }
+    torch.save(save_states, save_file_path)
 
 
 if __name__ == '__main__':
@@ -211,21 +233,29 @@ if __name__ == '__main__':
 
     if opt.resume_path is not None:
         if not opt.no_train:
-            resume(opt, model, optimizer, scheduler)
+            resume(opt.resume_path, opt.arch, opt.begin_epoch, model, optimizer,
+                   scheduler)
         else:
-            resume(opt, model)
+            resume(opt.resume_path, opt.arch, opt.begin_epoch, model)
 
     for i in range(opt.begin_epoch, opt.n_epochs + 1):
         if not opt.no_train:
-            train_epoch(i, train_loader, model, criterion, optimizer, scheduler,
-                        opt, train_logger, train_batch_logger)
+            train_epoch(i, train_loader, model, criterion, optimizer,
+                        opt.device, train_logger, train_batch_logger)
+            if i % opt.checkpoint == 0:
+                save_file_path = opt.result_path / 'save_{}.pth'.format(i)
+                save_checkpoint(save_file_path, i, opt.arch, model, optimizer,
+                                scheduler)
+
         if not opt.no_val:
-            validation_loss = val_epoch(i, val_loader, model, criterion, opt,
-                                        val_logger)
+            validation_loss = val_epoch(i, val_loader, model, criterion,
+                                        opt.device, val_logger)
 
         if not opt.no_train and not opt.no_val:
             scheduler.step(validation_loss)
 
     if opt.test:
         test_loader, test_class_names = get_test_utils(opt)
-        test.test(test_loader, model, opt, test_class_names)
+        test_result_path = opt.result_path / '{}.json'.format(opt.test_subset)
+        test.test(test_loader, model, opt.batch_size, test_result_path,
+                  test_class_names)
