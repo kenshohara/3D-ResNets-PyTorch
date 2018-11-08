@@ -73,6 +73,8 @@ def resume(resume_path,
     if scheduler is not None and 'scheduler' in checkpoint.keys():
         scheduler.load_state_dict(checkpoint['scheduler'])
 
+    return begin_epoch, model, optimizer, scheduler
+
 
 def get_normalize_method(mean, std, no_mean_norm, no_std_norm):
     if no_mean_norm:
@@ -87,7 +89,7 @@ def get_normalize_method(mean, std, no_mean_norm, no_std_norm):
             return Normalize(mean, std)
 
 
-def get_train_utils(opt):
+def get_train_utils(opt, model_parameters):
     assert opt.train_crop in ['random', 'corner']
     if opt.train_crop == 'random':
         crop_method = RandomResizedCrop(
@@ -131,14 +133,20 @@ def get_train_utils(opt):
     else:
         dampening = opt.dampening
     optimizer = SGD(
-        parameters,
+        model_parameters,
         lr=opt.learning_rate,
         momentum=opt.momentum,
         dampening=dampening,
         weight_decay=opt.weight_decay,
         nesterov=opt.nesterov)
-    scheduler = lr_scheduler.ReduceLROnPlateau(
-        optimizer, 'min', patience=opt.lr_patience)
+
+    assert opt.lr_scheduler in ['plateau', 'multistep']
+    if opt.lr_scheduler == 'plateau':
+        scheduler = lr_scheduler.ReduceLROnPlateau(
+            optimizer, 'min', patience=opt.plateau_patience)
+    else:
+        scheduler = lr_scheduler.MultiStepLR(optimizer,
+                                             opt.multistep_milestones)
 
     return train_loader, train_logger, train_batch_logger, optimizer, scheduler
 
@@ -227,34 +235,41 @@ if __name__ == '__main__':
 
     if not opt.no_train:
         (train_loader, train_logger, train_batch_logger, optimizer,
-         scheduler) = get_train_utils(opt)
+         scheduler) = get_train_utils(opt, parameters)
     if not opt.no_val:
         val_loader, val_logger = get_val_utils(opt)
 
     if opt.resume_path is not None:
         if not opt.no_train:
-            resume(opt.resume_path, opt.arch, opt.begin_epoch, model, optimizer,
-                   scheduler)
+            opt.begin_epoch, model, optimizer, scheduler = resume(
+                opt.resume_path, opt.arch, opt.begin_epoch, model, optimizer,
+                scheduler)
         else:
-            resume(opt.resume_path, opt.arch, opt.begin_epoch, model)
+            opt.begin_epoch, model, _, _ = resume(opt.resume_path, opt.arch,
+                                                  opt.begin_epoch, model)
 
+    prev_val_loss = None
     for i in range(opt.begin_epoch, opt.n_epochs + 1):
         if not opt.no_train:
+            if opt.lr_scheduler == 'multistep':
+                scheduler.step()
+            elif (opt.lr_scheduler == 'plateau' and not opt.no_val and
+                  prev_val_loss is not None):
+                scheduler.step(prev_val_loss)
+
             current_lr = get_lr(optimizer)
             train_epoch(i, train_loader, model, criterion, optimizer,
                         opt.device, current_lr, train_logger,
                         train_batch_logger)
+
             if i % opt.checkpoint == 0:
                 save_file_path = opt.result_path / 'save_{}.pth'.format(i)
                 save_checkpoint(save_file_path, i, opt.arch, model, optimizer,
                                 scheduler)
 
         if not opt.no_val:
-            validation_loss = val_epoch(i, val_loader, model, criterion,
-                                        opt.device, val_logger)
-
-        if not opt.no_train and not opt.no_val:
-            scheduler.step(validation_loss)
+            prev_val_loss = val_epoch(i, val_loader, model, criterion,
+                                      opt.device, val_logger)
 
     if opt.test:
         test_loader, test_class_names = get_test_utils(opt)

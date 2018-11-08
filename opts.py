@@ -117,7 +117,18 @@ def parse_opts():
         type=str,
         help='Currently only support SGD')
     parser.add_argument(
-        '--lr_patience',
+        '--lr_scheduler',
+        default='multistep',
+        type=str,
+        help='Type of LR scheduler (multistep | plateau)')
+    parser.add_argument(
+        '--multistep_milestones',
+        default=[50, 100, 150],
+        type=int,
+        nargs='+',
+        help='Milestones of LR scheduler. See documentation of MultistepLR.')
+    parser.add_argument(
+        '--plateau_patience',
         default=10,
         type=int,
         help='Patience of LR scheduler. See documentation of ReduceLROnPlateau.'
