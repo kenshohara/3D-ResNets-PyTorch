@@ -43,10 +43,12 @@ def parse_opts():
         type=Path,
         help='Pretrained model path (.pth).')
     parser.add_argument(
-        '--ft_begin_index',
-        default=0,
-        type=int,
-        help='Begin block index of fine-tuning')
+        '--ft_begin_module',
+        default='',
+        type=str,
+        help=
+        'Module name of beginning of fine-tuning (conv1, layer1, ...). The default means all layers are fine-tuned.'
+    )
     parser.add_argument(
         '--sample_size',
         default=112,
