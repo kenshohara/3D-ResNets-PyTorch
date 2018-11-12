@@ -173,6 +173,12 @@ def parse_opts():
         type=int,
         help='Stride of sliding window in test.')
     parser.add_argument(
+        '--test_crop',
+        default='center',
+        type=str,
+        help=('Cropping method in test. (center | nocrop)'
+              'When nocrop, fully convolutional inference is performed.'))
+    parser.add_argument(
         '--no_cuda', action='store_true', help='If true, cuda is not used.')
     parser.add_argument(
         '--n_threads',
