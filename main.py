@@ -180,14 +180,17 @@ def get_val_utils(opt):
 
 
 def get_test_utils(opt):
+    assert opt.test_crop in ['center', 'nocrop']
+
     normalize = get_normalize_method(opt.mean, opt.std, opt.no_mean_norm,
                                      opt.no_std_norm)
-    spatial_transform = Compose([
-        Resize(int(opt.sample_size)),
-        CenterCrop(opt.sample_size),
-        ToTensor(),
-        ScaleValue(opt.value_scale), normalize
-    ])
+
+    spatial_transform = [Resize(opt.sample_size)]
+    if opt.test_crop == 'center':
+        spatial_transform.append(CenterCrop(opt.sample_size))
+    spatial_transform += [ScaleValue(opt.value_scale), normalize]
+    spatial_transform = Compose(spatial_transform)
+
     temporal_transform = SlidingWindow(opt.sample_duration, opt.test_stride)
     target_transform = VideoID()
 
@@ -274,5 +277,9 @@ if __name__ == '__main__':
     if opt.test:
         test_loader, test_class_names = get_test_utils(opt)
         test_result_path = opt.result_path / '{}.json'.format(opt.test_subset)
+
+        if opt.test_crop == 'nocrop':
+            
+
         test.test(test_loader, model, opt.batch_size, test_result_path,
                   test_class_names)
