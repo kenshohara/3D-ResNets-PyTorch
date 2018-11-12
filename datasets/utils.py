@@ -32,10 +32,11 @@ def get_default_image_loader():
         return pil_loader
 
 
-def video_loader(video_dir_path, frame_indices, image_loader):
+def video_loader(video_dir_path, frame_indices, image_loader,
+                 file_name_formatter):
     video = []
     for i in frame_indices:
-        image_path = video_dir_path / 'image_{:05d}.jpg'.format(i)
+        image_path = video_dir_path / file_name_formatter(i)
         if image_path.exists():
             video.append(image_loader(image_path))
         else:
@@ -46,7 +47,11 @@ def video_loader(video_dir_path, frame_indices, image_loader):
 
 def get_default_video_loader():
     image_loader = get_default_image_loader()
-    return functools.partial(video_loader, image_loader=image_loader)
+    file_name_formatter = lambda x: 'image_{:05d}.jpg'.format(x)
+    return functools.partial(
+        video_loader,
+        image_loader=image_loader,
+        file_name_formatter=file_name_formatter)
 
 
 def load_annotation_data(data_file_path):
