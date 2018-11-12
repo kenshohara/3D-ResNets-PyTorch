@@ -4,10 +4,6 @@ from torch import nn
 from models import resnet, pre_act_resnet, wide_resnet, resnext, densenet
 
 
-def make_fully_convolutional(model):
-
-
-
 def get_fine_tuning_parameters(model, ft_begin_module):
     if not ft_begin_module:
         return model.parameters()
