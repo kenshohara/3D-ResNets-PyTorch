@@ -85,7 +85,7 @@ def generate_model(opt):
         assert opt.model_depth in [50]
 
         if opt.model_depth == 50:
-            model = wide_resnet.wide_resnet50(
+            model = wide_resnet.resnet50(
                 n_classes=opt.n_classes,
                 shortcut_type=opt.resnet_shortcut,
                 k=opt.wide_resnet_k,
@@ -95,21 +95,21 @@ def generate_model(opt):
         assert opt.model_depth in [50, 101, 152]
 
         if opt.model_depth == 50:
-            model = resnext.resnet50(
+            model = resnext.resnext50(
                 n_classes=opt.n_classes,
                 shortcut_type=opt.resnet_shortcut,
                 cardinality=opt.resnext_cardinality,
                 sample_size=opt.sample_size,
                 sample_duration=opt.sample_duration)
         elif opt.model_depth == 101:
-            model = resnext.resnet101(
+            model = resnext.resnext101(
                 n_classes=opt.n_classes,
                 shortcut_type=opt.resnet_shortcut,
                 cardinality=opt.resnext_cardinality,
                 sample_size=opt.sample_size,
                 sample_duration=opt.sample_duration)
         elif opt.model_depth == 152:
-            model = resnext.resnet152(
+            model = resnext.resnext152(
                 n_classes=opt.n_classes,
                 shortcut_type=opt.resnet_shortcut,
                 cardinality=opt.resnext_cardinality,

@@ -1,8 +1,13 @@
+import math
+from functools import partial
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import math
-from functools import partial
+
+
+def get_inplanes():
+    return [64, 128, 256, 512]
 
 
 def conv3x3x3(in_planes, out_planes, stride=1):
@@ -16,24 +21,12 @@ def conv3x3x3(in_planes, out_planes, stride=1):
         bias=False)
 
 
-def downsample_basic_block(x, planes, stride):
-    out = F.avg_pool3d(x, kernel_size=1, stride=stride)
-    zero_pads = torch.zeros(
-        out.size(0), planes - out.size(1), out.size(2), out.size(3),
-        out.size(4))
-    if isinstance(out.data, torch.cuda.FloatTensor):
-        zero_pads = zero_pads.cuda()
-
-    out = torch.cat([out.data, zero_pads], dim=1)
-
-    return out
-
-
 class BasicBlock(nn.Module):
     expansion = 1
 
     def __init__(self, inplanes, planes, stride=1, downsample=None):
         super().__init__()
+
         self.conv1 = conv3x3x3(inplanes, planes, stride)
         self.bn1 = nn.BatchNorm3d(planes)
         self.relu = nn.ReLU(inplace=True)
@@ -66,13 +59,14 @@ class Bottleneck(nn.Module):
 
     def __init__(self, inplanes, planes, stride=1, downsample=None):
         super().__init__()
+
         self.conv1 = nn.Conv3d(inplanes, planes, kernel_size=1, bias=False)
         self.bn1 = nn.BatchNorm3d(planes)
-        self.conv2 = nn.Conv3d(
-            planes, planes, kernel_size=3, stride=stride, padding=1, bias=False)
+        self.conv2 = conv3x3x3(planes, planes, stride)
         self.bn2 = nn.BatchNorm3d(planes)
-        self.conv3 = nn.Conv3d(planes, planes * 4, kernel_size=1, bias=False)
-        self.bn3 = nn.BatchNorm3d(planes * 4)
+        self.conv3 = nn.Conv3d(
+            planes, planes * self.expansion, kernel_size=1, bias=False)
+        self.bn3 = nn.BatchNorm3d(planes * self.expansion)
         self.relu = nn.ReLU(inplace=True)
         self.downsample = downsample
         self.stride = stride
@@ -105,13 +99,15 @@ class ResNet(nn.Module):
     def __init__(self,
                  block,
                  layers,
+                 inplanes,
                  sample_size,
                  sample_duration,
                  conv1_t_size=7,
                  shortcut_type='B',
-                 num_classes=400):
-        self.inplanes = 64
+                 n_classes=400):
         super().__init__()
+
+        self.inplanes = inplanes[0]
 
         if sample_duration >= 32:
             first_t_stride = 2
@@ -124,16 +120,17 @@ class ResNet(nn.Module):
             stride=(first_t_stride, 2, 2),
             padding=(int(conv1_t_size / 2), 3, 3),
             bias=False)
-        self.bn1 = nn.BatchNorm3d(64)
+        self.bn1 = nn.BatchNorm3d(inplanes[0])
         self.relu = nn.ReLU(inplace=True)
         self.maxpool = nn.MaxPool3d(kernel_size=(3, 3, 3), stride=2, padding=1)
-        self.layer1 = self._make_layer(block, 64, layers[0], shortcut_type)
+        self.layer1 = self._make_layer(block, inplanes[0], layers[0],
+                                       shortcut_type)
         self.layer2 = self._make_layer(
-            block, 128, layers[1], shortcut_type, stride=2)
+            block, inplanes[1], layers[1], shortcut_type, stride=2)
         self.layer3 = self._make_layer(
-            block, 256, layers[2], shortcut_type, stride=2)
+            block, inplanes[2], layers[2], shortcut_type, stride=2)
         self.layer4 = self._make_layer(
-            block, 512, layers[3], shortcut_type, stride=2)
+            block, inplanes[3], layers[3], shortcut_type, stride=2)
 
         n_spatial_downsampling = 5
         n_temporal_downsampling = 4
@@ -145,7 +142,7 @@ class ResNet(nn.Module):
         last_size = int(math.ceil(sample_size / 2**n_spatial_downsampling))
         self.avgpool = nn.AvgPool3d((last_duration, last_size, last_size),
                                     stride=1)
-        self.fc = nn.Linear(512 * block.expansion, num_classes)
+        self.fc = nn.Linear(inplanes[3] * block.expansion, n_classes)
 
         for m in self.modules():
             if isinstance(m, nn.Conv3d):
@@ -155,12 +152,24 @@ class ResNet(nn.Module):
                 nn.init.constant_(m.weight, 1)
                 nn.init.constant_(m.bias, 0)
 
+    def _downsample_basic_block(self, x, planes, stride):
+        out = F.avg_pool3d(x, kernel_size=1, stride=stride)
+        zero_pads = torch.zeros(
+            out.size(0), planes - out.size(1), out.size(2), out.size(3),
+            out.size(4))
+        if isinstance(out.data, torch.cuda.FloatTensor):
+            zero_pads = zero_pads.cuda()
+
+        out = torch.cat([out.data, zero_pads], dim=1)
+
+        return out
+
     def _make_layer(self, block, planes, blocks, shortcut_type, stride=1):
         downsample = None
         if stride != 1 or self.inplanes != planes * block.expansion:
             if shortcut_type == 'A':
                 downsample = partial(
-                    downsample_basic_block,
+                    self._downsample_basic_block,
                     planes=planes * block.expansion,
                     stride=stride)
             else:
@@ -173,7 +182,12 @@ class ResNet(nn.Module):
                         bias=False), nn.BatchNorm3d(planes * block.expansion))
 
         layers = []
-        layers.append(block(self.inplanes, planes, stride, downsample))
+        layers.append(
+            block(
+                inplanes=self.inplanes,
+                planes=planes,
+                stride=stride,
+                downsample=downsample))
         self.inplanes = planes * block.expansion
         for i in range(1, blocks):
             layers.append(block(self.inplanes, planes))
@@ -202,47 +216,47 @@ class ResNet(nn.Module):
 def resnet10(**kwargs):
     """Constructs a ResNet-18 model.
     """
-    model = ResNet(BasicBlock, [1, 1, 1, 1], **kwargs)
+    model = ResNet(BasicBlock, [1, 1, 1, 1], get_inplanes(), **kwargs)
     return model
 
 
 def resnet18(**kwargs):
     """Constructs a ResNet-18 model.
     """
-    model = ResNet(BasicBlock, [2, 2, 2, 2], **kwargs)
+    model = ResNet(BasicBlock, [2, 2, 2, 2], get_inplanes(), **kwargs)
     return model
 
 
 def resnet34(**kwargs):
     """Constructs a ResNet-34 model.
     """
-    model = ResNet(BasicBlock, [3, 4, 6, 3], **kwargs)
+    model = ResNet(BasicBlock, [3, 4, 6, 3], get_inplanes(), **kwargs)
     return model
 
 
 def resnet50(**kwargs):
     """Constructs a ResNet-50 model.
     """
-    model = ResNet(Bottleneck, [3, 4, 6, 3], **kwargs)
+    model = ResNet(Bottleneck, [3, 4, 6, 3], get_inplanes(), **kwargs)
     return model
 
 
 def resnet101(**kwargs):
     """Constructs a ResNet-101 model.
     """
-    model = ResNet(Bottleneck, [3, 4, 23, 3], **kwargs)
+    model = ResNet(Bottleneck, [3, 4, 23, 3], get_inplanes(), **kwargs)
     return model
 
 
 def resnet152(**kwargs):
-    """Constructs a ResNet-101 model.
+    """Constructs a ResNet-152 model.
     """
-    model = ResNet(Bottleneck, [3, 8, 36, 3], **kwargs)
+    model = ResNet(Bottleneck, [3, 8, 36, 3], get_inplanes(), **kwargs)
     return model
 
 
 def resnet200(**kwargs):
-    """Constructs a ResNet-101 model.
+    """Constructs a ResNet-200 model.
     """
-    model = ResNet(Bottleneck, [3, 24, 36, 3], **kwargs)
+    model = ResNet(Bottleneck, [3, 24, 36, 3], get_inplanes(), **kwargs)
     return model
