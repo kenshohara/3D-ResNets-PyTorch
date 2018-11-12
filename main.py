@@ -278,8 +278,5 @@ if __name__ == '__main__':
         test_loader, test_class_names = get_test_utils(opt)
         test_result_path = opt.result_path / '{}.json'.format(opt.test_subset)
 
-        if opt.test_crop == 'nocrop':
-            
-
         test.test(test_loader, model, opt.batch_size, test_result_path,
                   test_class_names)
