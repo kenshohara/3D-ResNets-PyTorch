@@ -57,10 +57,13 @@ class CenterCrop(transforms.CenterCrop):
 
 class CornerCrop(object):
 
-    def __init__(self, size, crop_position=None):
+    def __init__(self,
+                 size,
+                 crop_position=None,
+                 crop_positions=['c', 'tl', 'tr', 'bl', 'br']):
         self.size = size
         self.crop_position = crop_position
-        self.crop_positions = ['c', 'tl', 'tr', 'bl', 'br']
+        self.crop_positions = crop_positions
 
         if crop_position is None:
             self.randomize = True
@@ -127,11 +130,15 @@ class RandomHorizontalFlip(transforms.RandomHorizontalFlip):
 
 class MultiScaleCornerCrop(object):
 
-    def __init__(self, size, scales, interpolation=Image.BILINEAR):
+    def __init__(self,
+                 size,
+                 scales,
+                 interpolation=Image.BILINEAR,
+                 crop_positions=['c', 'tl', 'tr', 'bl', 'br']):
         self.size = size
         self.scales = scales
         self.interpolation = interpolation
-        self.crop_positions = ['c', 'tl', 'tr', 'bl', 'br']
+        self.crop_positions = crop_positions
 
         self.randomize_parameters()
 
