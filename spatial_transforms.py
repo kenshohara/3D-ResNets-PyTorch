@@ -133,8 +133,8 @@ class MultiScaleCornerCrop(object):
     def __init__(self,
                  size,
                  scales,
-                 interpolation=Image.BILINEAR,
-                 crop_positions=['c', 'tl', 'tr', 'bl', 'br']):
+                 crop_positions=['c', 'tl', 'tr', 'bl', 'br'],
+                 interpolation=Image.BILINEAR):
         self.size = size
         self.scales = scales
         self.interpolation = interpolation
