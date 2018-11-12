@@ -5,7 +5,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-import resnet
+from . import resnet
 
 
 class ResNeXtBottleneck(resnet.Bottleneck):
