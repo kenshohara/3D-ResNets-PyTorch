@@ -176,6 +176,7 @@ class RandomResizedCrop(transforms.RandomResizedCrop):
     def __call__(self, img):
         if self.randomize:
             self.random_crop = self.get_params(img, self.scale, self.ratio)
+            self.randomize = False
 
         i, j, h, w = self.random_crop
         return F.resized_crop(img, i, j, h, w, self.size, self.interpolation)
@@ -194,6 +195,8 @@ class ColorJitter(transforms.ColorJitter):
         if self.randomize:
             self.transform = self.get_params(self.brightness, self.contrast,
                                              self.saturation, self.hue)
+            self.randomize = False
+
         return self.transform(img)
 
     def randomize_parameters(self):
