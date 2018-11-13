@@ -195,7 +195,7 @@ def get_test_utils(opt):
     temporal_transform = SlidingWindow(opt.sample_duration, opt.test_stride)
     target_transform = VideoID()
     if opt.test_no_average:
-        target_transform = TargetCompose([VideoID, Segment])
+        target_transform = TargetCompose([VideoID(), Segment()])
 
     test_data, collate_fn = get_test_set(
         opt.video_path, opt.annotation_path, opt.dataset, opt.test_subset,
