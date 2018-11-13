@@ -68,7 +68,7 @@ def parse_opts():
               '(random | corner)'))
     parser.add_argument(
         '--train_crop_min_scale',
-        default=0.5,
+        default=0.25,
         type=float,
         help='Min scale for random cropping in training')
     parser.add_argument(
