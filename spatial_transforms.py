@@ -182,3 +182,19 @@ class RandomResizedCrop(transforms.RandomResizedCrop):
 
     def randomize_parameters(self):
         self.randomize = True
+
+
+class ColorJitter(transforms.ColorJitter):
+
+    def __init__(self, brightness=0, contrast=0, saturation=0, hue=0):
+        super().__init__(brightness, contrast, saturation, hue)
+        self.randomize_parameters()
+
+    def __call__(self, img):
+        if self.randomize:
+            self.transform = self.get_params(self.brightness, self.contrast,
+                                             self.saturation, self.hue)
+        return self.transform(img)
+
+    def randomize_parameters(self):
+        self.randomize = True

@@ -14,7 +14,7 @@ from model import generate_model
 from mean import get_mean_std
 from spatial_transforms import (
     Compose, Normalize, Resize, CenterCrop, CornerCrop, MultiScaleCornerCrop,
-    RandomResizedCrop, RandomHorizontalFlip, ToTensor, ScaleValue)
+    RandomResizedCrop, RandomHorizontalFlip, ToTensor, ScaleValue, ColorJitter)
 from temporal_transforms import (LoopPadding, TemporalRandomCrop,
                                  TemporalEvenCrop, SlidingWindow)
 from target_transforms import ClassLabel, VideoID
