@@ -188,7 +188,7 @@ def get_test_utils(opt):
     spatial_transform = [Resize(opt.sample_size)]
     if opt.test_crop == 'center':
         spatial_transform.append(CenterCrop(opt.sample_size))
-    spatial_transform += [ScaleValue(opt.value_scale), normalize]
+    spatial_transform += [ToTensor(), ScaleValue(opt.value_scale), normalize]
     spatial_transform = Compose(spatial_transform)
 
     temporal_transform = SlidingWindow(opt.sample_duration, opt.test_stride)
