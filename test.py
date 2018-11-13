@@ -183,11 +183,10 @@ def test_no_average(data_loader, model, batch_size, result_path, class_names):
     test_results = {'results': defaultdict(list)}
 
     with torch.no_grad():
-        for i, (new_inputs, new_video_ids,
-                new_segments) in enumerate(data_loader):
+        for i, (new_inputs, new_targets) in enumerate(data_loader):
             input_buffer.append(new_inputs)
             n_buffer_samples = sum([x.size(0) for x in input_buffer])
-            target_buffer.extend(list(zip(new_video_ids, new_segments)))
+            target_buffer.extend(list(zip(new_targets[0], new_targets[1])))
             if n_buffer_samples < batch_size:
                 continue
 
