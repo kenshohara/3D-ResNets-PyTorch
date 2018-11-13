@@ -111,10 +111,7 @@ class VideoDataset(data.Dataset):
 
     def __getitem__(self, index):
         path = self.data[index]['video']
-
         target = self.data[index]
-        if self.target_transform is not None:
-            target = self.target_transform(target)
 
         frame_indices = self.data[index]['frame_indices']
         if self.temporal_transform is not None:
@@ -122,13 +119,25 @@ class VideoDataset(data.Dataset):
 
         if isinstance(frame_indices[0], list):
             clips = []
+            targets = []
             for one_frame_indices in frame_indices:
                 clips.append(self.loading(path, one_frame_indices))
 
-            return clips, [target for _ in range(len(clips))]
+                current_target = target
+                current_target['segment'] = [
+                    one_frame_indices[0], one_frame_indices[-1]
+                ]
+                if self.target_transform is not None:
+                    current_target = self.target_transform(current_target)
+                targets.append(current_target)
+
+            return clips, targets
 
         else:
             clip = self.loading(path, frame_indices)
+
+            if self.target_transform is not None:
+                target = self.target_transform(target)
 
             return clip, target
 
