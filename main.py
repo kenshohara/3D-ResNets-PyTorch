@@ -17,7 +17,8 @@ from spatial_transforms import (
     RandomResizedCrop, RandomHorizontalFlip, ToTensor, ScaleValue, ColorJitter)
 from temporal_transforms import (LoopPadding, TemporalRandomCrop,
                                  TemporalEvenCrop, SlidingWindow)
-from target_transforms import ClassLabel, VideoID
+from target_transforms import ClassLabel, VideoID, Segment
+from target_transforms import Compose as TargetCompose
 from dataset import get_training_set, get_validation_set, get_test_set
 from utils import Logger, worker_init_fn, get_lr
 from train import train_epoch
@@ -193,6 +194,8 @@ def get_test_utils(opt):
 
     temporal_transform = SlidingWindow(opt.sample_duration, opt.test_stride)
     target_transform = VideoID()
+    if opt.test_no_average:
+        target_transform = TargetCompose([VideoID, Segment])
 
     test_data, collate_fn = get_test_set(
         opt.video_path, opt.annotation_path, opt.dataset, opt.test_subset,
@@ -278,5 +281,9 @@ if __name__ == '__main__':
         test_loader, test_class_names = get_test_utils(opt)
         test_result_path = opt.result_path / '{}.json'.format(opt.test_subset)
 
-        test.test(test_loader, model, opt.batch_size, test_result_path,
-                  test_class_names)
+        if opt.test_no_average:
+            test.test_no_average(test_loader, model, opt.batch_size,
+                                 test_result_path, test_class_names)
+        else:
+            test.test(test_loader, model, opt.batch_size, test_result_path,
+                      test_class_names)

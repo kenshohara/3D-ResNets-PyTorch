@@ -179,6 +179,10 @@ def parse_opts():
         help=('Cropping method in test. (center | nocrop)'
               'When nocrop, fully convolutional inference is performed.'))
     parser.add_argument(
+        '--test_no_average',
+        action='store_true',
+        help='If true, outputs for segments in a video are not averaged.')
+    parser.add_argument(
         '--no_cuda', action='store_true', help='If true, cuda is not used.')
     parser.add_argument(
         '--n_threads',
