@@ -24,3 +24,9 @@ class VideoID(object):
 
     def __call__(self, target):
         return target['video_id']
+
+
+class Segment(object):
+
+    def __call__(self, target):
+        return target['segment']
