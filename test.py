@@ -68,7 +68,7 @@ def prepare_inputs(input_buffer, batch_size):
 
 def calculate_video_results(outputs, video_id, class_names):
     average_scores = torch.mean(outputs, dim=0)
-    sorted_scores, locs = torch.topk(average_scores, k=5)
+    sorted_scores, locs = torch.topk(average_scores, k=min(5, len(class_names)))
 
     video_results = []
     for i in range(sorted_scores.size(0)):
