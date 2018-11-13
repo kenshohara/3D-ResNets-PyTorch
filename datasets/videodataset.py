@@ -125,7 +125,7 @@ class VideoDataset(data.Dataset):
 
                 current_target = target
                 current_target['segment'] = [
-                    one_frame_indices[0], one_frame_indices[-1]
+                    one_frame_indices[0], one_frame_indices[-1] + 1
                 ]
                 if self.target_transform is not None:
                     current_target = self.target_transform(current_target)
