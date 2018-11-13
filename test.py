@@ -186,7 +186,9 @@ def test_no_average(data_loader, model, batch_size, result_path, class_names):
         for i, (new_inputs, new_targets) in enumerate(data_loader):
             input_buffer.append(new_inputs)
             n_buffer_samples = sum([x.size(0) for x in input_buffer])
-            target_buffer.extend(list(zip(new_targets[0], new_targets[1])))
+            video_ids = new_targets[0]
+            segments = list(zip(new_targets[1][1], new_targets[1][2]))
+            target_buffer.extend(list(video_ids, segments))
             if n_buffer_samples < batch_size:
                 continue
 
