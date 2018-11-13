@@ -132,7 +132,6 @@ class VideoDataset(data.Dataset):
                 targets.append(current_target)
 
             return clips, targets
-
         else:
             clip = self.loading(path, frame_indices)
 
