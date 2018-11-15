@@ -100,7 +100,6 @@ class ResNet(nn.Module):
                  block,
                  layers,
                  block_inplanes,
-                 sample_size,
                  sample_duration,
                  conv1_t_size=7,
                  shortcut_type='B',

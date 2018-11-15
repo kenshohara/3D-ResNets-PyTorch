@@ -82,7 +82,6 @@ class DenseNet(nn.Module):
     """
 
     def __init__(self,
-                 sample_size,
                  sample_duration,
                  growth_rate=32,
                  block_config=(6, 12, 24, 16),
@@ -93,7 +92,6 @@ class DenseNet(nn.Module):
 
         super().__init__()
 
-        self.sample_size = sample_size
         self.sample_duration = sample_duration
 
         if sample_duration >= 32:
