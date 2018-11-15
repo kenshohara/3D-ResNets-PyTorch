@@ -132,16 +132,7 @@ class ResNet(nn.Module):
         self.layer4 = self._make_layer(
             block, block_inplanes[3], layers[3], shortcut_type, stride=2)
 
-        n_spatial_downsampling = 5
-        n_temporal_downsampling = 4
-        if first_t_stride == 2:
-            n_temporal_downsampling += 1
-
-        last_duration = int(
-            math.ceil(sample_duration / 2**n_temporal_downsampling))
-        last_size = int(math.ceil(sample_size / 2**n_spatial_downsampling))
-        self.avgpool = nn.AvgPool3d((last_duration, last_size, last_size),
-                                    stride=1)
+        self.avgpool = nn.AdaptiveAvgPool3d((1, 1, 1))
         self.fc = nn.Linear(block_inplanes[3] * block.expansion, n_classes)
 
         for m in self.modules():

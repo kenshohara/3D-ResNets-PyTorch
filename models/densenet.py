@@ -141,15 +141,6 @@ class DenseNet(nn.Module):
         # Linear layer
         self.classifier = nn.Linear(num_features, num_classes)
 
-        n_spatial_downsampling = 5
-        n_temporal_downsampling = 4
-        if first_t_stride == 2:
-            n_temporal_downsampling += 1
-        last_duration = int(
-            math.ceil(sample_duration / 2**n_temporal_downsampling))
-        last_size = int(math.ceil(sample_size / 2**n_spatial_downsampling))
-        self.avg_pool_kernel_size = (last_duration, last_size, last_size)
-
         for m in self.modules():
             if isinstance(m, nn.Conv3d):
                 m.weight = nn.init.kaiming_normal_(
@@ -163,9 +154,8 @@ class DenseNet(nn.Module):
     def forward(self, x):
         features = self.features(x)
         out = F.relu(features, inplace=True)
-        out = F.avg_pool3d(
-            out, kernel_size=self.avg_pool_kernel_size).view(
-                features.size(0), -1)
+        out = F.adaptive_avg_pool3d(
+            out, output_size=(1, 1, 1)).view(features.size(0), -1)
         out = self.classifier(out)
         return out
 
