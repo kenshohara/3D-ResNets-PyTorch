@@ -118,7 +118,7 @@ class ResNet(nn.Module):
             self.inplanes,
             kernel_size=(conv1_t_size, 7, 7),
             stride=(first_t_stride, 2, 2),
-            padding=(int(conv1_t_size / 2), 3, 3),
+            padding=(conv1_t_size // 2, 3, 3),
             bias=False)
         self.bn1 = nn.BatchNorm3d(self.inplanes)
         self.relu = nn.ReLU(inplace=True)
