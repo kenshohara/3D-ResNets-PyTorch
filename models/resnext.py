@@ -18,7 +18,7 @@ class ResNeXtBottleneck(resnet.Bottleneck):
 
     def __init__(self, inplanes, planes, cardinality, stride=1,
                  downsample=None):
-        super().__init__()
+        super().__init__(inplanes, planes, stride, downsample)
 
         mid_planes = cardinality * planes // 32
         self.conv1 = nn.Conv3d(inplanes, mid_planes, kernel_size=1, bias=False)
