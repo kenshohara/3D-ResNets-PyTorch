@@ -6,6 +6,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 from . import resnet
+from utils import partialclass
 
 
 def get_inplanes():
@@ -47,7 +48,7 @@ class ResNeXt(resnet.ResNet):
                  shortcut_type='B',
                  cardinality=32,
                  n_classes=400):
-        block = partial(block, cardinality=cardinality)
+        block = partialclass(block, cardinality=cardinality)
         super().__init__(block, layers, block_inplanes, sample_size,
                          sample_duration, conv1_t_size, shortcut_type,
                          n_classes)

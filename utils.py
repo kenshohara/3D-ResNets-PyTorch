@@ -1,5 +1,6 @@
 import csv
 import random
+from functools import partialmethod
 
 import torch
 import numpy as np
@@ -86,3 +87,11 @@ def get_lr(optimizer):
         lrs.append(lr)
 
     return max(lrs)
+
+
+def partialclass(cls, *args, **kwargs):
+
+    class PartialClass(cls):
+        __init__ = partialmethod(cls.__init__, *args, **kwargs)
+
+    return PartialClass
