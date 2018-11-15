@@ -99,7 +99,7 @@ class ResNet(nn.Module):
     def __init__(self,
                  block,
                  layers,
-                 inplanes,
+                 block_inplanes,
                  sample_size,
                  sample_duration,
                  conv1_t_size=7,
@@ -107,7 +107,7 @@ class ResNet(nn.Module):
                  n_classes=400):
         super().__init__()
 
-        self.inplanes = inplanes[0]
+        self.inplanes = 64
 
         if sample_duration >= 32:
             first_t_stride = 2
@@ -115,22 +115,22 @@ class ResNet(nn.Module):
             first_t_stride = 1
         self.conv1 = nn.Conv3d(
             3,
-            64,
+            self.inplanes,
             kernel_size=(conv1_t_size, 7, 7),
             stride=(first_t_stride, 2, 2),
             padding=(int(conv1_t_size / 2), 3, 3),
             bias=False)
-        self.bn1 = nn.BatchNorm3d(inplanes[0])
+        self.bn1 = nn.BatchNorm3d(self.inplanes)
         self.relu = nn.ReLU(inplace=True)
         self.maxpool = nn.MaxPool3d(kernel_size=(3, 3, 3), stride=2, padding=1)
-        self.layer1 = self._make_layer(block, inplanes[0], layers[0],
+        self.layer1 = self._make_layer(block, block_inplanes[0], layers[0],
                                        shortcut_type)
         self.layer2 = self._make_layer(
-            block, inplanes[1], layers[1], shortcut_type, stride=2)
+            block, block_inplanes[1], layers[1], shortcut_type, stride=2)
         self.layer3 = self._make_layer(
-            block, inplanes[2], layers[2], shortcut_type, stride=2)
+            block, block_inplanes[2], layers[2], shortcut_type, stride=2)
         self.layer4 = self._make_layer(
-            block, inplanes[3], layers[3], shortcut_type, stride=2)
+            block, block_inplanes[3], layers[3], shortcut_type, stride=2)
 
         n_spatial_downsampling = 5
         n_temporal_downsampling = 4
@@ -142,7 +142,7 @@ class ResNet(nn.Module):
         last_size = int(math.ceil(sample_size / 2**n_spatial_downsampling))
         self.avgpool = nn.AvgPool3d((last_duration, last_size, last_size),
                                     stride=1)
-        self.fc = nn.Linear(inplanes[3] * block.expansion, n_classes)
+        self.fc = nn.Linear(block_inplanes[3] * block.expansion, n_classes)
 
         for m in self.modules():
             if isinstance(m, nn.Conv3d):
