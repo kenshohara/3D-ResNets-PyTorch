@@ -1,8 +1,9 @@
+import math
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from collections import OrderedDict
-import math
 
 
 class _DenseLayer(nn.Sequential):
@@ -48,7 +49,7 @@ class _DenseBlock(nn.Sequential):
         for i in range(num_layers):
             layer = _DenseLayer(num_input_features + i * growth_rate,
                                 growth_rate, bn_size, drop_rate)
-            self.add_module('denselayer%d' % (i + 1), layer)
+            self.add_module('denselayer{}'.format(i + 1), layer)
 
 
 class _Transition(nn.Sequential):
@@ -95,6 +96,11 @@ class DenseNet(nn.Module):
         self.sample_size = sample_size
         self.sample_duration = sample_duration
 
+        if sample_duration >= 32:
+            first_t_stride = 2
+        else:
+            first_t_stride = 1
+
         # First convolution
         self.features = nn.Sequential(
             OrderedDict([
@@ -103,7 +109,7 @@ class DenseNet(nn.Module):
                      3,
                      num_init_features,
                      kernel_size=7,
-                     stride=(1, 2, 2),
+                     stride=(first_t_stride, 2, 2),
                      padding=(3, 3, 3),
                      bias=False)),
                 ('norm0', nn.BatchNorm3d(num_init_features)),
@@ -120,20 +126,29 @@ class DenseNet(nn.Module):
                 bn_size=bn_size,
                 growth_rate=growth_rate,
                 drop_rate=drop_rate)
-            self.features.add_module('denseblock%d' % (i + 1), block)
+            self.features.add_module('denseblock{}'.format(i + 1), block)
             num_features = num_features + num_layers * growth_rate
             if i != len(block_config) - 1:
                 trans = _Transition(
                     num_input_features=num_features,
                     num_output_features=num_features // 2)
-                self.features.add_module('transition%d' % (i + 1), trans)
+                self.features.add_module('transition{}'.format(i + 1), trans)
                 num_features = num_features // 2
 
         # Final batch norm
-        self.features.add_module('norm5', nn.BatchNorm2d(num_features))
+        self.features.add_module('norm5', nn.BatchNorm3d(num_features))
 
         # Linear layer
         self.classifier = nn.Linear(num_features, num_classes)
+
+        n_spatial_downsampling = 5
+        n_temporal_downsampling = 4
+        if first_t_stride == 2:
+            n_temporal_downsampling += 1
+        last_duration = int(
+            math.ceil(sample_duration / 2**n_temporal_downsampling))
+        last_size = int(math.ceil(sample_size / 2**n_spatial_downsampling))
+        self.avg_pool_kernel_size = (last_duration, last_size, last_size)
 
         for m in self.modules():
             if isinstance(m, nn.Conv3d):
@@ -148,10 +163,8 @@ class DenseNet(nn.Module):
     def forward(self, x):
         features = self.features(x)
         out = F.relu(features, inplace=True)
-        last_duration = int(math.ceil(self.sample_duration / 16))
-        last_size = int(math.floor(self.sample_size / 32))
         out = F.avg_pool3d(
-            out, kernel_size=(last_duration, last_size, last_size)).view(
+            out, kernel_size=self.avg_pool_kernel_size).view(
                 features.size(0), -1)
         out = self.classifier(out)
         return out
