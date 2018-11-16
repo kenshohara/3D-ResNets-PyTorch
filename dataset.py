@@ -57,9 +57,11 @@ def get_test_set(video_path, annotation_path, dataset_name, test_subset,
     assert dataset_name in [
         'kinetics', 'activitynet', 'ucf101', 'hmdb51', 'mit'
     ]
-    assert test_subset in ['val', 'test']
+    assert test_subset in ['train', 'val', 'test']
 
-    if test_subset == 'val':
+    if test_subset == 'train':
+        subset = 'training'
+    elif test_subset == 'val':
         subset = 'validation'
     elif test_subset == 'test':
         subset = 'testing'

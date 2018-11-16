@@ -166,7 +166,7 @@ def parse_opts():
         '--test_subset',
         default='val',
         type=str,
-        help='Used subset in test (val | test)')
+        help='Used subset in test (train | val | test)')
     parser.add_argument(
         '--test_stride',
         default=16,
