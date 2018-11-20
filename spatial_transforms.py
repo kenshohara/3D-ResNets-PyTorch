@@ -334,7 +334,7 @@ class MultiScaleCornerCrop(object):
         self.scale = self.scales[random.randint(0, len(self.scales) - 1)]
         self.crop_position = self.crop_positions[random.randint(
             0,
-            len(self.scales) - 1)]
+            len(self.crop_positions) - 1)]
 
 
 class MultiScaleRandomCrop(object):
