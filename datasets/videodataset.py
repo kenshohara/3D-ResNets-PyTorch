@@ -1,3 +1,5 @@
+import copy
+
 import torch
 import torch.utils.data as data
 from torch.utils.data.dataloader import default_collate
@@ -119,10 +121,10 @@ class VideoDataset(data.Dataset):
         for x in self.data:
             t_begin, t_end = x['segment']
             for t in range(t_begin, t_end, sample_stride):
-                sample = x
+                sample = copy.deepcopy(x)
                 segment = (t, min(t + sample_duration, t_end))
                 sample['segment'] = segment
-                sample['frame_indices'] = list(range(t, t + sample_duration))
+                sample['frame_indices'] = list(range(segment[0], segment[1]))
                 data.append(sample)
         self.data = data
 
