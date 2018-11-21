@@ -192,7 +192,7 @@ def get_test_utils(opt):
     spatial_transform += [ToTensor(), ScaleValue(opt.value_scale), normalize]
     spatial_transform = Compose(spatial_transform)
 
-    temporal_transform = SlidingWindow(opt.sample_duration, opt.test_stride)
+    temporal_transform = LoopPadding(opt.sample_duration)
     target_transform = VideoID()
     if opt.test_no_average:
         target_transform = TargetCompose([VideoID(), Segment()])
@@ -200,9 +200,10 @@ def get_test_utils(opt):
     test_data, collate_fn = get_test_set(
         opt.video_path, opt.annotation_path, opt.dataset, opt.test_subset,
         spatial_transform, temporal_transform, target_transform)
+    test_data.temporal_sliding_window(opt.sample_duration, opt.sample_stride)
     test_loader = torch.utils.data.DataLoader(
         test_data,
-        batch_size=1,
+        batch_size=opt.batch_size,
         shuffle=False,
         num_workers=opt.n_threads,
         pin_memory=True,

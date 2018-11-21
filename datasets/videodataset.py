@@ -61,9 +61,11 @@ def make_dataset(root_path, annotation_path, subset):
         if n_frames == 0:
             continue
 
+        frame_indices = list(range(1, n_frames + 1))
         sample = {
             'video': video_path,
-            'frame_indices': list(range(1, n_frames + 1)),
+            'segment': (frame_indices[0], frame_indices[-1] + 1),
+            'frame_indices': frame_indices,
             'video_id': video_ids[i],
             'label': label_id
         }
@@ -108,6 +110,18 @@ class VideoDataset(data.Dataset):
         clip = torch.stack(clip, 0).permute(1, 0, 2, 3)
 
         return clip
+
+    def temporal_sliding_window(self, sample_duration, sample_stride):
+        data = []
+        for x in self.data:
+            t_begin, t_end = x['segment']
+            for t in range(t_begin, t_end, sample_stride):
+                sample = x
+                segment = (t, min(t + sample_duration, t_end))
+                sample['segment'] = segment
+                sample['frame_indices'] = list(range(t, t + sample_duration))
+                data.append(sample)
+        self.data = data
 
     def __getitem__(self, index):
         path = self.data[index]['video']
