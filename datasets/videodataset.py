@@ -83,10 +83,13 @@ def multi_clips_collate_fn(batch):
         target for multi_targets in batch_targets for target in multi_targets
     ]
 
-    if isinstance(batch_targets[0], int):
-        return default_collate(list(zip(batch_clips, batch_targets)))
-    else:
-        return default_collate(batch_clips), batch_targets
+    return default_collate(list(zip(batch_clips, batch_targets)))
+
+
+def collate_fn(batch):
+    batch_clips, batch_targets = zip(*batch)
+
+    return default_collate(batch_clips), batch_targets
 
 
 class VideoDataset(data.Dataset):
