@@ -81,7 +81,7 @@ def multi_clips_collate_fn(batch):
         target for multi_targets in batch_targets for target in multi_targets
     ]
 
-    return default_collate(batch_clips, batch_targets), batch_targets
+    return default_collate(batch_clips), batch_targets
 
 
 class VideoDataset(data.Dataset):
