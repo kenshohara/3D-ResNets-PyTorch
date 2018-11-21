@@ -29,7 +29,7 @@ def test(data_loader, model, result_path, class_names, no_average):
     batch_time = AverageMeter()
     data_time = AverageMeter()
     results = {'results': defaultdict(list)}
-    
+
     end_time = time.time()
 
     with torch.no_grad():
@@ -65,16 +65,16 @@ def test(data_loader, model, result_path, class_names, no_average):
             ]
             video_outputs = torch.stack(video_outputs)
             average_scores = torch.mean(video_outputs, dim=0)
-            test_results[video_id] = get_video_results(average_scores,
-                                                       class_names)
+            test_results['results'][video_id] = get_video_results(
+                average_scores, class_names)
     else:
         for video_id, video_results in results['results'].items():
-            test_results[video_id] = []
+            test_results['results'][video_id] = []
             for segment_result in video_results:
                 segment = segment_result['segment']
                 result = get_video_results(segment_result['output'],
                                            class_names)
-                test_results[video_id].append({
+                test_results['results'][video_id].append({
                     'segment': segment,
                     'result': result
                 })
