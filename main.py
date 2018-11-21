@@ -200,7 +200,7 @@ def get_test_utils(opt):
     test_data, collate_fn = get_test_set(
         opt.video_path, opt.annotation_path, opt.dataset, opt.test_subset,
         spatial_transform, temporal_transform, target_transform)
-    test_data.temporal_sliding_window(opt.sample_duration, opt.sample_stride)
+    test_data.temporal_sliding_window(opt.sample_duration, opt.test_stride)
     test_loader = torch.utils.data.DataLoader(
         test_data,
         batch_size=opt.batch_size,
