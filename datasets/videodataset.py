@@ -1,6 +1,6 @@
 import torch
 import torch.utils.data as data
-from data.dataloader import default_collate
+from torch.utils.data.dataloader import default_collate
 
 from .utils import (get_default_video_loader, get_n_frames,
                     load_annotation_data)
