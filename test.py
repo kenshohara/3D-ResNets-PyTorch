@@ -29,6 +29,8 @@ def test(data_loader, model, result_path, class_names, no_average):
     batch_time = AverageMeter()
     data_time = AverageMeter()
     results = {'results': defaultdict(list)}
+    
+    end_time = time.time()
 
     with torch.no_grad():
         for i, (inputs, targets) in enumerate(data_loader):
