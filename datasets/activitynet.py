@@ -48,14 +48,14 @@ def make_dataset(root_path, annotation_path, subset):
         fps = load_value_file(fps_file_path)
 
         for annotation in annotations[i]:
-            begin_t = math.floor(annotation['segment'][0] * fps) + 1
-            end_t = math.floor(annotation['segment'][1] * fps) + 1
+            t_begin = math.floor(annotation['segment'][0] * fps) + 1
+            t_end = math.floor(annotation['segment'][1] * fps) + 1
             n_video_frames = get_n_frames(video_path)
             end_t = min(end_t, n_video_frames)
 
             sample = {
                 'video': video_path,
-                'frame_indices': list(range(begin_t, end_t)),
+                'frame_indices': list(range(t_begin, t_end)),
                 'fps': fps,
                 'video_id': video_ids[i]
             }
@@ -91,12 +91,12 @@ def make_untrimmed_dataset(root_path, annotation_path, subset):
         fps_file_path = video_path / 'fps'
         fps = load_value_file(fps_file_path)
 
-        begin_t = 1
-        end_t = get_n_frames(video_path) + 1
+        t_begin = 1
+        t_end = get_n_frames(video_path) + 1
 
         sample = {
             'video': video_path,
-            'frame_indices': list(range(begin_t, end_t)),
+            'frame_indices': list(range(t_begin, t_end)),
             'fps': fps,
             'video_id': video_ids[i]
         }
