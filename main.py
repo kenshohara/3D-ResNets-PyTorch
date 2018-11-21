@@ -280,4 +280,5 @@ if __name__ == '__main__':
         test_loader, test_class_names = get_test_utils(opt)
         test_result_path = opt.result_path / '{}.json'.format(opt.test_subset)
 
-        test.test(test_loader, model, test_result_path, test_class_names)
+        test.test(test_loader, model, test_result_path, test_class_names,
+                  opt.test_no_average)
