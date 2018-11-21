@@ -1,5 +1,6 @@
 import torch
 import torch.utils.data as data
+from data.dataloader import default_collate
 
 from .utils import (get_default_video_loader, get_n_frames,
                     load_annotation_data)
@@ -78,8 +79,7 @@ def multi_clips_collate_fn(batch):
         target for multi_targets in batch_targets for target in multi_targets
     ]
 
-    return data.dataloader.default_collate(
-        list(zip(batch_clips, batch_targets)))
+    return default_collate(batch_clips, batch_targets), batch_targets
 
 
 class VideoDataset(data.Dataset):
