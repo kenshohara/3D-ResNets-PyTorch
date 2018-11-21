@@ -51,7 +51,7 @@ def make_dataset(root_path, annotation_path, subset):
             t_begin = math.floor(annotation['segment'][0] * fps) + 1
             t_end = math.floor(annotation['segment'][1] * fps) + 1
             n_video_frames = get_n_frames(video_path)
-            end_t = min(end_t, n_video_frames)
+            t_end = min(t_end, n_video_frames)
 
             sample = {
                 'video': video_path,
