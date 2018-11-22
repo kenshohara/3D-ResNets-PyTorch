@@ -197,7 +197,7 @@ def get_test_utils(opt):
     else:
         del spatial_transform[1]  #remove CenterCrop
         temporal_transform = SlidingWindow(opt.sample_duration, opt.test_stride)
-
+    spatial_transform = Compose(spatial_transform)
     target_transform = TargetCompose([VideoID(), Segment()])
 
     test_data, collate_fn = get_test_set(
