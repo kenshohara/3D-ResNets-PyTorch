@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from . import resnet
+from .resnet import conv3x3x3, conv1x1x1, get_inplanes, ResNet
 
 
 class PreActivationBasicBlock(nn.Module):
@@ -45,12 +45,11 @@ class PreActivationBottleneck(nn.Module):
         super().__init__()
 
         self.bn1 = nn.BatchNorm3d(inplanes)
-        self.conv1 = nn.Conv3d(inplanes, planes, kernel_size=1, bias=False)
+        self.conv1 = conv1x1x1(inplanes, planes)
         self.bn2 = nn.BatchNorm3d(planes)
-        self.conv2 = resnet.conv3x3x3(planes, planes, stride)
+        self.conv2 = conv3x3x3(planes, planes, stride)
         self.bn3 = nn.BatchNorm3d(planes)
-        self.conv3 = nn.Conv3d(
-            planes, planes * self.expansion, kernel_size=1, bias=False)
+        self.conv3 = conv1x1x1(planes, planes * self.expansion)
         self.relu = nn.ReLU(inplace=True)
         self.downsample = downsample
         self.stride = stride
@@ -81,46 +80,46 @@ class PreActivationBottleneck(nn.Module):
 def resnet18(**kwargs):
     """Constructs a ResNet-18 model.
     """
-    model = resnet.ResNet(PreActivationBasicBlock, [2, 2, 2, 2],
-                          resnet.get_inplanes(), **kwargs)
+    model = ResNet(PreActivationBasicBlock, [2, 2, 2, 2], get_inplanes(),
+                   **kwargs)
     return model
 
 
 def resnet34(**kwargs):
     """Constructs a ResNet-34 model.
     """
-    model = resnet.ResNet(PreActivationBasicBlock, [3, 4, 6, 3],
-                          resnet.get_inplanes(), **kwargs)
+    model = ResNet(PreActivationBasicBlock, [3, 4, 6, 3], get_inplanes(),
+                   **kwargs)
     return model
 
 
 def resnet50(**kwargs):
     """Constructs a ResNet-50 model.
     """
-    model = resnet.ResNet(PreActivationBottleneck, [3, 4, 6, 3],
-                          resnet.get_inplanes(), **kwargs)
+    model = ResNet(PreActivationBottleneck, [3, 4, 6, 3], get_inplanes(),
+                   **kwargs)
     return model
 
 
 def resnet101(**kwargs):
     """Constructs a ResNet-101 model.
     """
-    model = resnet.ResNet(PreActivationBottleneck, [3, 4, 23, 3],
-                          resnet.get_inplanes(), **kwargs)
+    model = ResNet(PreActivationBottleneck, [3, 4, 23, 3], get_inplanes(),
+                   **kwargs)
     return model
 
 
 def resnet152(**kwargs):
     """Constructs a ResNet-101 model.
     """
-    model = resnet.ResNet(PreActivationBottleneck, [3, 8, 36, 3],
-                          resnet.get_inplanes(), **kwargs)
+    model = ResNet(PreActivationBottleneck, [3, 8, 36, 3], get_inplanes(),
+                   **kwargs)
     return model
 
 
 def resnet200(**kwargs):
     """Constructs a ResNet-101 model.
     """
-    model = resnet.ResNet(PreActivationBottleneck, [3, 24, 36, 3],
-                          resnet.get_inplanes(), **kwargs)
+    model = ResNet(PreActivationBottleneck, [3, 24, 36, 3], get_inplanes(),
+                   **kwargs)
     return model

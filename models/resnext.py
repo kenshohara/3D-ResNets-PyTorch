@@ -5,7 +5,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from . import resnet
+from .resnet import conv1x1x1, Bottleneck, ResNet
 from utils import partialclass
 
 
@@ -13,7 +13,7 @@ def get_inplanes():
     return [128, 256, 512, 1024]
 
 
-class ResNeXtBottleneck(resnet.Bottleneck):
+class ResNeXtBottleneck(Bottleneck):
     expansion = 2
 
     def __init__(self, inplanes, planes, cardinality, stride=1,
@@ -21,7 +21,7 @@ class ResNeXtBottleneck(resnet.Bottleneck):
         super().__init__(inplanes, planes, stride, downsample)
 
         mid_planes = cardinality * planes // 32
-        self.conv1 = nn.Conv3d(inplanes, mid_planes, kernel_size=1, bias=False)
+        self.conv1 = conv1x1x1(inplanes, mid_planes)
         self.bn1 = nn.BatchNorm3d(mid_planes)
         self.conv2 = nn.Conv3d(
             mid_planes,
@@ -32,26 +32,24 @@ class ResNeXtBottleneck(resnet.Bottleneck):
             groups=cardinality,
             bias=False)
         self.bn2 = nn.BatchNorm3d(mid_planes)
-        self.conv3 = nn.Conv3d(
-            mid_planes, planes * self.expansion, kernel_size=1, bias=False)
+        self.conv3 = conv1x1x1(mid_planes, planes * self.expansion)
 
 
-class ResNeXt(resnet.ResNet):
+class ResNeXt(ResNet):
 
     def __init__(self,
                  block,
                  layers,
                  block_inplanes,
                  sample_size,
-                 sample_duration,
                  conv1_t_size=7,
+                 conv1_t_stride=1,
                  shortcut_type='B',
                  cardinality=32,
                  n_classes=400):
         block = partialclass(block, cardinality=cardinality)
         super().__init__(block, layers, block_inplanes, sample_size,
-                         sample_duration, conv1_t_size, shortcut_type,
-                         n_classes)
+                         conv1_t_size, conv1_t_stride, shortcut_type, n_classes)
 
         self.fc = nn.Linear(cardinality * 32 * block.expansion, n_classes)
 
