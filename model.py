@@ -4,13 +4,21 @@ from torch import nn
 from models import resnet, pre_act_resnet, wide_resnet, resnext, densenet
 
 
+def get_module_name(name):
+    name = name.split('.')
+    if name[0] == 'module':
+        i = 1
+    else:
+        i = 0
+    if name[i] == 'features':
+        i += 1
+
+    return name[i]
+
+
 def get_fine_tuning_parameters(model, ft_begin_module):
     if not ft_begin_module:
         return model.parameters()
-
-    get_module_name = (
-        lambda x: x.split('.')[1] if x.split('.')[0] == 'features' else x.split('.')[0]
-    )
 
     parameters = []
     add_flag = False
