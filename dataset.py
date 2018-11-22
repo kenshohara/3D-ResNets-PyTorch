@@ -1,6 +1,4 @@
-from torch.utils.data.dataloader import default_collate
-
-from datasets.videodataset import VideoDataset, collate_fn, multi_clips_collate_fn
+from datasets.videodataset import VideoDataset
 from datasets.activitynet import ActivityNet
 
 
@@ -27,7 +25,7 @@ def get_training_set(video_path, annotation_path, dataset_name,
             temporal_transform=temporal_transform,
             target_transform=target_transform)
 
-    return training_data, default_collate
+    return training_data
 
 
 def get_validation_set(video_path, annotation_path, dataset_name,
@@ -49,7 +47,7 @@ def get_validation_set(video_path, annotation_path, dataset_name,
             temporal_transform=temporal_transform,
             target_transform=target_transform)
 
-    return validation_data, multi_clips_collate_fn
+    return validation_data
 
 
 def get_test_set(video_path, annotation_path, dataset_name, test_subset,
@@ -83,4 +81,4 @@ def get_test_set(video_path, annotation_path, dataset_name, test_subset,
             temporal_transform=temporal_transform,
             target_transform=target_transform)
 
-    return test_data, collate_fn
+    return test_data

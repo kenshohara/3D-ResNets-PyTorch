@@ -76,18 +76,17 @@ def make_dataset(root_path, annotation_path, subset):
     return dataset, idx_to_class
 
 
-def multi_clips_collate_fn(batch):
-    batch_clips, batch_targets = zip(*batch)
-    batch_clips = [clip for multi_clips in batch_clips for clip in multi_clips]
-    batch_targets = [
-        target for multi_targets in batch_targets for target in multi_targets
-    ]
-
-    return default_collate(list(zip(batch_clips, batch_targets)))
-
-
 def collate_fn(batch):
     batch_clips, batch_targets = zip(*batch)
+
+    if isinstance(batch_clips[0], list):
+        batch_clips = [
+            clip for multi_clips in batch_clips for clip in multi_clips
+        ]
+        batch_targets = [
+            target for multi_targets in batch_targets
+            for target in multi_targets
+        ]
 
     return default_collate(batch_clips), batch_targets
 

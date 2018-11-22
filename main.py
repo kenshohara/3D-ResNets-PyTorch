@@ -20,6 +20,7 @@ from temporal_transforms import (LoopPadding, TemporalRandomCrop,
 from target_transforms import ClassLabel, VideoID, Segment
 from target_transforms import Compose as TargetCompose
 from dataset import get_training_set, get_validation_set, get_test_set
+from datasets.videodataset import collate_fn
 from utils import Logger, worker_init_fn, get_lr
 from train import train_epoch
 from validation import val_epoch
@@ -113,9 +114,9 @@ def get_train_utils(opt, model_parameters):
     temporal_transform = TemporalRandomCrop(opt.sample_duration)
     target_transform = ClassLabel()
 
-    training_data, collate_fn = get_training_set(
-        opt.video_path, opt.annotation_path, opt.dataset, spatial_transform,
-        temporal_transform, target_transform)
+    training_data = get_training_set(opt.video_path, opt.annotation_path,
+                                     opt.dataset, spatial_transform,
+                                     temporal_transform, target_transform)
     train_loader = torch.utils.data.DataLoader(
         training_data,
         batch_size=opt.batch_size,
@@ -164,9 +165,9 @@ def get_val_utils(opt):
     temporal_transform = TemporalEvenCrop(opt.sample_duration,
                                           opt.n_val_samples)
     target_transform = ClassLabel()
-    validation_data, collate_fn = get_validation_set(
-        opt.video_path, opt.annotation_path, opt.dataset, spatial_transform,
-        temporal_transform, target_transform)
+    validation_data = get_validation_set(opt.video_path, opt.annotation_path,
+                                         opt.dataset, spatial_transform,
+                                         temporal_transform, target_transform)
     val_loader = torch.utils.data.DataLoader(
         validation_data,
         batch_size=(opt.batch_size // opt.n_val_samples),
@@ -200,9 +201,9 @@ def get_test_utils(opt):
     spatial_transform = Compose(spatial_transform)
     target_transform = TargetCompose([VideoID(), Segment()])
 
-    test_data, collate_fn = get_test_set(
-        opt.video_path, opt.annotation_path, opt.dataset, opt.test_subset,
-        spatial_transform, temporal_transform, target_transform)
+    test_data = get_test_set(opt.video_path, opt.annotation_path, opt.dataset,
+                             opt.test_subset, spatial_transform,
+                             temporal_transform, target_transform)
 
     if opt.test_crop == 'center':
         test_data.temporal_sliding_window(opt.sample_duration, opt.test_stride)
