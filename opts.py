@@ -209,7 +209,12 @@ def parse_opts():
         '--conv1_t_size',
         default=7,
         type=int,
-        help='Kernel size of conv1. Currently only support for ResNet.')
+        help='Kernel size in t dim of conv1.)
+    parser.add_argument(
+        '--conv1_t_stride',
+        default=1,
+        type=int,
+        help='Stride in t dim of conv1.)
     parser.add_argument(
         '--resnet_shortcut',
         default='B',
