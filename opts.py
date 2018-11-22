@@ -177,7 +177,8 @@ def parse_opts():
         default='center',
         type=str,
         help=('Cropping method in test. (center | nocrop)'
-              'When nocrop, fully convolutional inference is performed.'))
+              'When nocrop, fully convolutional inference is performed,'
+              'and mini-batch consists of clips of one video.'))
     parser.add_argument(
         '--test_no_average',
         action='store_true',
