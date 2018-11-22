@@ -147,16 +147,24 @@ def generate_model(opt):
 
         if opt.model_depth == 121:
             model = densenet.densenet121(
-                n_classes=opt.n_classes, conv1_t_stride=conv1_t_stride)
+                n_classes=opt.n_classes,
+                conv1_t_size=opt.conv1_t_size,
+                conv1_t_stride=conv1_t_stride)
         elif opt.model_depth == 169:
             model = densenet.densenet169(
-                n_classes=opt.n_classes, conv1_t_stride=conv1_t_stride)
+                n_classes=opt.n_classes,
+                conv1_t_size=opt.conv1_t_size,
+                conv1_t_stride=conv1_t_stride)
         elif opt.model_depth == 201:
             model = densenet.densenet201(
-                n_classes=opt.n_classes, conv1_t_stride=conv1_t_stride)
+                n_classes=opt.n_classes,
+                conv1_t_size=opt.conv1_t_size,
+                conv1_t_stride=conv1_t_stride)
         elif opt.model_depth == 264:
             model = densenet.densenet264(
-                n_classes=opt.n_classes, conv1_t_stride=conv1_t_stride)
+                n_classes=opt.n_classes,
+                conv1_t_size=opt.conv1_t_size,
+                conv1_t_stride=conv1_t_stride)
 
     if not opt.no_cuda:
         model = nn.DataParallel(model, device_ids=None).cuda()
