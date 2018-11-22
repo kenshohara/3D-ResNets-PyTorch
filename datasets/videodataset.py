@@ -88,7 +88,10 @@ def collate_fn(batch):
             for target in multi_targets
         ]
 
-    return default_collate(batch_clips), batch_targets
+    if isinstance(batch_targets[0], int):
+        return default_collate(batch_clips), default_collate(batch_targets)
+    else:
+        return default_collate(batch_clips), batch_targets
 
 
 class VideoDataset(data.Dataset):
