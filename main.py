@@ -260,6 +260,8 @@ if __name__ == '__main__':
             opt.begin_epoch, model, optimizer, scheduler = resume(
                 opt.resume_path, opt.arch, opt.begin_epoch, model, optimizer,
                 scheduler)
+            if opt.overwrite_milestones:
+                scheduler.milestones = opt.multistep_milestones
         else:
             opt.begin_epoch, model, _, _ = resume(opt.resume_path, opt.arch,
                                                   opt.begin_epoch, model)

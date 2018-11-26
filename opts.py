@@ -130,6 +130,11 @@ def parse_opts():
         nargs='+',
         help='Milestones of LR scheduler. See documentation of MultistepLR.')
     parser.add_argument(
+        '--overwrite_milestones',
+        action='store_true',
+        help='If true, overwriting multistep_milestones when resuming training.'
+    )
+    parser.add_argument(
         '--plateau_patience',
         default=10,
         type=int,
