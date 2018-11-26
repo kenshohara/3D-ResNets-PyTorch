@@ -57,7 +57,7 @@ def make_dataset(root_path, annotation_path, subset):
         if segment[1] == 1:
             continue
 
-        frame_indices = list(segment[0], segment[1])
+        frame_indices = list(range(segment[0], segment[1]))
         sample = {
             'video': video_path,
             'segment': segment,
