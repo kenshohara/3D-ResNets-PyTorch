@@ -40,8 +40,8 @@ def convert_csv_to_dict(csv_dir_path, split_index):
 
 def get_labels(csv_dir_path):
     labels = []
-    for name in csv_dir_path.iterdir():
-        labels.append('_'.join(name.split('_')[:-2]))
+    for file_path in csv_dir_path.iterdir():
+        labels.append('_'.join(file_path.name.split('_')[:-2]))
     return sorted(list(set(labels)))
 
 
