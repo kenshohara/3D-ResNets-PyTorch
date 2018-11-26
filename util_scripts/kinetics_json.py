@@ -12,7 +12,7 @@ def convert_csv_to_dict(csv_path, subset):
     keys = []
     key_labels = []
     for i in range(data.shape[0]):
-        row = data.ix[i, :]
+        row = data.iloc[i, :]
         basename = '%s_%s_%s' % (row['youtube_id'], '%06d' % row['time_start'],
                                  '%06d' % row['time_end'])
         keys.append(basename)
@@ -39,7 +39,7 @@ def load_labels(train_csv_path):
 
 
 def convert_kinetics_csv_to_json(train_csv_path, val_csv_path, test_csv_path,
-                                 video_path, dst_json_path):
+                                 video_dir_path, dst_json_path):
     labels = load_labels(train_csv_path)
     train_database = convert_csv_to_dict(train_csv_path, 'training')
     val_database = convert_csv_to_dict(val_csv_path, 'validation')
@@ -58,7 +58,7 @@ def convert_kinetics_csv_to_json(train_csv_path, val_csv_path, test_csv_path,
         else:
             label = 'test'
 
-        video_path = video_path / label / k
+        video_path = video_dir_path / label / k
         n_frames = get_n_frames(video_path)
         v['annotations']['segment'] = (1, n_frames)
 
@@ -70,8 +70,8 @@ if __name__ == "__main__":
     train_csv_path = Path(sys.argv[1])
     val_csv_path = Path(sys.argv[2])
     test_csv_path = Path(sys.argv[3])
-    video_path = Path(sys.argv[4])
+    video_dir_path = Path(sys.argv[4])
     dst_json_path = Path(sys.argv[5])
 
     convert_kinetics_csv_to_json(train_csv_path, val_csv_path, test_csv_path,
-                                 video_path, dst_json_path)
+                                 video_dir_path, dst_json_path)

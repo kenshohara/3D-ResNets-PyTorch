@@ -61,7 +61,7 @@ def convert_hmdb51_csv_to_json(csv_dir_path, split_index, video_dir_path,
         else:
             label = 'test'
 
-        video_path = video_path / label / k
+        video_path = video_dir_path / label / k
         n_frames = get_n_frames(video_path)
         v['annotations']['segment'] = (1, n_frames)
 
