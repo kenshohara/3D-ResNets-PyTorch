@@ -18,6 +18,8 @@ def class_process(class_dir_path, dst_root_path, fps=-1):
 
         if dst_dir_path.exists():
             continue
+        else:
+            dst_dir_path.mkdir()
 
         p = subprocess.Popen(
             'ffprobe -hide_banner -show_entries stream=width,height "{}"'.
