@@ -9,7 +9,8 @@ from utils import get_n_frames
 
 def convert_csv_to_dict(csv_dir_path, split_index):
     database = {}
-    for filename in csv_dir_path.iterdir():
+    for file_path in csv_dir_path.iterdir():
+        filename = file_path.name
         if 'split{}'.format(split_index) not in filename:
             continue
 
