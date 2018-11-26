@@ -53,6 +53,7 @@ def make_dataset(root_path, annotation_path, subset):
             label = annotations[i]['label']
             label_id = class_to_idx[label]
         else:
+            label = 'test'
             label_id = -1
 
         video_path = root_path / label / video_ids[i]
