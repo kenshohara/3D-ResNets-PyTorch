@@ -72,7 +72,7 @@ def convert_hmdb51_csv_to_json(csv_dir_path, split_index, video_dir_path,
 
 if __name__ == '__main__':
     csv_dir_path = Path(sys.argv[1])
-    video_dir_path = Path(sys.argv[1])
+    video_dir_path = Path(sys.argv[2])
 
     for split_index in range(1, 4):
         dst_json_path = csv_dir_path / 'hmdb51_{}.json'.format(split_index)
