@@ -53,7 +53,7 @@ def convert_kinetics_csv_to_json(train_csv_path, val_csv_path, test_csv_path,
     dst_data['database'].update(test_database)
 
     for k, v in dst_data['database'].items():
-        if v['annotations'] is not None:
+        if 'label' in v['annotations']:
             label = v['annotations']['label']
         else:
             label = 'test'
