@@ -9,12 +9,11 @@ from .utils import get_n_frames
 
 def convert_csv_to_dict(csv_dir_path, split_index):
     database = {}
-    for filename in os.listdir(csv_dir_path):
+    for filename in csv_dir_path.iterdir():
         if 'split{}'.format(split_index) not in filename:
             continue
 
-        data = pd.read_csv(
-            os.path.join(csv_dir_path, filename), delimiter=' ', header=None)
+        data = pd.read_csv(csv_dir_path / filename, delimiter=' ', header=None)
         keys = []
         subsets = []
         for i in range(data.shape[0]):
@@ -41,7 +40,7 @@ def convert_csv_to_dict(csv_dir_path, split_index):
 
 def get_labels(csv_dir_path):
     labels = []
-    for name in os.listdir(csv_dir_path):
+    for name in csv_dir_path.iterdir():
         labels.append('_'.join(name.split('_')[:-2]))
     return sorted(list(set(labels)))
 
