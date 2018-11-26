@@ -4,7 +4,7 @@ import sys
 import json
 from pathlib import Path
 
-from .utils import get_n_frames
+from utils import get_n_frames
 
 
 def convert_csv_to_dict(csv_path, subset):
