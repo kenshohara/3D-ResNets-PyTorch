@@ -63,7 +63,7 @@ def convert_hmdb51_csv_to_json(csv_dir_path, split_index, video_dir_path,
 
         video_path = video_dir_path / label / k
         n_frames = get_n_frames(video_path)
-        v['annotations']['segment'] = (1, n_frames)
+        v['annotations']['segment'] = (1, n_frames + 1)
 
     with open(dst_json_path, 'w') as dst_file:
         json.dump(dst_data, dst_file)
