@@ -17,7 +17,7 @@ def convert_csv_to_dict(csv_dir_path, split_index):
         keys = []
         subsets = []
         for i in range(data.shape[0]):
-            row = data.ix[i, :]
+            row = data.iloc[i, :]
             if row[1] == 0:
                 continue
             elif row[1] == 1:
