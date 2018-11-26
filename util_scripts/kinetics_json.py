@@ -66,7 +66,7 @@ def convert_kinetics_csv_to_json(train_csv_path, val_csv_path, test_csv_path,
         json.dump(dst_data, dst_file)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     train_csv_path = Path(sys.argv[1])
     val_csv_path = Path(sys.argv[2])
     test_csv_path = Path(sys.argv[3])
