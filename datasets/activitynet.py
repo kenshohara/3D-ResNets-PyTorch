@@ -4,8 +4,8 @@ import torch
 import torch.utils.data as data
 
 from .utils import (get_default_video_loader, get_n_frames,
-                    load_annotation_data, load_value_file)
-from .videodataset import VideoDataset, get_video_ids_and_annotations
+                    load_annotation_data)
+from .videodataset import VideoDataset
 
 
 def get_class_labels(data):
@@ -27,9 +27,25 @@ def get_class_labels(data):
     return class_labels_map
 
 
+def get_video_ids_annotations_and_fps(data, subset):
+    video_ids = []
+    annotations = []
+    fps_values = []
+
+    for key, value in data['database'].items():
+        this_subset = value['subset']
+        if this_subset == subset:
+            video_ids.append(key)
+            annotations.append(value['annotations'])
+            fps_values.append(value['fps'])
+
+    return video_ids, annotations, fps_values
+
+
 def make_dataset(root_path, annotation_path, subset):
     data = load_annotation_data(annotation_path)
-    video_ids, annotations = get_video_ids_and_annotations(data, subset)
+    video_ids, annotations, fps_values = get_video_ids_annotations_and_fps(
+        data, subset)
     class_to_idx = get_class_labels(data)
     idx_to_class = {}
     for name, label in class_to_idx.items():
@@ -44,8 +60,7 @@ def make_dataset(root_path, annotation_path, subset):
         if not video_path.exists():
             continue
 
-        fps_file_path = video_path / 'fps'
-        fps = load_value_file(fps_file_path)
+        fps = fps_values[i]
 
         for annotation in annotations[i]:
             t_begin = math.floor(annotation['segment'][0] * fps) + 1
