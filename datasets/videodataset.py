@@ -4,8 +4,7 @@ import torch
 import torch.utils.data as data
 from torch.utils.data.dataloader import default_collate
 
-from .utils import (get_default_video_loader, get_n_frames,
-                    load_annotation_data)
+from .utils import (get_default_video_loader, load_annotation_data)
 
 
 def get_class_labels(data):
@@ -24,16 +23,10 @@ def get_video_ids_and_annotations(data, subset):
     for key, value in data['database'].items():
         this_subset = value['subset']
         if this_subset == subset:
-            if subset == 'testing':
-                video_ids.append(key)
-            else:
-                video_ids.append(key)
-                annotations.append(value['annotations'])
+            video_ids.append(key)
+            annotations.append(value['annotations'])
 
-    if subset == 'testing':
-        return video_ids, None
-    else:
-        return video_ids, annotations
+    return video_ids, annotations
 
 
 def make_dataset(root_path, annotation_path, subset):
@@ -49,7 +42,7 @@ def make_dataset(root_path, annotation_path, subset):
         if i % 1000 == 0:
             print('dataset loading [{}/{}]'.format(i, len(video_ids)))
 
-        if annotations is not None:
+        if 'label' in annotations[i]:
             label = annotations[i]['label']
             label_id = class_to_idx[label]
         else:
@@ -60,14 +53,14 @@ def make_dataset(root_path, annotation_path, subset):
         if not video_path.exists():
             continue
 
-        n_frames = get_n_frames(video_path)
-        if n_frames == 0:
+        segment = annotations[i]['segment']
+        if segment[1] == 1:
             continue
 
-        frame_indices = list(range(1, n_frames + 1))
+        frame_indices = list(segment[0], segment[1])
         sample = {
             'video': video_path,
-            'segment': (frame_indices[0], frame_indices[-1] + 1),
+            'segment': segment,
             'frame_indices': frame_indices,
             'video_id': video_ids[i],
             'label': label_id
