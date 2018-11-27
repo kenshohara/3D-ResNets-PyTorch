@@ -1,6 +1,6 @@
-from pathlib import Path
-import sys
+import argparse
 import json
+from pathlib import Path
 
 import pandas as pd
 
@@ -66,14 +66,32 @@ def convert_ucf101_csv_to_json(label_csv_path, train_csv_path, val_csv_path,
 
 
 if __name__ == '__main__':
-    csv_dir_path = Path(sys.argv[1])
-    video_dir_path = Path(sys.argv[2])
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        'dir_path',
+        default=None,
+        type=Path,
+        help=('Directory path including classInd.txt, '
+              'trainlist0-.txt, testlist0-.txt'))
+    parser.add_argument(
+        'video_path',
+        default=None,
+        type=Path,
+        help=('Path of video directory (jpg).'
+              'Using to get n_frames of each video.'))
+    parser.add_argument(
+        'dst_path',
+        default=None,
+        type=Path,
+        help='Directory path of dst json file.')
+
+    args = parser.parse_args()
 
     for split_index in range(1, 4):
-        label_csv_path = csv_dir_path / 'classInd.txt'
-        train_csv_path = csv_dir_path / 'trainlist0{}.txt'.format(split_index)
-        val_csv_path = csv_dir_path / 'testlist0{}.txt'.format(split_index)
-        dst_json_path = csv_dir_path / 'ucf101_0{}.json'.format(split_index)
+        label_csv_path = args.dir_path / 'classInd.txt'
+        train_csv_path = args.dir_path / 'trainlist0{}.txt'.format(split_index)
+        val_csv_path = args.dir_path / 'testlist0{}.txt'.format(split_index)
+        dst_json_path = args.dst_path / 'ucf101_0{}.json'.format(split_index)
 
         convert_ucf101_csv_to_json(label_csv_path, train_csv_path, val_csv_path,
-                                   video_dir_path, dst_json_path)
+                                   args.video_path, dst_json_path)

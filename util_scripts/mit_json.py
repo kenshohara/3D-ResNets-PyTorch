@@ -1,8 +1,8 @@
-import pandas as pd
-
-import sys
+import argparse
 import json
 from pathlib import Path
+
+import pandas as pd
 
 from utils import get_n_frames
 
@@ -51,14 +51,16 @@ def convert_mit_csv_to_json(class_file_path, train_csv_path, val_csv_path,
     labels = load_labels(class_file_path)
     train_database = convert_csv_to_dict(train_csv_path, 'training')
     val_database = convert_csv_to_dict(val_csv_path, 'validation')
-    test_database = convert_csv_to_dict(test_csv_path, 'testing')
+    if test_csv_path.exists():
+        test_database = convert_csv_to_dict(test_csv_path, 'testing')
 
     dst_data = {}
     dst_data['labels'] = labels
     dst_data['database'] = {}
     dst_data['database'].update(train_database)
     dst_data['database'].update(val_database)
-    dst_data['database'].update(test_database)
+    if test_csv_path.exists():
+        dst_data['database'].update(test_database)
 
     for k, v in dst_data['database'].items():
         if 'label' in v['annotations']:
@@ -75,12 +77,29 @@ def convert_mit_csv_to_json(class_file_path, train_csv_path, val_csv_path,
 
 
 if __name__ == '__main__':
-    class_file_path = Path(sys.argv[1])
-    train_csv_path = Path(sys.argv[2])
-    val_csv_path = Path(sys.argv[3])
-    test_csv_path = Path(sys.argv[4])
-    video_dir_path = Path(sys.argv[5])
-    dst_json_path = Path(sys.argv[6])
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        'dir_path',
+        default=None,
+        type=Path,
+        help=('Directory path including moments_categories.txt, '
+              'trainingSet.csv, validationSet.csv, '
+              '(testingSet.csv (optional))'))
+    parser.add_argument(
+        'video_path',
+        default=None,
+        type=Path,
+        help=('Path of video directory (jpg).'
+              'Using to get n_frames of each video.'))
+    parser.add_argument(
+        'dst_path', default=None, type=Path, help='Path of dst json file.')
+
+    args = parser.parse_args()
+
+    class_file_path = args.dir_path / 'moments_categories.txt'
+    train_csv_path = args.dir_path / 'trainingSet.csv'
+    val_csv_path = args.dir_path / 'validationSet.csv'
+    test_csv_path = args.dir_path / 'testingSet.csv'
 
     convert_mit_csv_to_json(class_file_path, train_csv_path, val_csv_path,
-                            test_csv_path, video_dir_path, dst_json_path)
+                            test_csv_path, args.video_path, args.dst_path)

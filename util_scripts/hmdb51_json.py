@@ -1,6 +1,6 @@
-from pathlib import Path
-import sys
+import argparse
 import json
+from pathlib import Path
 
 import pandas as pd
 
@@ -71,10 +71,27 @@ def convert_hmdb51_csv_to_json(csv_dir_path, split_index, video_dir_path,
 
 
 if __name__ == '__main__':
-    csv_dir_path = Path(sys.argv[1])
-    video_dir_path = Path(sys.argv[2])
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        'dir_path',
+        default=None,
+        type=Path,
+        help='Directory path of HMDB51 annotation files.')
+    parser.add_argument(
+        'video_path',
+        default=None,
+        type=Path,
+        help=('Path of video directory (jpg).'
+              'Using to get n_frames of each video.'))
+    parser.add_argument(
+        'dst_dir_path',
+        default=None,
+        type=Path,
+        help='Directory path of dst json file.')
+
+    args = parser.parse_args()
 
     for split_index in range(1, 4):
-        dst_json_path = csv_dir_path / 'hmdb51_{}.json'.format(split_index)
-        convert_hmdb51_csv_to_json(csv_dir_path, split_index, video_dir_path,
+        dst_json_path = args.dst_dir_path / 'hmdb51_{}.json'.format(split_index)
+        convert_hmdb51_csv_to_json(args.dir_path, split_index, args.video_path,
                                    dst_json_path)
