@@ -65,6 +65,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     video_file_paths = [x for x in sorted(args.dir_path.iterdir())]
-    status_list = Parallel(n_jobs=args.n_jobs)(
-        delayed(video_process)(video_file_path, args.dst_path, args.fps)
-        for video_file_path in video_file_paths)
+    status_list = Parallel(
+        n_jobs=args.n_jobs, backend='threading')(
+            delayed(video_process)(video_file_path, args.dst_path, args.fps)
+            for video_file_path in video_file_paths)

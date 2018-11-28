@@ -73,6 +73,7 @@ if __name__ == '__main__':
 
     class_dir_paths = [x for x in sorted(args.dir_path.iterdir())]
 
-    status_list = Parallel(n_jobs=args.n_jobs)(
-        delayed(class_process)(class_dir_path, args.dst_path, args.fps)
-        for class_dir_path in class_dir_paths)
+    status_list = Parallel(
+        n_jobs=args.n_jobs, backend='threading')(
+            delayed(class_process)(class_dir_path, args.dst_path, args.fps)
+            for class_dir_path in class_dir_paths)
