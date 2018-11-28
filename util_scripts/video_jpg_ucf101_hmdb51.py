@@ -1,6 +1,8 @@
-import sys
 import subprocess
+import argparse
 from pathlib import Path
+
+from joblib import Parallel, delayed
 
 
 def class_process(class_dir_path, dst_root_path, fps=-1):
@@ -51,11 +53,26 @@ def class_process(class_dir_path, dst_root_path, fps=-1):
 
 
 if __name__ == '__main__':
-    dir_path = Path(sys.argv[1])
-    dst_dir_path = Path(sys.argv[2])
-    fps = -1
-    if len(sys.argv) > 3:
-        fps = int(sys.argv[3])
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        'dir_path', default=None, type=Path, help='Directory path of videos')
+    parser.add_argument(
+        'dst_path',
+        default=None,
+        type=Path,
+        help='Directory path of jpg videos')
+    parser.add_argument(
+        '--n_jobs', default=-1, type=int, help='Number of parallel jobs')
+    parser.add_argument(
+        '--fps',
+        default=-1,
+        type=int,
+        help=('Frame rates of output videos.'
+              '-1 means original frame rates.'))
+    args = parser.parse_args()
 
-    for class_dir_path in sorted(dir_path.iterdir()):
-        class_process(class_dir_path, dst_dir_path, fps)
+    class_dir_paths = [x for x in sorted(args.dir_path.iterdir())]
+
+    status_list = Parallel(n_jobs=args.n_jobs)(
+        delayed(class_process)(class_dir_path, args.dst_path, args.fps)
+        for class_dir_path in class_dir_paths)
