@@ -5,8 +5,8 @@ from pathlib import Path
 from joblib import Parallel, delayed
 
 
-def video_process(video_file_path, dst_root_path, fps=-1):
-    if '.mp4' not in video_file_path.name:
+def video_process(video_file_path, dst_root_path, ext, fps=-1):
+    if ext != video_file_path.suffix:
         return
     name = video_file_path.stem
     dst_dir_path = dst_root_path / name
@@ -45,6 +45,17 @@ def video_process(video_file_path, dst_root_path, fps=-1):
     print('\n')
 
 
+def class_process(class_dir_path, dst_root_path, ext, fps=-1):
+    if not class_dir_path.is_dir():
+        return
+
+    dst_class_path = dst_root_path / class_dir_path.name
+    dst_class_path.mkdir(exist_ok=True)
+
+    for video_file_path in sorted(class_dir_path.iterdir()):
+        video_process(video_file_path, dst_root_path, ext, fps)
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -55,6 +66,11 @@ if __name__ == '__main__':
         type=Path,
         help='Directory path of jpg videos')
     parser.add_argument(
+        'dataset',
+        default='',
+        type=str,
+        help='Dataset name (kinetics | mit | ucf101 | hmdb51 | activitynet)')
+    parser.add_argument(
         '--n_jobs', default=-1, type=int, help='Number of parallel jobs')
     parser.add_argument(
         '--fps',
@@ -64,8 +80,26 @@ if __name__ == '__main__':
               '-1 means original frame rates.'))
     args = parser.parse_args()
 
-    video_file_paths = [x for x in sorted(args.dir_path.iterdir())]
-    status_list = Parallel(
-        n_jobs=args.n_jobs, backend='threading')(
-            delayed(video_process)(video_file_path, args.dst_path, args.fps)
-            for video_file_path in video_file_paths)
+    if args.dataset in ['kinetics', 'mit', 'activitynet']:
+        ext = 'mp4'
+    else:
+        ext = 'avi'
+
+    if args.dataset == 'activitynet':
+        video_file_paths = [x for x in sorted(args.dir_path.iterdir())]
+        status_list = Parallel(
+            n_jobs=args.n_jobs,
+            backend='threading')(delayed(video_process)(video_file_path, args.
+                                                        dst_path, ext, args.fps)
+                                 for video_file_path in video_file_paths)
+    else:
+        class_dir_paths = [x for x in sorted(args.dir_path.iterdir())]
+        test_set_video_path = args.dir_path / 'test'
+        if test_set_video_path.exists():
+            class_dir_paths.append(test_set_video_path)
+
+        status_list = Parallel(
+            n_jobs=args.n_jobs,
+            backend='threading')(delayed(class_process)(class_dir_path, args.
+                                                        dst_path, ext, args.fps)
+                                 for class_dir_path in class_dir_paths)
