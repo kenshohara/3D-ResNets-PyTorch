@@ -60,7 +60,7 @@ if __name__ == '__main__':
         '--fps',
         default=-1,
         type=int,
-        help=('Frame rates of output videos.'
+        help=('Frame rates of output videos. '
               '-1 means original frame rates.'))
     args = parser.parse_args()
 
