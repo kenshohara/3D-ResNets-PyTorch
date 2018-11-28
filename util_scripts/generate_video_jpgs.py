@@ -81,9 +81,9 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     if args.dataset in ['kinetics', 'mit', 'activitynet']:
-        ext = 'mp4'
+        ext = '.mp4'
     else:
-        ext = 'avi'
+        ext = '.avi'
 
     if args.dataset == 'activitynet':
         video_file_paths = [x for x in sorted(args.dir_path.iterdir())]
