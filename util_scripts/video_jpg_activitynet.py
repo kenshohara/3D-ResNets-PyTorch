@@ -37,7 +37,7 @@ def video_process(video_file_path, dst_root_path, fps=-1):
     if fps > 0:
         fps_param = ',fps={}'.format(fps)
 
-    cmd = 'ffmpeg -i \"{}\" -vf "scale={}{}" \"{}/image_%05d.jpg\"'.format(
+    cmd = 'ffmpeg -i \"{}\" -vf "scale={}{}" -threads 1 \"{}/image_%05d.jpg\"'.format(
         video_file_path, scale_param, fps_param, dst_dir_path)
 
     print(cmd)
