@@ -79,5 +79,5 @@ def test(data_loader, model, result_path, class_names, no_average):
                     'result': result
                 })
 
-    with open(result_path, 'w') as f:
+    with result_path.open('w') as f:
         json.dump(test_results, f)

@@ -65,7 +65,7 @@ def convert_kinetics_csv_to_json(train_csv_path, val_csv_path, test_csv_path,
             n_frames = get_n_frames(video_path)
             v['annotations']['segment'] = (1, n_frames + 1)
 
-    with open(dst_json_path, 'w') as dst_file:
+    with dst_json_path.open('w') as dst_file:
         json.dump(dst_data, dst_file)
 
 

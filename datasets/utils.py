@@ -10,7 +10,7 @@ import torchvision
 
 def pil_loader(path):
     # open path as file to avoid ResourceWarning (https://github.com/python-pillow/Pillow/issues/835)
-    with open(path, 'rb') as f:
+    with path.open('rb') as f:
         with Image.open(f) as img:
             return img.convert('RGB')
 
@@ -55,12 +55,12 @@ def get_default_video_loader():
 
 
 def load_annotation_data(data_file_path):
-    with open(data_file_path, 'r') as data_file:
+    with data_file_path.open('r') as data_file:
         return json.load(data_file)
 
 
 def load_value_file(file_path):
-    with open(file_path, 'r') as input_file:
+    with file_path.open('r') as input_file:
         value = float(input_file.read().rstrip('\n\r'))
 
     return value

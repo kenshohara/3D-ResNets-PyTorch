@@ -52,7 +52,7 @@ def get_opt():
     opt.begin_epoch = 1
     opt.mean, opt.std = get_mean_std(opt.value_scale, dataset=opt.mean_dataset)
     print(opt)
-    with open(opt.result_path / 'opts.json', 'w') as opt_file:
+    with (opt.result_path / 'opts.json').open('w') as opt_file:
         json.dump(vars(opt), opt_file, default=json_serial)
 
     return opt

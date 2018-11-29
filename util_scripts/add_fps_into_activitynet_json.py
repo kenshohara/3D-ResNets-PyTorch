@@ -11,7 +11,7 @@ if __name__ == '__main__':
     else:
         dst_json_path = json_path
 
-    with open(json_path, 'r') as f:
+    with json_path.open('r') as f:
         json_data = json.load(f)
 
     for video_file_path in sorted(video_dir_path.iterdir()):
@@ -30,5 +30,5 @@ if __name__ == '__main__':
         fps = float([x for x in res.split(',') if 'fps' in x][0].rstrip('fps'))
         json_data['database'][name[2:]]['fps'] = fps
 
-    with open(dst_json_path, 'w') as f:
+    with dst_json_path.open('w') as f:
         json.dump(json_data, f)

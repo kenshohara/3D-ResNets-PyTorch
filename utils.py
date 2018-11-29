@@ -29,7 +29,7 @@ class AverageMeter(object):
 class Logger(object):
 
     def __init__(self, path, header):
-        self.log_file = open(path, 'w')
+        self.log_file = path.open('w')
         self.logger = csv.writer(self.log_file, delimiter='\t')
 
         self.logger.writerow(header)

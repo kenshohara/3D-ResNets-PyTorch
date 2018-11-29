@@ -14,7 +14,7 @@ def get_class_labels(data):
 
 
 def load_ground_truth(ground_truth_path, subset):
-    with open(ground_truth_path, 'r') as f:
+    with ground_truth_path.open('r') as f:
         data = json.load(f)
 
     class_labels_map = get_class_labels(data)
@@ -30,7 +30,7 @@ def load_ground_truth(ground_truth_path, subset):
 
 
 def load_result(result_path, top_k, class_labels_map):
-    with open(result_path, 'r') as f:
+    with result_path.open('r') as f:
         data = json.load(f)
 
     result = {}
@@ -95,6 +95,6 @@ if __name__ == '__main__':
                         args.k, args.ignore)
 
     if args.save:
-        with open(args.result_path.parent / 'top{}.txt'.format(args.k),
-                  'w') as f:
+        with (args.result_path.parent / 'top{}.txt'.format(
+                args.k)).open('w') as f:
             f.write(str(accuracy))
