@@ -40,7 +40,7 @@ def make_dataset(root_path, annotation_path, subset):
     n_videos = len(video_ids)
     dataset = []
     for i in range(n_videos):
-        if i % (n_videos // 10) == 0:
+        if i % (n_videos // 5) == 0:
             print('dataset loading [{}/{}]'.format(i, len(video_ids)))
 
         if 'label' in annotations[i]:
