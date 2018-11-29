@@ -37,9 +37,10 @@ def make_dataset(root_path, annotation_path, subset):
     for name, label in class_to_idx.items():
         idx_to_class[label] = name
 
+    n_videos = len(video_ids)
     dataset = []
-    for i in range(len(video_ids)):
-        if i % 1000 == 0:
+    for i in range(n_videos):
+        if i % (n_videos // 10) == 0:
             print('dataset loading [{}/{}]'.format(i, len(video_ids)))
 
         if 'label' in annotations[i]:
