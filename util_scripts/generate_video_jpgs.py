@@ -5,7 +5,7 @@ from pathlib import Path
 from joblib import Parallel, delayed
 
 
-def video_process(video_file_path, dst_root_path, ext, fps=-1):
+def video_process(video_file_path, dst_root_path, ext, fps=-1, size=240):
     if ext != video_file_path.suffix:
         return
     name = video_file_path.stem
@@ -29,9 +29,9 @@ def video_process(video_file_path, dst_root_path, ext, fps=-1):
     height = int([x.split('=') for x in res if 'height' in x][0][1])
 
     if width > height:
-        scale_param = '-1:240'
+        scale_param = '-1:{}'.format(size)
     else:
-        scale_param = '240:-1'
+        scale_param = '{}:-1'.format(size)
 
     fps_param = ''
     if fps > 0:
@@ -104,6 +104,6 @@ if __name__ == '__main__':
 
         status_list = Parallel(
             n_jobs=args.n_jobs,
-            backend='threading')(delayed(class_process)(class_dir_path, args.
-                                                        dst_path, ext, args.fps)
+            backend='threading')(delayed(class_process)(
+                class_dir_path, args.dst_path, ext, args.fps, args.size)
                                  for class_dir_path in class_dir_paths)
