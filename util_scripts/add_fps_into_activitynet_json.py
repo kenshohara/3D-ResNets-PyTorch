@@ -20,11 +20,9 @@ if __name__ == '__main__':
             continue
         name = video_file_path.stem
 
+        ffprobe_cmd = ['ffprobe', str(video_file_path)]
         p = subprocess.Popen(
-            'ffprobe {}'.format(video_file_path),
-            shell=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE)
+            ffprobe_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         res = p.communicate()[1].decode('utf-8')
 
         fps = float([x for x in res.split(',') if 'fps' in x][0].rstrip('fps'))

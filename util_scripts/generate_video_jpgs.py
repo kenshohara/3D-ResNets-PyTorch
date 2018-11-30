@@ -16,12 +16,12 @@ def video_process(video_file_path, dst_root_path, ext, fps=-1):
     else:
         dst_dir_path.mkdir()
 
+    ffprobe_cmd = [
+        'ffprobe', '-hide_banner', '-show_entries', 'stream=width,height',
+        str(video_file_path)
+    ]
     p = subprocess.Popen(
-        'ffprobe -hide_banner -show_entries stream=width,height "{}"'.format(
-            video_file_path),
-        shell=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE)
+        ffprobe_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     res = p.communicate()[0].decode('utf-8').split('\n')
     if len(res) <= 3:
         return
@@ -37,11 +37,13 @@ def video_process(video_file_path, dst_root_path, ext, fps=-1):
     if fps > 0:
         fps_param = ',fps={}'.format(fps)
 
-    cmd = 'ffmpeg -i \"{}\" -vf "scale={}{}" -threads 1 \"{}/image_%05d.jpg\"'.format(
-        video_file_path, scale_param, fps_param, dst_dir_path)
-
-    print(cmd)
-    subprocess.call(cmd, shell=True)
+    ffmpeg_cmd = [
+        'ffmpeg', '-i',
+        str(video_file_path), '-vf', '"{}{}"'.format(scale_param, fps_param),
+        '-threads', '1', '{}/image_%05d.jpg'.format(dst_dir_path)
+    ]
+    print(ffmpeg_cmd)
+    subprocess.call(ffmpeg_cmd)
     print('\n')
 
 
