@@ -29,20 +29,18 @@ def video_process(video_file_path, dst_root_path, ext, fps=-1, size=240):
     height = int([x.split('=') for x in res if 'height' in x][0][1])
 
     if width > height:
-        scale_param = '-1:{}'.format(size)
+        scale_param = 'scale=-1:{}'.format(size)
     else:
-        scale_param = '{}:-1'.format(size)
+        scale_param = 'scale={}:-1'.format(size)
 
     fps_param = ''
     if fps > 0:
-        fps_param = ',fps={}'.format(fps)
-    vf_param = '"scale={}{}"'.format(scale_param, fps_param)
+        fps_param = 'fps={}'.format(fps)
 
-    ffmpeg_cmd = [
-        'ffmpeg', '-i',
-        str(video_file_path), '-vf', vf_param, '-threads', '1',
-        '{}/image_%05d.jpg'.format(dst_dir_path)
-    ]
+    ffmpeg_cmd = ['ffmpeg', '-i', str(video_file_path), '-vf', scale_param]
+    if fps_param:
+        ffmpeg_cmd += ['-vf', fps_param]
+    ffmpeg_cmd += ['-threads', '1', '{}/image_%05d.jpg'.format(dst_dir_path)]
     print(ffmpeg_cmd)
     subprocess.call(ffmpeg_cmd)
     print('\n')
