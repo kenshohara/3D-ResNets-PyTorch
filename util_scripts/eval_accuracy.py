@@ -53,8 +53,7 @@ def remove_nonexistent_ground_truth(ground_truth, result):
     return exist_ground_truth
 
 
-def evaluate(ground_truth_path, result_path, subset='val', top_k=1,
-             ignore=True):
+def evaluate(ground_truth_path, result_path, subset, top_k, ignore):
     print('load ground truth')
     ground_truth, class_labels_map = load_ground_truth(ground_truth_path,
                                                        subset)
