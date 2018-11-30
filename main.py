@@ -92,21 +92,24 @@ def get_normalize_method(mean, std, no_mean_norm, no_std_norm):
 
 
 def get_train_utils(opt, model_parameters):
-    assert opt.train_crop in ['random', 'corner']
+    assert opt.train_crop in ['random', 'corner', 'center']
     if opt.train_crop == 'random':
-        crop_method = RandomResizedCrop(
-            opt.sample_size, (opt.train_crop_min_scale, 1.0),
-            (opt.train_crop_min_ratio, 1.0 / opt.train_crop_min_ratio))
+        crop_method = [
+            RandomResizedCrop(
+                opt.sample_size, (opt.train_crop_min_scale, 1.0),
+                (opt.train_crop_min_ratio, 1.0 / opt.train_crop_min_ratio))
+        ]
     elif opt.train_crop == 'corner':
         scales = [1.0]
         scale_step = 1 / (2**(1 / 4))
         for _ in range(1, 5):
             scales.append(scales[-1] * scale_step)
-        crop_method = MultiScaleCornerCrop(opt.sample_size, scales)
+        crop_method = [MultiScaleCornerCrop(opt.sample_size, scales)]
+    elif opt.train_crop == 'center':
+        crop_method = [Resize(opt.sample_size), CenterCrop(opt.sample_size)]
     normalize = get_normalize_method(opt.mean, opt.std, opt.no_mean_norm,
                                      opt.no_std_norm)
-    spatial_transform = Compose([
-        crop_method,
+    spatial_transform = Compose(crop_method + [
         RandomHorizontalFlip(),
         ToTensor(),
         ScaleValue(opt.value_scale), normalize

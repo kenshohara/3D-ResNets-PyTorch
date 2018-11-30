@@ -62,10 +62,10 @@ def parse_opts():
         '--train_crop',
         default='random',
         type=str,
-        help=('Spatial cropping method in training.'
-              'random is uniform.'
-              'corner is selection from 4 corners and 1 center.'
-              '(random | corner)'))
+        help=('Spatial cropping method in training. '
+              'random is uniform. '
+              'corner is selection from 4 corners and 1 center. '
+              '(random | corner | center)'))
     parser.add_argument(
         '--train_crop_min_scale',
         default=0.25,
