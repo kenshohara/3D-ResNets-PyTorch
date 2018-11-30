@@ -48,7 +48,7 @@ def video_process(video_file_path, dst_root_path, ext, fps=-1, size=240):
     print('\n')
 
 
-def class_process(class_dir_path, dst_root_path, ext, fps=-1):
+def class_process(class_dir_path, dst_root_path, ext, fps=-1, size=240):
     if not class_dir_path.is_dir():
         return
 
@@ -56,7 +56,7 @@ def class_process(class_dir_path, dst_root_path, ext, fps=-1):
     dst_class_path.mkdir(exist_ok=True)
 
     for video_file_path in sorted(class_dir_path.iterdir()):
-        video_process(video_file_path, dst_class_path, ext, fps)
+        video_process(video_file_path, dst_class_path, ext, fps, size)
 
 
 if __name__ == '__main__':
@@ -94,8 +94,8 @@ if __name__ == '__main__':
         video_file_paths = [x for x in sorted(args.dir_path.iterdir())]
         status_list = Parallel(
             n_jobs=args.n_jobs,
-            backend='threading')(delayed(video_process)(video_file_path, args.
-                                                        dst_path, ext, args.fps)
+            backend='threading')(delayed(video_process)(
+                video_file_path, args.dst_path, ext, args.fps, args.size)
                                  for video_file_path in video_file_paths)
     else:
         class_dir_paths = [x for x in sorted(args.dir_path.iterdir())]
