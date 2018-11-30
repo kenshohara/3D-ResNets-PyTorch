@@ -81,6 +81,13 @@ def parse_opts():
         action='store_true',
         help='If true holizontal flipping is not performed.')
     parser.add_argument(
+        '--train_t_crop',
+        default='random',
+        type=str,
+        help=('Temporal cropping method in training. '
+              'random is uniform. '
+              '(random | center)'))
+    parser.add_argument(
         '--learning_rate',
         default=0.1,
         type=float,

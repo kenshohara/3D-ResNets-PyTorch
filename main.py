@@ -16,7 +16,8 @@ from spatial_transforms import (
     Compose, Normalize, Resize, CenterCrop, CornerCrop, MultiScaleCornerCrop,
     RandomResizedCrop, RandomHorizontalFlip, ToTensor, ScaleValue, ColorJitter)
 from temporal_transforms import (LoopPadding, TemporalRandomCrop,
-                                 TemporalEvenCrop, SlidingWindow)
+                                 TemporalCenterCrop, TemporalEvenCrop,
+                                 SlidingWindow)
 from target_transforms import ClassLabel, VideoID, Segment
 from target_transforms import Compose as TargetCompose
 from dataset import get_training_set, get_validation_set, get_test_set
@@ -114,7 +115,13 @@ def get_train_utils(opt, model_parameters):
         ToTensor(),
         ScaleValue(opt.value_scale), normalize
     ])
-    temporal_transform = TemporalRandomCrop(opt.sample_duration)
+
+    assert opt.train_t_crop in ['random', 'center']
+    if opt.train_t_crop == 'random':
+        temporal_transform = TemporalRandomCrop(opt.sample_duration)
+    elif opt.train_t_crop == 'center':
+        temporal_transform = TemporalCenterCrop(opt.sample_duration)
+
     target_transform = ClassLabel()
 
     training_data = get_training_set(opt.video_path, opt.annotation_path,
