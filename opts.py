@@ -81,6 +81,10 @@ def parse_opts():
         action='store_true',
         help='If true holizontal flipping is not performed.')
     parser.add_argument(
+        '--colorjitter',
+        action='store_true',
+        help='If true colorjitter is performed.')
+    parser.add_argument(
         '--train_t_crop',
         default='random',
         type=str,

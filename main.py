@@ -113,6 +113,8 @@ def get_train_utils(opt, model_parameters):
                                      opt.no_std_norm)
     if not opt.no_hflip:
         spatial_transform.append(RandomHorizontalFlip())
+    if opt.colorjitter:
+        spatial_transform.append(ColorJitter())
     spatial_transform.append(ToTensor())
     spatial_transform.append(ScaleValue(opt.value_scale))
     spatial_transform.append(normalize)
