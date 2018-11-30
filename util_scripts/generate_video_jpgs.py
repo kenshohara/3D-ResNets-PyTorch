@@ -80,6 +80,8 @@ if __name__ == '__main__':
         type=int,
         help=('Frame rates of output videos. '
               '-1 means original frame rates.'))
+    parser.add_argument(
+        '--size', default=240, type=int, help='Frame size of output videos.')
     args = parser.parse_args()
 
     if args.dataset in ['kinetics', 'mit', 'activitynet']:
