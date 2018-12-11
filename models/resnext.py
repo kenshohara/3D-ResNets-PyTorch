@@ -47,8 +47,8 @@ class ResNeXt(ResNet):
                  cardinality=32,
                  n_classes=400):
         block = partialclass(block, cardinality=cardinality)
-        super().__init__(block, layers, block_inplanes, sample_size,
-                         conv1_t_size, conv1_t_stride, shortcut_type, n_classes)
+        super().__init__(block, layers, block_inplanes, conv1_t_size,
+                         conv1_t_stride, shortcut_type, n_classes)
 
         self.fc = nn.Linear(cardinality * 32 * block.expansion, n_classes)
 
