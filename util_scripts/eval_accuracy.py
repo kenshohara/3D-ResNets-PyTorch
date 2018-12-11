@@ -45,9 +45,7 @@ def load_result(result_path, top_k, class_labels_map):
 
 
 def remove_nonexistent_ground_truth(ground_truth, result):
-    exist_ground_truth = [
-        line for line in ground_truth if line[0] in result.keys()
-    ]
+    exist_ground_truth = [line for line in ground_truth if line[0] in result]
 
     return exist_ground_truth
 

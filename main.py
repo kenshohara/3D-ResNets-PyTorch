@@ -71,9 +71,9 @@ def resume(resume_path,
 
     begin_epoch = checkpoint['epoch'] + 1
     model.load_state_dict(checkpoint['state_dict'])
-    if optimizer is not None and 'optimizer' in checkpoint.keys():
+    if optimizer is not None and 'optimizer' in checkpoint:
         optimizer.load_state_dict(checkpoint['optimizer'])
-    if scheduler is not None and 'scheduler' in checkpoint.keys():
+    if scheduler is not None and 'scheduler' in checkpoint:
         scheduler.load_state_dict(checkpoint['scheduler'])
 
     return begin_epoch, model, optimizer, scheduler
