@@ -41,7 +41,6 @@ class ResNeXt(ResNet):
                  block,
                  layers,
                  block_inplanes,
-                 sample_size,
                  conv1_t_size=7,
                  conv1_t_stride=1,
                  shortcut_type='B',
