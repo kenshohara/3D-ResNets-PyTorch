@@ -232,6 +232,10 @@ def parse_opts():
         type=int,
         help='Stride in t dim of conv1.')
     parser.add_argument(
+        '--no_max_pool',
+        action='store_true',
+        help='If true, the max pooling after conv1 is removed.')
+    parser.add_argument(
         '--resnet_shortcut',
         default='B',
         type=str,

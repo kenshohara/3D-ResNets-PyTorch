@@ -43,12 +43,13 @@ class ResNeXt(ResNet):
                  block_inplanes,
                  conv1_t_size=7,
                  conv1_t_stride=1,
+                 no_max_pool=False,
                  shortcut_type='B',
                  cardinality=32,
                  n_classes=400):
         block = partialclass(block, cardinality=cardinality)
         super().__init__(block, layers, block_inplanes, conv1_t_size,
-                         conv1_t_stride, shortcut_type, n_classes)
+                         conv1_t_stride, no_max_pool, shortcut_type, n_classes)
 
         self.fc = nn.Linear(cardinality * 32 * block.expansion, n_classes)
 

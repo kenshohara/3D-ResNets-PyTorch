@@ -84,6 +84,7 @@ class DenseNet(nn.Module):
     def __init__(self,
                  conv1_t_size=7,
                  conv1_t_stride=1,
+                 no_max_pool=False,
                  growth_rate=32,
                  block_config=(6, 12, 24, 16),
                  num_init_features=64,
@@ -94,20 +95,21 @@ class DenseNet(nn.Module):
         super().__init__()
 
         # First convolution
-        self.features = nn.Sequential(
-            OrderedDict([
-                ('conv1',
-                 nn.Conv3d(
-                     3,
-                     num_init_features,
-                     kernel_size=(conv1_t_size, 7, 7),
-                     stride=(conv1_t_stride, 2, 2),
-                     padding=(conv1_t_size // 2, 3, 3),
-                     bias=False)),
-                ('norm1', nn.BatchNorm3d(num_init_features)),
-                ('relu1', nn.ReLU(inplace=True)),
-                ('pool1', nn.MaxPool3d(kernel_size=3, stride=2, padding=1)),
-            ]))
+        self.features = [('conv1',
+                          nn.Conv3d(
+                              3,
+                              num_init_features,
+                              kernel_size=(conv1_t_size, 7, 7),
+                              stride=(conv1_t_stride, 2, 2),
+                              padding=(conv1_t_size // 2, 3, 3),
+                              bias=False)),
+                         ('norm1', nn.BatchNorm3d(num_init_features)),
+                         ('relu1', nn.ReLU(inplace=True))]
+        if not no_max_pool:
+            self.features.append(('pool1',
+                                  nn.MaxPool3d(
+                                      kernel_size=3, stride=2, padding=1)))
+        self.features = nn.Sequential(OrderedDict(self.features))
 
         # Each denseblock
         num_features = num_init_features

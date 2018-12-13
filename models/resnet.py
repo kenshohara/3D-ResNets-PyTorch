@@ -105,11 +105,13 @@ class ResNet(nn.Module):
                  block_inplanes,
                  conv1_t_size=7,
                  conv1_t_stride=1,
+                 no_max_pool=False,
                  shortcut_type='B',
                  n_classes=400):
         super().__init__()
 
         self.inplanes = 64
+        self.no_max_pool = no_max_pool
 
         self.conv1 = nn.Conv3d(
             3,
@@ -183,7 +185,8 @@ class ResNet(nn.Module):
         x = self.conv1(x)
         x = self.bn1(x)
         x = self.relu(x)
-        x = self.maxpool(x)
+        if not self.no_max_pool:
+            x = self.maxpool(x)
 
         x = self.layer1(x)
         x = self.layer2(x)
