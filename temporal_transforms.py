@@ -126,3 +126,12 @@ class SlidingWindow(object):
                 out.append(sample)
 
         return out
+
+
+class TemporalSubsampling(object):
+
+    def __init__(self, stride):
+        self.stride = stride
+
+    def __call__(self, frame_indices):
+        return frame_indices[::self.stride]

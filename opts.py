@@ -59,6 +59,11 @@ def parse_opts():
         type=int,
         help='Temporal duration of inputs')
     parser.add_argument(
+        '--sample_t_stride',
+        default=1,
+        type=int,
+        help='If larger than 1, input frames are subsampled with the stride.')
+    parser.add_argument(
         '--train_crop',
         default='random',
         type=str,

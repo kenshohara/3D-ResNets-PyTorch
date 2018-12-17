@@ -17,7 +17,7 @@ from spatial_transforms import (
     RandomResizedCrop, RandomHorizontalFlip, ToTensor, ScaleValue, ColorJitter)
 from temporal_transforms import (LoopPadding, TemporalRandomCrop,
                                  TemporalCenterCrop, TemporalEvenCrop,
-                                 SlidingWindow)
+                                 SlidingWindow, TemporalSubsampling)
 from target_transforms import ClassLabel, VideoID, Segment
 from target_transforms import Compose as TargetCompose
 from dataset import get_training_set, get_validation_set, get_test_set
@@ -121,10 +121,14 @@ def get_train_utils(opt, model_parameters):
     spatial_transform = Compose(spatial_transform)
 
     assert opt.train_t_crop in ['random', 'center']
+    temporal_transform = []
+    if opt.sample_t_stride > 1:
+        temporal_transform.append(TemporalSubsampling(opt.sample_t_stride))
     if opt.train_t_crop == 'random':
-        temporal_transform = TemporalRandomCrop(opt.sample_duration)
+        temporal_transform.append(TemporalRandomCrop(opt.sample_duration))
     elif opt.train_t_crop == 'center':
-        temporal_transform = TemporalCenterCrop(opt.sample_duration)
+        temporal_transform.append(TemporalCenterCrop(opt.sample_duration))
+    temporal_transform = Compose(temporal_transform)
 
     target_transform = ClassLabel()
 
@@ -176,8 +180,13 @@ def get_val_utils(opt):
         ToTensor(),
         ScaleValue(opt.value_scale), normalize
     ])
-    temporal_transform = TemporalEvenCrop(opt.sample_duration,
-                                          opt.n_val_samples)
+    temporal_transform = []
+    if opt.sample_t_stride > 1:
+        temporal_transform.append(TemporalSubsampling(opt.sample_t_stride))
+    temporal_transform.append(
+        TemporalEvenCrop(opt.sample_duration, opt.n_val_samples))
+    temporal_transform = Compose(temporal_transform)
+
     target_transform = ClassLabel()
     validation_data = get_validation_set(opt.video_path, opt.annotation_path,
                                          opt.dataset, spatial_transform,
@@ -207,6 +216,9 @@ def get_test_utils(opt):
         ToTensor(),
         ScaleValue(opt.value_scale), normalize
     ]
+    temporal_transform = []
+    if opt.sample_t_stride > 1:
+        temporal_transform.append(TemporalSubsampling(opt.sample_t_stride))
     if opt.test_crop == 'center':
         temporal_transform = LoopPadding(opt.sample_duration)
     else:
