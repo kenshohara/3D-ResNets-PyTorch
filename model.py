@@ -62,8 +62,6 @@ def generate_model(opt):
             conv1_t_stride=opt.conv1_t_stride,
             no_max_pool=opt.no_max_pool)
     elif opt.model == 'preresnet':
-        assert opt.model_depth in [18, 34, 50, 101, 152, 200]
-
         model = pre_act_resnet.generate_model(
             model_depth=opt.model_depth,
             n_classes=opt.n_classes,
@@ -71,32 +69,12 @@ def generate_model(opt):
             conv1_t_stride=opt.conv1_t_stride,
             no_max_pool=opt.no_max_pool)
     elif opt.model == 'densenet':
-        assert opt.model_depth in [121, 169, 201, 264]
-
-        if opt.model_depth == 121:
-            model = densenet.densenet121(
-                n_classes=opt.n_classes,
-                conv1_t_size=opt.conv1_t_size,
-                conv1_t_stride=opt.conv1_t_stride,
-                no_max_pool=opt.no_max_pool)
-        elif opt.model_depth == 169:
-            model = densenet.densenet169(
-                n_classes=opt.n_classes,
-                conv1_t_size=opt.conv1_t_size,
-                conv1_t_stride=opt.conv1_t_stride,
-                no_max_pool=opt.no_max_pool)
-        elif opt.model_depth == 201:
-            model = densenet.densenet201(
-                n_classes=opt.n_classes,
-                conv1_t_size=opt.conv1_t_size,
-                conv1_t_stride=opt.conv1_t_stride,
-                no_max_pool=opt.no_max_pool)
-        elif opt.model_depth == 264:
-            model = densenet.densenet264(
-                n_classes=opt.n_classes,
-                conv1_t_size=opt.conv1_t_size,
-                conv1_t_stride=opt.conv1_t_stride,
-                no_max_pool=opt.no_max_pool)
+        model = densenet.generate_model(
+            model_depth=opt.model_depth,
+            n_classes=opt.n_classes,
+            conv1_t_size=opt.conv1_t_size,
+            conv1_t_stride=opt.conv1_t_stride,
+            no_max_pool=opt.no_max_pool)
 
     if not opt.no_cuda:
         model = nn.DataParallel(model, device_ids=None).cuda()
