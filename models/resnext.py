@@ -53,14 +53,6 @@ class ResNeXt(ResNet):
 
         self.fc = nn.Linear(cardinality * 32 * block.expansion, n_classes)
 
-        for m in self.modules():
-            if isinstance(m, nn.Conv3d):
-                m.weight = nn.init.kaiming_normal_(
-                    m.weight, mode='fan_out', nonlinearity='relu')
-            elif isinstance(m, nn.BatchNorm3d):
-                nn.init.constant_(m.weight, 1)
-                nn.init.constant_(m.bias, 0)
-
 
 def resnext50(**kwargs):
     """Constructs a ResNet-50 model.
