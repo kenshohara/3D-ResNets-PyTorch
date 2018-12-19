@@ -58,16 +58,16 @@ def generate_model(model_depth, **kwargs):
     assert model_depth in [50, 101, 152, 200]
 
     if model_depth == 50:
-        model = ResNet(ResNeXtBottleneck, [3, 4, 6, 3], get_inplanes(),
-                       **kwargs)
+        model = ResNeXt(ResNeXtBottleneck, [3, 4, 6, 3], get_inplanes(),
+                        **kwargs)
     elif model_depth == 101:
-        model = ResNet(ResNeXtBottleneck, [3, 4, 23, 3], get_inplanes(),
-                       **kwargs)
+        model = ResNeXt(ResNeXtBottleneck, [3, 4, 23, 3], get_inplanes(),
+                        **kwargs)
     elif model_depth == 152:
-        model = ResNet(ResNeXtBottleneck, [3, 8, 36, 3], get_inplanes(),
-                       **kwargs)
+        model = ResNeXt(ResNeXtBottleneck, [3, 8, 36, 3], get_inplanes(),
+                        **kwargs)
     elif model_depth == 200:
-        model = ResNet(ResNeXtBottleneck, [3, 24, 36, 3], get_inplanes(),
-                       **kwargs)
+        model = ResNeXt(ResNeXtBottleneck, [3, 24, 36, 3], get_inplanes(),
+                        **kwargs)
 
     return model
