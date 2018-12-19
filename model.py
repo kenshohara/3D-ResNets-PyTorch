@@ -42,23 +42,25 @@ def generate_model(opt):
             model_depth=opt.model_depth,
             n_classes=opt.n_classes,
             shortcut_type=opt.resnet_shortcut,
-            conv1_t_stride=opt.conv1_t_stride,
             conv1_t_size=opt.conv1_t_size,
+            conv1_t_stride=opt.conv1_t_stride,
             no_max_pool=opt.no_max_pool)
     elif opt.model == 'wideresnet':
         model = wide_resnet.generate_model(
             model_depth=opt.model_depth,
+            k=opt.wide_resnet_k,
             n_classes=opt.n_classes,
             shortcut_type=opt.resnet_shortcut,
-            k=opt.wide_resnet_k,
+            conv1_t_size=opt.conv1_t_size,
             conv1_t_stride=opt.conv1_t_stride,
             no_max_pool=opt.no_max_pool)
     elif opt.model == 'resnext':
         model = resnext.generate_model(
             model_depth=opt.model_depth,
+            cardinality=opt.resnext_cardinality,
             n_classes=opt.n_classes,
             shortcut_type=opt.resnet_shortcut,
-            cardinality=opt.resnext_cardinality,
+            conv1_t_size=opt.conv1_t_size,
             conv1_t_stride=opt.conv1_t_stride,
             no_max_pool=opt.no_max_pool)
     elif opt.model == 'preresnet':
@@ -66,6 +68,7 @@ def generate_model(opt):
             model_depth=opt.model_depth,
             n_classes=opt.n_classes,
             shortcut_type=opt.resnet_shortcut,
+            conv1_t_size=opt.conv1_t_size,
             conv1_t_stride=opt.conv1_t_stride,
             no_max_pool=opt.no_max_pool)
     elif opt.model == 'densenet':
