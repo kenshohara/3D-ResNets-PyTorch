@@ -77,49 +77,29 @@ class PreActivationBottleneck(nn.Module):
         return out
 
 
-def resnet18(**kwargs):
-    """Constructs a ResNet-18 model.
-    """
-    model = ResNet(PreActivationBasicBlock, [2, 2, 2, 2], get_inplanes(),
-                   **kwargs)
-    return model
+def generate_model(model_depth, **kwargs):
+    assert model_depth in [10, 18, 34, 50, 101, 152, 200]
 
+    if model_depth == 10:
+        model = ResNet(PreActivationBasicBlock, [1, 1, 1, 1], get_inplanes(),
+                       **kwargs)
+    elif model_depth == 18:
+        model = ResNet(PreActivationBasicBlock, [2, 2, 2, 2], get_inplanes(),
+                       **kwargs)
+    elif model_depth == 34:
+        model = ResNet(PreActivationBasicBlock, [3, 4, 6, 3], get_inplanes(),
+                       **kwargs)
+    elif model_depth == 50:
+        model = ResNet(PreActivationBottleneck, [3, 4, 6, 3], get_inplanes(),
+                       **kwargs)
+    elif model_depth == 101:
+        model = ResNet(PreActivationBottleneck, [3, 4, 23, 3], get_inplanes(),
+                       **kwargs)
+    elif model_depth == 152:
+        model = ResNet(PreActivationBottleneck, [3, 8, 36, 3], get_inplanes(),
+                       **kwargs)
+    elif model_depth == 200:
+        model = ResNet(PreActivationBottleneck, [3, 24, 36, 3], get_inplanes(),
+                       **kwargs)
 
-def resnet34(**kwargs):
-    """Constructs a ResNet-34 model.
-    """
-    model = ResNet(PreActivationBasicBlock, [3, 4, 6, 3], get_inplanes(),
-                   **kwargs)
-    return model
-
-
-def resnet50(**kwargs):
-    """Constructs a ResNet-50 model.
-    """
-    model = ResNet(PreActivationBottleneck, [3, 4, 6, 3], get_inplanes(),
-                   **kwargs)
-    return model
-
-
-def resnet101(**kwargs):
-    """Constructs a ResNet-101 model.
-    """
-    model = ResNet(PreActivationBottleneck, [3, 4, 23, 3], get_inplanes(),
-                   **kwargs)
-    return model
-
-
-def resnet152(**kwargs):
-    """Constructs a ResNet-101 model.
-    """
-    model = ResNet(PreActivationBottleneck, [3, 8, 36, 3], get_inplanes(),
-                   **kwargs)
-    return model
-
-
-def resnet200(**kwargs):
-    """Constructs a ResNet-101 model.
-    """
-    model = ResNet(PreActivationBottleneck, [3, 24, 36, 3], get_inplanes(),
-                   **kwargs)
     return model

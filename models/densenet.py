@@ -154,37 +154,32 @@ class DenseNet(nn.Module):
         return out
 
 
-def densenet121(**kwargs):
-    model = DenseNet(
-        num_init_features=64,
-        growth_rate=32,
-        block_config=(6, 12, 24, 16),
-        **kwargs)
-    return model
+def generate_model(model_depth, **kwargs):
+    assert model_depth in [121, 169, 201, 264]
 
+    if model_depth == 121:
+        model = DenseNet(
+            num_init_features=64,
+            growth_rate=32,
+            block_config=(6, 12, 24, 16),
+            **kwargs)
+    elif model_depth == 169:
+        model = DenseNet(
+            num_init_features=64,
+            growth_rate=32,
+            block_config=(6, 12, 32, 32),
+            **kwargs)
+    elif model_depth == 201:
+        model = DenseNet(
+            num_init_features=64,
+            growth_rate=32,
+            block_config=(6, 12, 48, 32),
+            **kwargs)
+    elif model_depth == 264:
+        model = DenseNet(
+            num_init_features=64,
+            growth_rate=32,
+            block_config=(6, 12, 64, 48),
+            **kwargs)
 
-def densenet169(**kwargs):
-    model = DenseNet(
-        num_init_features=64,
-        growth_rate=32,
-        block_config=(6, 12, 32, 32),
-        **kwargs)
-    return model
-
-
-def densenet201(**kwargs):
-    model = DenseNet(
-        num_init_features=64,
-        growth_rate=32,
-        block_config=(6, 12, 48, 32),
-        **kwargs)
-    return model
-
-
-def densenet264(**kwargs):
-    model = DenseNet(
-        num_init_features=64,
-        growth_rate=32,
-        block_config=(6, 12, 64, 48),
-        **kwargs)
     return model
