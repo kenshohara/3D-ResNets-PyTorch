@@ -239,7 +239,7 @@ Assume the structure of data directories is the following:
 Confirm all options.
 
 ```bash
-python main.lua -h
+python main.py -h
 ```
 
 Train ResNets-34 on the Kinetics dataset (400 classes) with 4 CPU threads (for data loading).  
