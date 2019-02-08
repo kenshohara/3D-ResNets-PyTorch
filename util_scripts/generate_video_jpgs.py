@@ -8,21 +8,31 @@ from joblib import Parallel, delayed
 def video_process(video_file_path, dst_root_path, ext, fps=-1, size=240):
     if ext != video_file_path.suffix:
         return
-    name = video_file_path.stem
-    dst_dir_path = dst_root_path / name
 
-    if dst_dir_path.exists():
-        return
-
-    dst_dir_path.mkdir(exist_ok=True)
-
-    ffprobe_cmd = ('ffprobe -v error -select_streams v'
+    ffprobe_cmd = ('ffprobe -v error -select_streams v:0'
                    '-of default=noprint_wrappers=1 -show_entries'
-                   'stream=width,height {}'.format(video_file_path)).split()
+                   'stream=width,height,avg_frame_rate,duration').split()
+    ffprobe_cmd.append(str(video_file_path))
 
     p = subprocess.run(ffprobe_cmd, stdout=subprocess.PIPE)
     res = p.stdout.decode('utf-8').split('\n')
-    if len(res) <= 3:
+    if len(res) < 5:
+        return
+
+    frame_rate = [float(r) for r in res[2].split('/')]
+    frame_rate = frame_rate[0] / frame_rate[1]
+    duration = float(res[3])
+    n_frames = int(frame_rate * duration)
+
+    name = video_file_path.stem
+    dst_dir_path = dst_root_path / name
+    dst_dir_path.mkdir(exist_ok=True)
+    n_exist_frames = len([
+        x for x in dst_dir_path.iterdir()
+        if x.suffix == '.jpg' and x.name[0] != '.'
+    ])
+
+    if n_exist_frames >= n_frames:
         return
 
     width = int(res[0])
