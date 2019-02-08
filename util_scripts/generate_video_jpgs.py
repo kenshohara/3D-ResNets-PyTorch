@@ -13,8 +13,8 @@ def video_process(video_file_path, dst_root_path, ext, fps=-1, size=240):
 
     if dst_dir_path.exists():
         return
-    else:
-        dst_dir_path.mkdir()
+
+    dst_dir_path.mkdir(exist_ok=True)
 
     ffprobe_cmd = [
         'ffprobe', '-hide_banner', '-show_entries', 'stream=width,height',
