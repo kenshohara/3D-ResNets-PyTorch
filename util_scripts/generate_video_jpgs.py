@@ -16,17 +16,17 @@ def video_process(video_file_path, dst_root_path, ext, fps=-1, size=240):
 
     dst_dir_path.mkdir(exist_ok=True)
 
-    ffprobe_cmd = [
-        'ffprobe', '-hide_banner', '-show_entries', 'stream=width,height',
-        str(video_file_path)
-    ]
-    p = subprocess.Popen(
-        ffprobe_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    res = p.communicate()[0].decode('utf-8').split('\n')
+    ffprobe_cmd = ('ffprobe -v error -select_streams v'
+                   '-of default=noprint_wrappers=1 -show_entries'
+                   'stream=width,height {}'.format(video_file_path)).split()
+
+    p = subprocess.run(ffprobe_cmd, stdout=subprocess.PIPE)
+    res = p.stdout.decode('utf-8').split('\n')
     if len(res) <= 3:
         return
-    width = int([x.split('=') for x in res if 'width' in x][0][1])
-    height = int([x.split('=') for x in res if 'height' in x][0][1])
+
+    width = int(res[0])
+    height = int(res[1])
 
     if width > height:
         scale_param = 'scale=-1:{}'.format(size)
