@@ -9,8 +9,8 @@ def video_process(video_file_path, dst_root_path, ext, fps=-1, size=240):
     if ext != video_file_path.suffix:
         return
 
-    ffprobe_cmd = ('ffprobe -v error -select_streams v:0'
-                   '-of default=noprint_wrappers=1 -show_entries'
+    ffprobe_cmd = ('ffprobe -v error -select_streams v:0 '
+                   '-of default=noprint_wrappers=1 -show_entries '
                    'stream=width,height,avg_frame_rate,duration').split()
     ffprobe_cmd.append(str(video_file_path))
 
