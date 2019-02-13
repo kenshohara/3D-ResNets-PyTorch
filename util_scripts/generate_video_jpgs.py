@@ -14,9 +14,9 @@ def video_process(video_file_path, dst_root_path, ext, fps=-1, size=240):
                    'stream=width,height,avg_frame_rate,duration').split()
     ffprobe_cmd.append(str(video_file_path))
 
-    p = subprocess.run(ffprobe_cmd, stdout=subprocess.PIPE)
-    res = p.stdout.decode('utf-8').split('\n')
-    if len(res) < 5:
+    p = subprocess.run(ffprobe_cmd, capture_output=True)
+    res = p.stdout.decode('utf-8').splitlines()
+    if len(res) < 4:
         return
 
     frame_rate = [float(r) for r in res[2].split('/')]
@@ -52,7 +52,7 @@ def video_process(video_file_path, dst_root_path, ext, fps=-1, size=240):
         ffmpeg_cmd += ['-vf', fps_param]
     ffmpeg_cmd += ['-threads', '1', '{}/image_%05d.jpg'.format(dst_dir_path)]
     print(ffmpeg_cmd)
-    subprocess.call(ffmpeg_cmd)
+    subprocess.run(ffmpeg_cmd)
     print('\n')
 
 
