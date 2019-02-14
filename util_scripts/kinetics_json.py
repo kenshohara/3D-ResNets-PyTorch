@@ -79,6 +79,11 @@ if __name__ == '__main__':
               'kinetics_train.csv, kinetics_val.csv, '
               '(kinetics_test.csv (optional))'))
     parser.add_argument(
+        'n_classes',
+        default=400,
+        type=int,
+        help='400 or 600 (Kinetics-400 or Kinetics-600)')
+    parser.add_argument(
         'video_path',
         default=None,
         type=Path,
@@ -89,9 +94,12 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    train_csv_path = args.dir_path / 'kinetics_train.csv'
-    val_csv_path = args.dir_path / 'kinetics_val.csv'
-    test_csv_path = args.dir_path / 'kinetics_test.csv'
+    train_csv_path = (
+        args.dir_path / 'kinetics-{}_train.csv'.format(args.n_classes))
+    val_csv_path = (
+        args.dir_path / 'kinetics-{}_val.csv'.format(args.n_classes))
+    test_csv_path = (
+        args.dir_path / 'kinetics-{}_test.csv'.format(args.n_classes))
 
     convert_kinetics_csv_to_json(train_csv_path, val_csv_path, test_csv_path,
                                  args.video_path, args.dst_path)
