@@ -39,17 +39,14 @@ def video_process(video_file_path, dst_root_path, ext, fps=-1, size=240):
     height = int(res[1])
 
     if width > height:
-        scale_param = 'scale=-1:{}'.format(size)
+        vf_param = 'scale=-1:{}'.format(size)
     else:
-        scale_param = 'scale={}:-1'.format(size)
+        vf_param = 'scale={}:-1'.format(size)
 
-    fps_param = ''
     if fps > 0:
-        fps_param = 'minterpolate={}'.format(fps)
+        vf_param += ',minterpolate={}'.format(fps)
 
-    ffmpeg_cmd = ['ffmpeg', '-i', str(video_file_path), '-vf', scale_param]
-    if fps_param:
-        ffmpeg_cmd += ['-vf', fps_param]
+    ffmpeg_cmd = ['ffmpeg', '-i', str(video_file_path), '-vf', vf_param]
     ffmpeg_cmd += ['-threads', '1', '{}/image_%05d.jpg'.format(dst_dir_path)]
     print(ffmpeg_cmd)
     subprocess.run(ffmpeg_cmd)
