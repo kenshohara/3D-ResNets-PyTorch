@@ -45,7 +45,7 @@ def video_process(video_file_path, dst_root_path, ext, fps=-1, size=240):
 
     fps_param = ''
     if fps > 0:
-        fps_param = 'fps={}'.format(fps)
+        fps_param = 'minterpolate={}'.format(fps)
 
     ffmpeg_cmd = ['ffmpeg', '-i', str(video_file_path), '-vf', scale_param]
     if fps_param:
