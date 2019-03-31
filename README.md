@@ -128,9 +128,9 @@ conda install pytorch torchvision cuda80 -c soumith
 * FFmpeg, FFprobe
 
 ```bash
-wget http://johnvansickle.com/ffmpeg/releases/ffmpeg-release-64bit-static.tar.xz
+wget https://johnvansickle.com/ffmpeg/builds/ffmpeg-git-amd64-static.tar.xz
 tar xvf ffmpeg-release-64bit-static.tar.xz
-cd ./ffmpeg-3.3.3-64bit-static/; sudo cp ffmpeg ffprobe /usr/local/bin;
+cd ./ffmpeg-git-20190327-amd64-static/; sudo cp ffmpeg ffprobe /usr/local/bin;
 ```
 
 * Python 3
