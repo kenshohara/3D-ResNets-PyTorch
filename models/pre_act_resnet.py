@@ -111,8 +111,6 @@ class PreActivationResNet(nn.Module):
     def __init__(self,
                  block,
                  layers,
-                 sample_size,
-                 sample_duration,
                  shortcut_type='B',
                  num_classes=400):
         self.inplanes = 64
@@ -134,10 +132,7 @@ class PreActivationResNet(nn.Module):
             block, 256, layers[2], shortcut_type, stride=2)
         self.layer4 = self._make_layer(
             block, 512, layers[3], shortcut_type, stride=2)
-        last_duration = int(math.ceil(sample_duration / 16))
-        last_size = int(math.ceil(sample_size / 32))
-        self.avgpool = nn.AvgPool3d(
-            (last_duration, last_size, last_size), stride=1)
+        self.avgpool = nn.AdaptiveAvgPool3d(1)
         self.fc = nn.Linear(512 * block.expansion, num_classes)
 
         for m in self.modules():
