@@ -14,12 +14,12 @@ def video_loader(video_file_path, frame_indices):
     with h5py.File(video_file_path, 'r') as f:
         video_data = f['video']
 
-    video = []
-    for i in frame_indices:
-        if i < len(video_data):
-            video.append(Image.open(io.BytesIO(video_data[i])))
-        else:
-            return video
+        video = []
+        for i in frame_indices:
+            if i < len(video_data):
+                video.append(Image.open(io.BytesIO(video_data[i])))
+            else:
+                return video
 
     return video
 
