@@ -135,3 +135,12 @@ class TemporalSubsampling(object):
 
     def __call__(self, frame_indices):
         return frame_indices[::self.stride]
+
+
+class Shuffle(object):
+
+    def __init__(self):
+
+    def __call__(self, frame_indices):
+        random.shuffle(frame_indices)
+        return frame_indices
