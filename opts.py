@@ -247,6 +247,10 @@ def parse_opts():
                         default=5,
                         type=int,
                         help='Top-k scores are saved in json file.')
+    parser.add_argument('--file_type',
+                        default='jpg',
+                        type=str,
+                        help='(jpg | hdf5)')
 
     args = parser.parse_args()
 

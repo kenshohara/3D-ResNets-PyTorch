@@ -137,8 +137,9 @@ def get_train_utils(opt, model_parameters):
     target_transform = ClassLabel()
 
     training_data = get_training_set(opt.video_path, opt.annotation_path,
-                                     opt.dataset, spatial_transform,
-                                     temporal_transform, target_transform)
+                                     opt.dataset, opt.file_type,
+                                     spatial_transform, temporal_transform,
+                                     target_transform)
     train_loader = torch.utils.data.DataLoader(training_data,
                                                batch_size=opt.batch_size,
                                                shuffle=True,
@@ -191,8 +192,9 @@ def get_val_utils(opt):
 
     target_transform = ClassLabel()
     validation_data = get_validation_set(opt.video_path, opt.annotation_path,
-                                         opt.dataset, spatial_transform,
-                                         temporal_transform, target_transform)
+                                         opt.dataset, opt.file_type,
+                                         spatial_transform, temporal_transform,
+                                         target_transform)
     val_loader = torch.utils.data.DataLoader(validation_data,
                                              batch_size=(opt.batch_size //
                                                          opt.n_val_samples),
@@ -230,7 +232,7 @@ def get_test_utils(opt):
     target_transform = TargetCompose([VideoID(), Segment()])
 
     test_data = get_test_set(opt.video_path, opt.annotation_path, opt.dataset,
-                             opt.test_subset, spatial_transform,
+                             opt.file_type, opt.test_subset, spatial_transform,
                              temporal_transform, target_transform)
 
     if opt.test_crop == 'center':
