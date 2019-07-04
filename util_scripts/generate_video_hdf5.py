@@ -41,7 +41,7 @@ def video_process(video_file_path, dst_root_path, ext, fps=-1, size=240):
     print(ffmpeg_cmd)
     subprocess.run(ffmpeg_cmd)
 
-    hdf5_path = dst_dir_path / 'video.hdf5'
+    hdf5_path = dst_dir_path.parent / f'{dst_dir_path.name}.hdf5'
     with h5py.File(hdf5_path, 'w') as f:
         dtype = h5py.special_dtype(vlen='uint8')
         video = f.create_dataset('video',
@@ -71,28 +71,32 @@ def class_process(class_dir_path, dst_root_path, ext, fps=-1, size=240):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        'dir_path', default=None, type=Path, help='Directory path of videos')
-    parser.add_argument(
-        'dst_path',
-        default=None,
-        type=Path,
-        help='Directory path of jpg videos')
+    parser.add_argument('dir_path',
+                        default=None,
+                        type=Path,
+                        help='Directory path of videos')
+    parser.add_argument('dst_path',
+                        default=None,
+                        type=Path,
+                        help='Directory path of jpg videos')
     parser.add_argument(
         'dataset',
         default='',
         type=str,
         help='Dataset name (kinetics | mit | ucf101 | hmdb51 | activitynet)')
-    parser.add_argument(
-        '--n_jobs', default=-1, type=int, help='Number of parallel jobs')
-    parser.add_argument(
-        '--fps',
-        default=-1,
-        type=int,
-        help=('Frame rates of output videos. '
-              '-1 means original frame rates.'))
-    parser.add_argument(
-        '--size', default=240, type=int, help='Frame size of output videos.')
+    parser.add_argument('--n_jobs',
+                        default=-1,
+                        type=int,
+                        help='Number of parallel jobs')
+    parser.add_argument('--fps',
+                        default=-1,
+                        type=int,
+                        help=('Frame rates of output videos. '
+                              '-1 means original frame rates.'))
+    parser.add_argument('--size',
+                        default=240,
+                        type=int,
+                        help='Frame size of output videos.')
     args = parser.parse_args()
 
     if args.dataset in ['kinetics', 'mit', 'activitynet']:
@@ -102,19 +106,17 @@ if __name__ == '__main__':
 
     if args.dataset == 'activitynet':
         video_file_paths = [x for x in sorted(args.dir_path.iterdir())]
-        status_list = Parallel(
-            n_jobs=args.n_jobs,
-            backend='threading')(delayed(video_process)(
-                video_file_path, args.dst_path, ext, args.fps, args.size)
-                                 for video_file_path in video_file_paths)
+        status_list = Parallel(n_jobs=args.n_jobs, backend='threading')(
+            delayed(video_process)(video_file_path, args.dst_path, ext,
+                                   args.fps, args.size)
+            for video_file_path in video_file_paths)
     else:
         class_dir_paths = [x for x in sorted(args.dir_path.iterdir())]
         test_set_video_path = args.dir_path / 'test'
         if test_set_video_path.exists():
             class_dir_paths.append(test_set_video_path)
 
-        status_list = Parallel(
-            n_jobs=args.n_jobs,
-            backend='threading')(delayed(class_process)(
-                class_dir_path, args.dst_path, ext, args.fps, args.size)
-                                 for class_dir_path in class_dir_paths)
+        status_list = Parallel(n_jobs=args.n_jobs, backend='threading')(
+            delayed(class_process)(class_dir_path, args.dst_path, ext, args.fps,
+                                   args.size)
+            for class_dir_path in class_dir_paths)
