@@ -139,8 +139,6 @@ class TemporalSubsampling(object):
 
 class Shuffle(object):
 
-    def __init__(self):
-
     def __call__(self, frame_indices):
         random.shuffle(frame_indices)
         return frame_indices
