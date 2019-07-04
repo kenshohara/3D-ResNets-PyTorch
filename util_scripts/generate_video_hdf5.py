@@ -56,6 +56,7 @@ def video_process(video_file_path, dst_root_path, ext, fps=-1, size=240):
 
     for file_path in dst_dir_path.glob('*.jpg'):
         file_path.unlink()
+    dst_dir_path.rmdir()
 
 
 def class_process(class_dir_path, dst_root_path, ext, fps=-1, size=240):
