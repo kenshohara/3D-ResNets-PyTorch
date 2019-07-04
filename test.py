@@ -8,8 +8,9 @@ import torch.nn.functional as F
 from utils import AverageMeter
 
 
-def get_video_results(outputs, class_names):
-    sorted_scores, locs = torch.topk(outputs, k=min(5, len(class_names)))
+def get_video_results(outputs, class_names, output_topk):
+    sorted_scores, locs = torch.topk(outputs,
+                                     k=min(output_topk, len(class_names)))
 
     video_results = []
     for i in range(sorted_scores.size(0)):
@@ -21,7 +22,7 @@ def get_video_results(outputs, class_names):
     return video_results
 
 
-def test(data_loader, model, result_path, class_names, no_average):
+def test(data_loader, model, result_path, class_names, no_average, output_topk):
     print('test')
 
     model.eval()
@@ -66,14 +67,14 @@ def test(data_loader, model, result_path, class_names, no_average):
             video_outputs = torch.stack(video_outputs)
             average_scores = torch.mean(video_outputs, dim=0)
             test_results['results'][video_id] = get_video_results(
-                average_scores, class_names)
+                average_scores, class_names, output_topk)
     else:
         for video_id, video_results in results['results'].items():
             test_results['results'][video_id] = []
             for segment_result in video_results:
                 segment = segment_result['segment']
                 result = get_video_results(segment_result['output'],
-                                           class_names)
+                                           class_names, output_topk)
                 test_results['results'][video_id].append({
                     'segment': segment,
                     'result': result

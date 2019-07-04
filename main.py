@@ -12,9 +12,10 @@ import torchvision
 from opts import parse_opts
 from model import generate_model
 from mean import get_mean_std
-from spatial_transforms import (
-    Compose, Normalize, Resize, CenterCrop, CornerCrop, MultiScaleCornerCrop,
-    RandomResizedCrop, RandomHorizontalFlip, ToTensor, ScaleValue, ColorJitter)
+from spatial_transforms import (Compose, Normalize, Resize, CenterCrop,
+                                CornerCrop, MultiScaleCornerCrop,
+                                RandomResizedCrop, RandomHorizontalFlip,
+                                ToTensor, ScaleValue, ColorJitter)
 from temporal_transforms import (LoopPadding, TemporalRandomCrop,
                                  TemporalCenterCrop, TemporalEvenCrop,
                                  SlidingWindow, TemporalSubsampling)
@@ -48,6 +49,9 @@ def get_opt():
     if opt.pretrain_path is not None:
         opt.n_finetune_classes = opt.n_classes
         opt.n_classes = opt.n_pretrain_classes
+
+    if opt.output_topk <= 0:
+        opt.output_topk = opt.n_classes
 
     opt.arch = '{}-{}'.format(opt.model, opt.model_depth)
     opt.begin_epoch = 1
@@ -135,14 +139,13 @@ def get_train_utils(opt, model_parameters):
     training_data = get_training_set(opt.video_path, opt.annotation_path,
                                      opt.dataset, spatial_transform,
                                      temporal_transform, target_transform)
-    train_loader = torch.utils.data.DataLoader(
-        training_data,
-        batch_size=opt.batch_size,
-        shuffle=True,
-        num_workers=opt.n_threads,
-        pin_memory=True,
-        worker_init_fn=worker_init_fn,
-        collate_fn=collate_fn)
+    train_loader = torch.utils.data.DataLoader(training_data,
+                                               batch_size=opt.batch_size,
+                                               shuffle=True,
+                                               num_workers=opt.n_threads,
+                                               pin_memory=True,
+                                               worker_init_fn=worker_init_fn,
+                                               collate_fn=collate_fn)
     train_logger = Logger(opt.result_path / 'train.log',
                           ['epoch', 'loss', 'acc', 'lr'])
     train_batch_logger = Logger(opt.result_path / 'train_batch.log',
@@ -152,13 +155,12 @@ def get_train_utils(opt, model_parameters):
         dampening = 0
     else:
         dampening = opt.dampening
-    optimizer = SGD(
-        model_parameters,
-        lr=opt.learning_rate,
-        momentum=opt.momentum,
-        dampening=dampening,
-        weight_decay=opt.weight_decay,
-        nesterov=opt.nesterov)
+    optimizer = SGD(model_parameters,
+                    lr=opt.learning_rate,
+                    momentum=opt.momentum,
+                    dampening=dampening,
+                    weight_decay=opt.weight_decay,
+                    nesterov=opt.nesterov)
 
     assert opt.lr_scheduler in ['plateau', 'multistep']
     if opt.lr_scheduler == 'plateau':
@@ -191,14 +193,14 @@ def get_val_utils(opt):
     validation_data = get_validation_set(opt.video_path, opt.annotation_path,
                                          opt.dataset, spatial_transform,
                                          temporal_transform, target_transform)
-    val_loader = torch.utils.data.DataLoader(
-        validation_data,
-        batch_size=(opt.batch_size // opt.n_val_samples),
-        shuffle=False,
-        num_workers=opt.n_threads,
-        pin_memory=True,
-        worker_init_fn=worker_init_fn,
-        collate_fn=collate_fn)
+    val_loader = torch.utils.data.DataLoader(validation_data,
+                                             batch_size=(opt.batch_size //
+                                                         opt.n_val_samples),
+                                             shuffle=False,
+                                             num_workers=opt.n_threads,
+                                             pin_memory=True,
+                                             worker_init_fn=worker_init_fn,
+                                             collate_fn=collate_fn)
     val_logger = Logger(opt.result_path / 'val.log', ['epoch', 'loss', 'acc'])
 
     return val_loader, val_logger
@@ -236,14 +238,13 @@ def get_test_utils(opt):
         batch_size = opt.batch_size
     else:
         batch_size = 1
-    test_loader = torch.utils.data.DataLoader(
-        test_data,
-        batch_size=batch_size,
-        shuffle=False,
-        num_workers=opt.n_threads,
-        pin_memory=True,
-        worker_init_fn=worker_init_fn,
-        collate_fn=collate_fn)
+    test_loader = torch.utils.data.DataLoader(test_data,
+                                              batch_size=batch_size,
+                                              shuffle=False,
+                                              num_workers=opt.n_threads,
+                                              pin_memory=True,
+                                              worker_init_fn=worker_init_fn,
+                                              collate_fn=collate_fn)
 
     return test_loader, test_data.class_names
 
@@ -320,4 +321,4 @@ if __name__ == '__main__':
         test_result_path = opt.result_path / '{}.json'.format(opt.test_subset)
 
         test.test(test_loader, model, test_result_path, test_class_names,
-                  opt.test_no_average)
+                  opt.test_no_average, opt.output_topk)
