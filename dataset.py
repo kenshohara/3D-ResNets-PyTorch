@@ -19,7 +19,7 @@ def get_training_set(video_path, annotation_path, dataset_name, file_type,
         if file_type == 'jpg':
             from datasets.videodataset import VideoDataset
         else:
-            from datasets.videodataset_hdf5 import VideoDataset
+            from datasets.videodataset_hdf5 import VideoDatasetHDF5 as VideoDataset
 
         training_data = VideoDataset(video_path,
                                      annotation_path,
@@ -46,7 +46,7 @@ def get_validation_set(video_path, annotation_path, dataset_name, file_type,
         if file_type == 'jpg':
             from datasets.videodataset import VideoDataset
         else:
-            from datasets.videodataset_hdf5 import VideoDataset
+            from datasets.videodataset_hdf5 import VideoDatasetHDF5 as VideoDataset
 
         validation_data = VideoDataset(video_path,
                                        annotation_path,
@@ -85,7 +85,7 @@ def get_test_set(video_path, annotation_path, dataset_name, file_type,
         if file_type == 'jpg':
             from datasets.videodataset import VideoDataset
         else:
-            from datasets.videodataset_hdf5 import VideoDataset
+            from datasets.videodataset_hdf5 import VideoDatasetHDF5 as VideoDataset
 
         test_data = VideoDataset(video_path,
                                  annotation_path,
