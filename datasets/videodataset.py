@@ -29,7 +29,7 @@ def get_video_ids_and_annotations(data, subset):
     return video_ids, annotations
 
 
-def make_dataset(root_path, annotation_path, subset):
+def make_dataset(root_path, annotation_path, subset, video_path_formatter):
     data = load_annotation_data(annotation_path)
     video_ids, annotations = get_video_ids_and_annotations(data, subset)
     class_to_idx = get_class_labels(data)
@@ -50,7 +50,7 @@ def make_dataset(root_path, annotation_path, subset):
             label = 'test'
             label_id = -1
 
-        video_path = root_path / label / video_ids[i]
+        video_path = video_path_formatter(root_path, label, video_ids[i])
         if not video_path.exists():
             continue
 
@@ -98,14 +98,16 @@ class VideoDataset(data.Dataset):
                  spatial_transform=None,
                  temporal_transform=None,
                  target_transform=None,
-                 get_loader=get_default_video_loader):
+                 video_loader=get_default_video_loader(),
+                 video_path_formatter=(lambda root_path, label, video_id:
+                                       root_path / label / video_id)):
         self.data, self.class_names = make_dataset(root_path, annotation_path,
-                                                   subset)
+                                                   subset, video_path_formatter)
 
         self.spatial_transform = spatial_transform
         self.temporal_transform = temporal_transform
         self.target_transform = target_transform
-        self.loader = get_loader()
+        self.loader = video_loader
 
     def loading(self, path, frame_indices):
         clip = self.loader(path, frame_indices)
