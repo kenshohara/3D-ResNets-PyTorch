@@ -214,19 +214,17 @@ def get_test_utils(opt):
     normalize = get_normalize_method(opt.mean, opt.std, opt.no_mean_norm,
                                      opt.no_std_norm)
 
-    spatial_transform = [
-        Resize(opt.sample_size),
-        CenterCrop(opt.sample_size),
-        ToTensor(),
-        ScaleValue(opt.value_scale), normalize
-    ]
+    spatial_transform = [Resize(opt.sample_size)]
+    if opt.test_crop == 'center':
+        spatial_transform.append(CenterCrop(opt.sample_size))
+    spatial_transform.extend(
+        [ToTensor(), ScaleValue(opt.value_scale), normalize])
     temporal_transform = []
     if opt.sample_t_stride > 1:
         temporal_transform.append(TemporalSubsampling(opt.sample_t_stride))
     if opt.test_crop == 'center':
         temporal_transform = LoopPadding(opt.sample_duration)
     else:
-        del spatial_transform[1]  #remove CenterCrop
         temporal_transform = SlidingWindow(opt.sample_duration, opt.test_stride)
     spatial_transform = Compose(spatial_transform)
     target_transform = TargetCompose([VideoID(), Segment()])
