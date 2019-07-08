@@ -1,10 +1,57 @@
+import json
 import copy
+import functools
 
 import torch
 import torch.utils.data as data
 from torch.utils.data.dataloader import default_collate
+import torchvision
+from PIL import Image
 
-from .utils import (get_default_video_loader, load_annotation_data)
+
+def pil_loader(path):
+    # open path as file to avoid ResourceWarning (https://github.com/python-pillow/Pillow/issues/835)
+    with path.open('rb') as f:
+        with Image.open(f) as img:
+            return img.convert('RGB')
+
+
+def accimage_loader(path):
+    import accimage
+    try:
+        return accimage.Image(str(path))
+    except IOError:
+        # Potentially a decoding problem, fall back to PIL.Image
+        return pil_loader(path)
+
+
+def get_default_image_loader():
+    from torchvision import get_image_backend
+    if get_image_backend() == 'accimage':
+        return accimage_loader
+    else:
+        return pil_loader
+
+
+def video_loader(video_dir_path, frame_indices, image_loader,
+                 file_name_formatter):
+    video = []
+    for i in frame_indices:
+        image_path = video_dir_path / file_name_formatter(i)
+        if image_path.exists():
+            video.append(image_loader(image_path))
+        else:
+            return video
+
+    return video
+
+
+def get_default_video_loader():
+    image_loader = get_default_image_loader()
+    file_name_formatter = lambda x: 'image_{:05d}.jpg'.format(x)
+    return functools.partial(video_loader,
+                             image_loader=image_loader,
+                             file_name_formatter=file_name_formatter)
 
 
 def get_class_labels(data):
@@ -30,7 +77,8 @@ def get_video_ids_and_annotations(data, subset):
 
 
 def make_dataset(root_path, annotation_path, subset, video_path_formatter):
-    data = load_annotation_data(annotation_path)
+    with annotation_path.open('r') as f:
+        data = json.load(f)
     video_ids, annotations = get_video_ids_and_annotations(data, subset)
     class_to_idx = get_class_labels(data)
     idx_to_class = {}

@@ -1,11 +1,17 @@
 import math
+import json
 
 import torch
 import torch.utils.data as data
 
-from .utils import (get_default_video_loader, get_n_frames,
-                    load_annotation_data)
-from .videodataset import VideoDataset
+from .videodataset import VideoDataset, get_default_video_loader
+
+
+def get_n_frames(video_path):
+    return len([
+        x for x in video_path.iterdir()
+        if 'image' in x.name and x.name[0] != '.'
+    ])
 
 
 def get_class_labels(data):
@@ -43,7 +49,8 @@ def get_video_ids_annotations_and_fps(data, subset):
 
 
 def make_dataset(root_path, annotation_path, subset):
-    data = load_annotation_data(annotation_path)
+    with annotation_path.open('r') as f:
+        data = json.load(f)
     video_ids, annotations, fps_values = get_video_ids_annotations_and_fps(
         data, subset)
     class_to_idx = get_class_labels(data)
@@ -89,8 +96,10 @@ def make_dataset(root_path, annotation_path, subset):
 
 
 def make_untrimmed_dataset(root_path, annotation_path, subset):
-    data = load_annotation_data(annotation_path)
-    video_ids, _ = get_video_ids_and_annotations(data, subset)
+    with annotation_path.open('r') as f:
+        data = json.load(f)
+    video_ids, annotations, fps_values = get_video_ids_annotations_and_fps(
+        data, subset)
     class_to_idx = get_class_labels(data)
     idx_to_class = {}
     for name, label in class_to_idx.items():
@@ -105,8 +114,7 @@ def make_untrimmed_dataset(root_path, annotation_path, subset):
         if not video_path.exists():
             continue
 
-        fps_file_path = video_path / 'fps'
-        fps = load_value_file(fps_file_path)
+        fps = fps_values[i]
 
         t_begin = 1
         t_end = get_n_frames(video_path) + 1

@@ -3,7 +3,6 @@ import io
 import h5py
 from PIL import Image
 
-from .utils import load_annotation_data
 from .videodataset import VideoDataset
 
 
