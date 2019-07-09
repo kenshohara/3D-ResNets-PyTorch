@@ -228,7 +228,7 @@ def get_test_utils(opt):
                                          temporal_transform)
 
     test_loader = torch.utils.data.DataLoader(test_data,
-                                              batch_size=opt.batch_size,
+                                              batch_size=opt.test_batch_size,
                                               shuffle=False,
                                               num_workers=opt.n_threads,
                                               pin_memory=True,

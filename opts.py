@@ -153,6 +153,11 @@ def parse_opts():
                         default=128,
                         type=int,
                         help='Batch Size')
+    parser.add_argument(
+        '--test_batch_size',
+        default=0,
+        type=int,
+        help='Batch Size for test. 0 means this is the same as batch_size.')
     parser.add_argument('--n_epochs',
                         default=200,
                         type=int,
