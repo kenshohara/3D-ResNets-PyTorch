@@ -19,10 +19,10 @@ from spatial_transforms import (Compose, Normalize, Resize, CenterCrop,
 from temporal_transforms import (LoopPadding, TemporalRandomCrop,
                                  TemporalCenterCrop, TemporalEvenCrop,
                                  SlidingWindow, TemporalSubsampling)
+from temporal_transforms import Compose as TemporalCompose
 from target_transforms import ClassLabel, VideoID, Segment
 from target_transforms import Compose as TargetCompose
 from dataset import get_training_set, get_validation_set, get_test_set
-from datasets.videodataset import collate_fn
 from utils import Logger, worker_init_fn, get_lr
 from train import train_epoch
 from validation import val_epoch
@@ -132,21 +132,17 @@ def get_train_utils(opt, model_parameters):
         temporal_transform.append(TemporalRandomCrop(opt.sample_duration))
     elif opt.train_t_crop == 'center':
         temporal_transform.append(TemporalCenterCrop(opt.sample_duration))
-    temporal_transform = Compose(temporal_transform)
-
-    target_transform = ClassLabel()
+    temporal_transform = TemporalCompose(temporal_transform)
 
     training_data = get_training_set(opt.video_path, opt.annotation_path,
                                      opt.dataset, opt.file_type,
-                                     spatial_transform, temporal_transform,
-                                     target_transform)
+                                     spatial_transform, temporal_transform)
     train_loader = torch.utils.data.DataLoader(training_data,
                                                batch_size=opt.batch_size,
                                                shuffle=True,
                                                num_workers=opt.n_threads,
                                                pin_memory=True,
-                                               worker_init_fn=worker_init_fn,
-                                               collate_fn=collate_fn)
+                                               worker_init_fn=worker_init_fn)
     train_logger = Logger(opt.result_path / 'train.log',
                           ['epoch', 'loss', 'acc', 'lr'])
     train_batch_logger = Logger(opt.result_path / 'train_batch.log',
@@ -183,26 +179,24 @@ def get_val_utils(opt):
         ToTensor(),
         ScaleValue(opt.value_scale), normalize
     ])
+
     temporal_transform = []
     if opt.sample_t_stride > 1:
         temporal_transform.append(TemporalSubsampling(opt.sample_t_stride))
     temporal_transform.append(
         TemporalEvenCrop(opt.sample_duration, opt.n_val_samples))
-    temporal_transform = Compose(temporal_transform)
+    temporal_transform = TemporalCompose(temporal_transform)
 
-    target_transform = ClassLabel()
     validation_data = get_validation_set(opt.video_path, opt.annotation_path,
                                          opt.dataset, opt.file_type,
-                                         spatial_transform, temporal_transform,
-                                         target_transform)
+                                         spatial_transform, temporal_transform)
     val_loader = torch.utils.data.DataLoader(validation_data,
                                              batch_size=(opt.batch_size //
                                                          opt.n_val_samples),
                                              shuffle=False,
                                              num_workers=opt.n_threads,
                                              pin_memory=True,
-                                             worker_init_fn=worker_init_fn,
-                                             collate_fn=collate_fn)
+                                             worker_init_fn=worker_init_fn)
     val_logger = Logger(opt.result_path / 'val.log', ['epoch', 'loss', 'acc'])
 
     return val_loader, val_logger
@@ -219,27 +213,22 @@ def get_test_utils(opt):
         spatial_transform.append(CenterCrop(opt.sample_size))
     spatial_transform.extend(
         [ToTensor(), ScaleValue(opt.value_scale), normalize])
+    spatial_transform = Compose(spatial_transform)
+
     temporal_transform = []
     if opt.sample_t_stride > 1:
         temporal_transform.append(TemporalSubsampling(opt.sample_t_stride))
-    if opt.test_crop == 'center':
-        temporal_transform = LoopPadding(opt.sample_duration)
-    else:
-        temporal_transform = SlidingWindow(opt.sample_duration, opt.test_stride)
-    spatial_transform = Compose(spatial_transform)
-    target_transform = TargetCompose([VideoID(), Segment()])
+    temporal_transform.append(
+        SlidingWindow(opt.sample_duration, opt.test_stride))
+    temporal_transform = TemporalCompose(temporal_transform)
 
-    test_data = get_test_set(opt.video_path, opt.annotation_path, opt.dataset,
-                             opt.file_type, opt.test_subset, spatial_transform,
-                             temporal_transform, target_transform)
+    test_data, collate_fn = get_test_set(opt.video_path, opt.annotation_path,
+                                         opt.dataset, opt.file_type,
+                                         opt.test_subset, spatial_transform,
+                                         temporal_transform)
 
-    if opt.test_crop == 'center':
-        test_data.temporal_sliding_window(opt.sample_duration, opt.test_stride)
-        batch_size = opt.batch_size
-    else:
-        batch_size = 1
     test_loader = torch.utils.data.DataLoader(test_data,
-                                              batch_size=batch_size,
+                                              batch_size=opt.batch_size,
                                               shuffle=False,
                                               num_workers=opt.n_threads,
                                               pin_memory=True,
