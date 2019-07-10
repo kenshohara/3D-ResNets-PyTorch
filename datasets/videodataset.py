@@ -6,7 +6,28 @@ import torch
 import torch.utils.data as data
 
 from .loader import VideoLoader
-from .utils import get_class_labels, get_video_ids_and_annotations
+
+
+def get_class_labels(data):
+    class_labels_map = {}
+    index = 0
+    for class_label in data['labels']:
+        class_labels_map[class_label] = index
+        index += 1
+    return class_labels_map
+
+
+def get_video_ids_and_annotations(data, subset):
+    video_ids = []
+    annotations = []
+
+    for key, value in data['database'].items():
+        this_subset = value['subset']
+        if this_subset == subset:
+            video_ids.append(key)
+            annotations.append(value['annotations'])
+
+    return video_ids, annotations
 
 
 class VideoDataset(data.Dataset):
