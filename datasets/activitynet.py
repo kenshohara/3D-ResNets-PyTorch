@@ -4,7 +4,8 @@ import json
 import torch
 import torch.utils.data as data
 
-from .videodataset import VideoDataset, get_default_video_loader
+from .loader import VideoLoader
+from .videodataset import VideoDataset
 
 
 def get_n_frames(video_path):
@@ -48,32 +49,108 @@ def get_video_ids_annotations_and_fps(data, subset):
     return video_ids, annotations, fps_values
 
 
-def make_dataset(root_path, annotation_path, subset):
-    with annotation_path.open('r') as f:
-        data = json.load(f)
-    video_ids, annotations, fps_values = get_video_ids_annotations_and_fps(
-        data, subset)
-    class_to_idx = get_class_labels(data)
-    idx_to_class = {}
-    for name, label in class_to_idx.items():
-        idx_to_class[label] = name
+class ActivityNet(VideoDataset):
 
-    dataset = []
-    for i in range(len(video_ids)):
-        if i % 1000 == 0:
-            print('dataset loading [{}/{}]'.format(i, len(video_ids)))
+    def __init__(
+            self,
+            root_path,
+            annotation_path,
+            subset,
+            is_untrimmed_setting=False,
+            spatial_transform=None,
+            temporal_transform=None,
+            target_transform=None,
+            video_loader=None,
+            video_path_formatter=(
+                lambda root_path, label, video_id: root_path / f'v_{video_id}'),
+            image_name_formatter=lambda x: f'image_{x:05d}.jpg'):
+        if is_untrimmed_setting:
+            self.data, self.class_names = self.__make_untrimmed_dataset(
+                root_path, annotation_path, subset, video_path_formatter)
+        else:
+            self.data, self.class_names = self.__make_dataset(
+                root_path, annotation_path, subset, video_path_formatter)
 
-        video_path = root_path / 'v_{}'.format(video_ids[i])
-        if not video_path.exists():
-            continue
+        self.spatial_transform = spatial_transform
+        self.temporal_transform = temporal_transform
+        self.target_transform = target_transform
 
-        fps = fps_values[i]
+        if video_loader is None:
+            self.loader = VideoLoader(image_name_formatter)
+        else:
+            self.loader = video_loader
 
-        for annotation in annotations[i]:
-            t_begin = math.floor(annotation['segment'][0] * fps) + 1
-            t_end = math.floor(annotation['segment'][1] * fps) + 1
-            n_video_frames = get_n_frames(video_path)
-            t_end = min(t_end, n_video_frames)
+    def __make_dataset(self, root_path, annotation_path, subset,
+                       video_path_formatter):
+        with annotation_path.open('r') as f:
+            data = json.load(f)
+        video_ids, annotations, fps_values = get_video_ids_annotations_and_fps(
+            data, subset)
+        class_to_idx = get_class_labels(data)
+        idx_to_class = {}
+        for name, label in class_to_idx.items():
+            idx_to_class[label] = name
+
+        dataset = []
+        for i in range(len(video_ids)):
+            if i % 1000 == 0:
+                print('dataset loading [{}/{}]'.format(i, len(video_ids)))
+
+            video_path = video_path_formatter(root_path, label, video_ids[i])
+            if not video_path.exists():
+                continue
+
+            fps = fps_values[i]
+
+            for annotation in annotations[i]:
+                t_begin = math.floor(annotation['segment'][0] * fps) + 1
+                t_end = math.floor(annotation['segment'][1] * fps) + 1
+                n_video_frames = get_n_frames(video_path)
+                t_end = min(t_end, n_video_frames)
+                frame_indices = list(range(t_begin, t_end))
+
+                sample = {
+                    'video': video_path,
+                    'segment': (frame_indices[0], frame_indices[-1] + 1),
+                    'frame_indices': frame_indices,
+                    'fps': fps,
+                    'video_id': video_ids[i]
+                }
+                if annotations is not None:
+                    sample['label'] = class_to_idx[annotation['label']]
+                else:
+                    sample['label'] = -1
+
+                if len(sample['frame_indices']) < 8:
+                    continue
+                dataset.append(sample)
+
+        return dataset, idx_to_class
+
+    def __make_untrimmed_dataset(self, root_path, annotation_path, subset,
+                                 video_path_formatter):
+        with annotation_path.open('r') as f:
+            data = json.load(f)
+        video_ids, annotations, fps_values = get_video_ids_annotations_and_fps(
+            data, subset)
+        class_to_idx = get_class_labels(data)
+        idx_to_class = {}
+        for name, label in class_to_idx.items():
+            idx_to_class[label] = name
+
+        dataset = []
+        for i in range(len(video_ids)):
+            if i % 1000 == 0:
+                print('dataset loading [{}/{}]'.format(i, len(video_ids)))
+
+            video_path = video_path_formatter(root_path, label, video_ids[i])
+            if not video_path.exists():
+                continue
+
+            fps = fps_values[i]
+
+            t_begin = 1
+            t_end = get_n_frames(video_path) + 1
             frame_indices = list(range(t_begin, t_end))
 
             sample = {
@@ -83,74 +160,6 @@ def make_dataset(root_path, annotation_path, subset):
                 'fps': fps,
                 'video_id': video_ids[i]
             }
-            if annotations is not None:
-                sample['label'] = class_to_idx[annotation['label']]
-            else:
-                sample['label'] = -1
-
-            if len(sample['frame_indices']) < 8:
-                continue
             dataset.append(sample)
 
-    return dataset, idx_to_class
-
-
-def make_untrimmed_dataset(root_path, annotation_path, subset):
-    with annotation_path.open('r') as f:
-        data = json.load(f)
-    video_ids, annotations, fps_values = get_video_ids_annotations_and_fps(
-        data, subset)
-    class_to_idx = get_class_labels(data)
-    idx_to_class = {}
-    for name, label in class_to_idx.items():
-        idx_to_class[label] = name
-
-    dataset = []
-    for i in range(len(video_ids)):
-        if i % 1000 == 0:
-            print('dataset loading [{}/{}]'.format(i, len(video_ids)))
-
-        video_path = root_path / 'v_{}'.format(video_ids[i])
-        if not video_path.exists():
-            continue
-
-        fps = fps_values[i]
-
-        t_begin = 1
-        t_end = get_n_frames(video_path) + 1
-        frame_indices = list(range(t_begin, t_end))
-
-        sample = {
-            'video': video_path,
-            'segment': (frame_indices[0], frame_indices[-1] + 1),
-            'frame_indices': frame_indices,
-            'fps': fps,
-            'video_id': video_ids[i]
-        }
-        dataset.append(sample)
-
-    return dataset, idx_to_class
-
-
-class ActivityNet(VideoDataset):
-
-    def __init__(self,
-                 root_path,
-                 annotation_path,
-                 subset,
-                 spatial_transform=None,
-                 temporal_transform=None,
-                 target_transform=None,
-                 is_untrimmed_setting=False,
-                 get_loader=get_default_video_loader):
-        if is_untrimmed_setting:
-            self.data, self.class_names = make_untrimmed_dataset(
-                root_path, annotation_path, subset)
-        else:
-            self.data, self.class_names = make_dataset(root_path,
-                                                       annotation_path, subset)
-
-        self.spatial_transform = spatial_transform
-        self.temporal_transform = temporal_transform
-        self.target_transform = target_transform
-        self.loader = get_loader()
+        return dataset, idx_to_class
