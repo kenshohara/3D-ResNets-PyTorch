@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from utils import get_n_frames
+from .utils import get_n_frames
 
 
 def convert_csv_to_dict(csv_path, subset):
@@ -85,14 +85,15 @@ if __name__ == '__main__':
         help=('Directory path including moments_categories.txt, '
               'trainingSet.csv, validationSet.csv, '
               '(testingSet.csv (optional))'))
-    parser.add_argument(
-        'video_path',
-        default=None,
-        type=Path,
-        help=('Path of video directory (jpg).'
-              'Using to get n_frames of each video.'))
-    parser.add_argument(
-        'dst_path', default=None, type=Path, help='Path of dst json file.')
+    parser.add_argument('video_path',
+                        default=None,
+                        type=Path,
+                        help=('Path of video directory (jpg).'
+                              'Using to get n_frames of each video.'))
+    parser.add_argument('dst_path',
+                        default=None,
+                        type=Path,
+                        help='Path of dst json file.')
 
     args = parser.parse_args()
 

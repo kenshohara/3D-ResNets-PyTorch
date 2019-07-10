@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from utils import get_n_frames
+from .utils import get_n_frames
 
 
 def convert_csv_to_dict(csv_path, subset):
@@ -71,35 +71,34 @@ def convert_kinetics_csv_to_json(train_csv_path, val_csv_path, test_csv_path,
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        'dir_path',
-        default=None,
-        type=Path,
-        help=('Directory path including '
-              'kinetics_train.csv, kinetics_val.csv, '
-              '(kinetics_test.csv (optional))'))
-    parser.add_argument(
-        'n_classes',
-        default=400,
-        type=int,
-        help='400 or 600 (Kinetics-400 or Kinetics-600)')
-    parser.add_argument(
-        'video_path',
-        default=None,
-        type=Path,
-        help=('Path of video directory (jpg).'
-              'Using to get n_frames of each video.'))
-    parser.add_argument(
-        'dst_path', default=None, type=Path, help='Path of dst json file.')
+    parser.add_argument('dir_path',
+                        default=None,
+                        type=Path,
+                        help=('Directory path including '
+                              'kinetics_train.csv, kinetics_val.csv, '
+                              '(kinetics_test.csv (optional))'))
+    parser.add_argument('n_classes',
+                        default=400,
+                        type=int,
+                        help='400 or 600 (Kinetics-400 or Kinetics-600)')
+    parser.add_argument('video_path',
+                        default=None,
+                        type=Path,
+                        help=('Path of video directory (jpg).'
+                              'Using to get n_frames of each video.'))
+    parser.add_argument('dst_path',
+                        default=None,
+                        type=Path,
+                        help='Path of dst json file.')
 
     args = parser.parse_args()
 
-    train_csv_path = (
-        args.dir_path / 'kinetics-{}_train.csv'.format(args.n_classes))
-    val_csv_path = (
-        args.dir_path / 'kinetics-{}_val.csv'.format(args.n_classes))
-    test_csv_path = (
-        args.dir_path / 'kinetics-{}_test.csv'.format(args.n_classes))
+    train_csv_path = (args.dir_path /
+                      'kinetics-{}_train.csv'.format(args.n_classes))
+    val_csv_path = (args.dir_path /
+                    'kinetics-{}_val.csv'.format(args.n_classes))
+    test_csv_path = (args.dir_path /
+                     'kinetics-{}_test.csv'.format(args.n_classes))
 
     convert_kinetics_csv_to_json(train_csv_path, val_csv_path, test_csv_path,
                                  args.video_path, args.dst_path)
