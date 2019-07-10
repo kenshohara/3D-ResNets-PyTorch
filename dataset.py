@@ -125,12 +125,12 @@ def get_test_set(video_path,
         test_data = ActivityNet(video_path,
                                 annotation_path,
                                 subset,
-                                is_untrimmed_setting=True,
                                 spatial_transform=spatial_transform,
                                 temporal_transform=temporal_transform,
                                 target_transform=target_transform,
                                 video_loader=loader,
-                                video_path_formatter=video_path_formatter)
+                                video_path_formatter=video_path_formatter,
+                                is_untrimmed_setting=True)
     else:
         test_data = VideoDatasetMultiClips(
             video_path,

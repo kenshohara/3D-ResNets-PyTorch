@@ -56,14 +56,14 @@ class ActivityNet(VideoDataset):
             root_path,
             annotation_path,
             subset,
-            is_untrimmed_setting=False,
             spatial_transform=None,
             temporal_transform=None,
             target_transform=None,
             video_loader=None,
             video_path_formatter=(
                 lambda root_path, label, video_id: root_path / f'v_{video_id}'),
-            image_name_formatter=lambda x: f'image_{x:05d}.jpg'):
+            image_name_formatter=lambda x: f'image_{x:05d}.jpg',
+            is_untrimmed_setting=False):
         if is_untrimmed_setting:
             self.data, self.class_names = self.__make_untrimmed_dataset(
                 root_path, annotation_path, subset, video_path_formatter)
