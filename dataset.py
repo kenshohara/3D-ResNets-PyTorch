@@ -109,10 +109,10 @@ def get_test_set(video_path,
         test_data = ActivityNet(video_path,
                                 annotation_path,
                                 subset,
-                                spatial_transform,
-                                temporal_transform,
-                                target_transform,
-                                is_untrimmed_setting=True)
+                                is_untrimmed_setting=True,
+                                spatial_transform=spatial_transform,
+                                temporal_transform=temporal_transform,
+                                target_transform=target_transform)
     else:
         if file_type == 'jpg':
             loader = VideoLoader(lambda x: f'image_{x:05d}.jpg')
