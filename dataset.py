@@ -17,23 +17,25 @@ def get_training_set(video_path,
     ]
     assert file_type in ['jpg', 'hdf5']
 
+    if file_type == 'jpg':
+        loader = VideoLoader(lambda x: f'image_{x:05d}.jpg')
+        video_path_formatter = (
+            lambda root_path, label, video_id: root_path / label / video_id)
+    else:
+        loader = VideoLoaderHDF5()
+        video_path_formatter = (lambda root_path, label, video_id: root_path /
+                                label / f'{video_id}.hdf5')
+
     if dataset_name == 'activitynet':
         training_data = ActivityNet(video_path,
                                     annotation_path,
                                     'training',
                                     spatial_transform=spatial_transform,
                                     temporal_transform=temporal_transform,
-                                    target_transform=target_transform)
+                                    target_transform=target_transform,
+                                    video_loader=loader,
+                                    video_path_formatter=video_path_formatter)
     else:
-        if file_type == 'jpg':
-            loader = VideoLoader(lambda x: f'image_{x:05d}.jpg')
-            video_path_formatter = (
-                lambda root_path, label, video_id: root_path / label / video_id)
-        else:
-            loader = VideoLoaderHDF5()
-            video_path_formatter = (lambda root_path, label, video_id: root_path
-                                    / label / f'{video_id}.hdf5')
-
         training_data = VideoDataset(video_path,
                                      annotation_path,
                                      'training',
@@ -58,20 +60,25 @@ def get_validation_set(video_path,
     ]
     assert file_type in ['jpg', 'hdf5']
 
-    if dataset_name == 'activitynet':
-        validation_data = ActivityNet(video_path, annotation_path, 'validation',
-                                      spatial_transform, temporal_transform,
-                                      target_transform)
+    if file_type == 'jpg':
+        loader = VideoLoader(lambda x: f'image_{x:05d}.jpg')
+        video_path_formatter = (
+            lambda root_path, label, video_id: root_path / label / video_id)
     else:
-        if file_type == 'jpg':
-            loader = VideoLoader(lambda x: f'image_{x:05d}.jpg')
-            video_path_formatter = (
-                lambda root_path, label, video_id: root_path / label / video_id)
-        else:
-            loader = VideoLoaderHDF5()
-            video_path_formatter = (lambda root_path, label, video_id: root_path
-                                    / label / f'{video_id}.hdf5')
+        loader = VideoLoaderHDF5()
+        video_path_formatter = (lambda root_path, label, video_id: root_path /
+                                label / f'{video_id}.hdf5')
 
+    if dataset_name == 'activitynet':
+        validation_data = ActivityNet(video_path,
+                                      annotation_path,
+                                      'validation',
+                                      spatial_transform=spatial_transform,
+                                      temporal_transform=temporal_transform,
+                                      target_transform=target_transform,
+                                      video_loader=loader,
+                                      video_path_formatter=video_path_formatter)
+    else:
         validation_data = VideoDataset(
             video_path,
             annotation_path,
@@ -99,6 +106,15 @@ def get_test_set(video_path,
     assert file_type in ['jpg', 'hdf5']
     assert test_subset in ['train', 'val', 'test']
 
+    if file_type == 'jpg':
+        loader = VideoLoader(lambda x: f'image_{x:05d}.jpg')
+        video_path_formatter = (
+            lambda root_path, label, video_id: root_path / label / video_id)
+    else:
+        loader = VideoLoaderHDF5()
+        video_path_formatter = (lambda root_path, label, video_id: root_path /
+                                label / f'{video_id}.hdf5')
+
     if test_subset == 'train':
         subset = 'training'
     elif test_subset == 'val':
@@ -112,17 +128,10 @@ def get_test_set(video_path,
                                 is_untrimmed_setting=True,
                                 spatial_transform=spatial_transform,
                                 temporal_transform=temporal_transform,
-                                target_transform=target_transform)
+                                target_transform=target_transform,
+                                video_loader=loader,
+                                video_path_formatter=video_path_formatter)
     else:
-        if file_type == 'jpg':
-            loader = VideoLoader(lambda x: f'image_{x:05d}.jpg')
-            video_path_formatter = (
-                lambda root_path, label, video_id: root_path / label / video_id)
-        else:
-            loader = VideoLoaderHDF5()
-            video_path_formatter = (lambda root_path, label, video_id: root_path
-                                    / label / f'{video_id}.hdf5')
-
         test_data = VideoDatasetMultiClips(
             video_path,
             annotation_path,
