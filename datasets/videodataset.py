@@ -5,7 +5,7 @@ import functools
 import torch
 import torch.utils.data as data
 
-from loader import VideoLoader
+from .loader import VideoLoader
 from .utils import get_class_labels, get_video_ids_and_annotations
 
 
