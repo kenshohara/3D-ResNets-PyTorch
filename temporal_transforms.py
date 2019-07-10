@@ -171,6 +171,14 @@ class TemporalSubsampling(object):
 
 class Shuffle(object):
 
+    def __init__(self, block_size):
+        self.block_size = block_size
+
     def __call__(self, frame_indices):
+        frame_indices = [
+            frame_indices[i:(i + self.block_size)]
+            for i in range(0, len(frame_indices), self.block_size)
+        ]
         random.shuffle(frame_indices)
+        frame_indices = [t for block in frame_indices for t in block]
         return frame_indices
