@@ -10,7 +10,7 @@ class Compose(object):
     def __call__(self, frame_indices):
         for i, t in enumerate(self.transforms):
             if isinstance(frame_indices[0], list):
-                next_transforms = Compose(self.transforms[(i + 1):])
+                next_transforms = Compose(self.transforms[i:])
                 dst_frame_indices = [
                     next_transforms(clip_frame_indices)
                     for clip_frame_indices in frame_indices
