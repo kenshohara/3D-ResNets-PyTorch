@@ -6,7 +6,6 @@ import torch
 from torch.utils.data.dataloader import default_collate
 
 from .videodataset import VideoDataset
-from .utils import get_class_labels, get_video_ids_and_annotations
 
 
 def collate_fn(batch):
