@@ -154,10 +154,11 @@ def parse_opts():
                         type=int,
                         help='Batch Size')
     parser.add_argument(
-        '--test_batch_size',
+        '--inference_batch_size',
         default=0,
         type=int,
-        help='Batch Size for test. 0 means this is the same as batch_size.')
+        help='Batch Size for inference. 0 means this is the same as batch_size.'
+    )
     parser.add_argument('--n_epochs',
                         default=200,
                         type=int,
@@ -176,26 +177,26 @@ def parse_opts():
     parser.add_argument('--no_val',
                         action='store_true',
                         help='If true, validation is not performed.')
-    parser.add_argument('--test',
+    parser.add_argument('--inference',
                         action='store_true',
-                        help='If true, test is performed.')
-    parser.add_argument('--test_subset',
+                        help='If true, inference is performed.')
+    parser.add_argument('--inference_subset',
                         default='val',
                         type=str,
-                        help='Used subset in test (train | val | test)')
-    parser.add_argument('--test_stride',
+                        help='Used subset in inference (train | val | test)')
+    parser.add_argument('--inference_stride',
                         default=16,
                         type=int,
-                        help='Stride of sliding window in test.')
+                        help='Stride of sliding window in inference.')
     parser.add_argument(
-        '--test_crop',
+        '--inference_crop',
         default='center',
         type=str,
-        help=('Cropping method in test. (center | nocrop)'
+        help=('Cropping method in inference. (center | nocrop)'
               'When nocrop, fully convolutional inference is performed,'
               'and mini-batch consists of clips of one video.'))
     parser.add_argument(
-        '--test_no_average',
+        '--inference_no_average',
         action='store_true',
         help='If true, outputs for segments in a video are not averaged.')
     parser.add_argument('--no_cuda',

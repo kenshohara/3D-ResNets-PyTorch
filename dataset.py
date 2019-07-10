@@ -5,13 +5,13 @@ from datasets.activitynet import ActivityNet
 from datasets.loader import VideoLoader, VideoLoaderHDF5
 
 
-def get_training_set(video_path,
-                     annotation_path,
-                     dataset_name,
-                     file_type,
-                     spatial_transform=None,
-                     temporal_transform=None,
-                     target_transform=None):
+def get_training_data(video_path,
+                      annotation_path,
+                      dataset_name,
+                      file_type,
+                      spatial_transform=None,
+                      temporal_transform=None,
+                      target_transform=None):
     assert dataset_name in [
         'kinetics', 'activitynet', 'ucf101', 'hmdb51', 'mit'
     ]
@@ -48,13 +48,13 @@ def get_training_set(video_path,
     return training_data
 
 
-def get_validation_set(video_path,
-                       annotation_path,
-                       dataset_name,
-                       file_type,
-                       spatial_transform=None,
-                       temporal_transform=None,
-                       target_transform=None):
+def get_validation_data(video_path,
+                        annotation_path,
+                        dataset_name,
+                        file_type,
+                        spatial_transform=None,
+                        temporal_transform=None,
+                        target_transform=None):
     assert dataset_name in [
         'kinetics', 'activitynet', 'ucf101', 'hmdb51', 'mit'
     ]
@@ -92,19 +92,19 @@ def get_validation_set(video_path,
     return validation_data
 
 
-def get_test_set(video_path,
-                 annotation_path,
-                 dataset_name,
-                 file_type,
-                 test_subset,
-                 spatial_transform=None,
-                 temporal_transform=None,
-                 target_transform=None):
+def get_inference_data(video_path,
+                       annotation_path,
+                       dataset_name,
+                       file_type,
+                       inference_subset,
+                       spatial_transform=None,
+                       temporal_transform=None,
+                       target_transform=None):
     assert dataset_name in [
         'kinetics', 'activitynet', 'ucf101', 'hmdb51', 'mit'
     ]
     assert file_type in ['jpg', 'hdf5']
-    assert test_subset in ['train', 'val', 'test']
+    assert inference_subset in ['train', 'val', 'test']
 
     if file_type == 'jpg':
         loader = VideoLoader(lambda x: f'image_{x:05d}.jpg')
@@ -115,24 +115,24 @@ def get_test_set(video_path,
         video_path_formatter = (lambda root_path, label, video_id: root_path /
                                 label / f'{video_id}.hdf5')
 
-    if test_subset == 'train':
+    if inference_subset == 'train':
         subset = 'training'
-    elif test_subset == 'val':
+    elif inference_subset == 'val':
         subset = 'validation'
-    elif test_subset == 'test':
+    elif inference_subset == 'test':
         subset = 'testing'
     if dataset_name == 'activitynet':
-        test_data = ActivityNet(video_path,
-                                annotation_path,
-                                subset,
-                                spatial_transform=spatial_transform,
-                                temporal_transform=temporal_transform,
-                                target_transform=target_transform,
-                                video_loader=loader,
-                                video_path_formatter=video_path_formatter,
-                                is_untrimmed_setting=True)
+        inference_data = ActivityNet(video_path,
+                                     annotation_path,
+                                     subset,
+                                     spatial_transform=spatial_transform,
+                                     temporal_transform=temporal_transform,
+                                     target_transform=target_transform,
+                                     video_loader=loader,
+                                     video_path_formatter=video_path_formatter,
+                                     is_untrimmed_setting=True)
     else:
-        test_data = VideoDatasetMultiClips(
+        inference_data = VideoDatasetMultiClips(
             video_path,
             annotation_path,
             subset,
@@ -142,4 +142,4 @@ def get_test_set(video_path,
             video_loader=loader,
             video_path_formatter=video_path_formatter)
 
-    return test_data, collate_fn
+    return inference_data, collate_fn

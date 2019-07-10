@@ -22,11 +22,11 @@ from temporal_transforms import (LoopPadding, TemporalRandomCrop,
 from temporal_transforms import Compose as TemporalCompose
 from target_transforms import ClassLabel, VideoID, Segment
 from target_transforms import Compose as TargetCompose
-from dataset import get_training_set, get_validation_set, get_test_set
+from dataset import get_training_data, get_validation_data, get_inference_data
 from utils import Logger, worker_init_fn, get_lr
-from train import train_epoch
+from training import train_epoch
 from validation import val_epoch
-import test
+import inference
 
 
 def json_serial(obj):
@@ -134,9 +134,9 @@ def get_train_utils(opt, model_parameters):
         temporal_transform.append(TemporalCenterCrop(opt.sample_duration))
     temporal_transform = TemporalCompose(temporal_transform)
 
-    training_data = get_training_set(opt.video_path, opt.annotation_path,
-                                     opt.dataset, opt.file_type,
-                                     spatial_transform, temporal_transform)
+    training_data = get_training_data(opt.video_path, opt.annotation_path,
+                                      opt.dataset, opt.file_type,
+                                      spatial_transform, temporal_transform)
     train_loader = torch.utils.data.DataLoader(training_data,
                                                batch_size=opt.batch_size,
                                                shuffle=True,
@@ -187,9 +187,9 @@ def get_val_utils(opt):
         TemporalEvenCrop(opt.sample_duration, opt.n_val_samples))
     temporal_transform = TemporalCompose(temporal_transform)
 
-    validation_data = get_validation_set(opt.video_path, opt.annotation_path,
-                                         opt.dataset, opt.file_type,
-                                         spatial_transform, temporal_transform)
+    validation_data = get_validation_data(opt.video_path, opt.annotation_path,
+                                          opt.dataset, opt.file_type,
+                                          spatial_transform, temporal_transform)
     val_loader = torch.utils.data.DataLoader(validation_data,
                                              batch_size=(opt.batch_size //
                                                          opt.n_val_samples),
@@ -202,14 +202,14 @@ def get_val_utils(opt):
     return val_loader, val_logger
 
 
-def get_test_utils(opt):
-    assert opt.test_crop in ['center', 'nocrop']
+def get_inference_utils(opt):
+    assert opt.inference_crop in ['center', 'nocrop']
 
     normalize = get_normalize_method(opt.mean, opt.std, opt.no_mean_norm,
                                      opt.no_std_norm)
 
     spatial_transform = [Resize(opt.sample_size)]
-    if opt.test_crop == 'center':
+    if opt.inference_crop == 'center':
         spatial_transform.append(CenterCrop(opt.sample_size))
     spatial_transform.extend(
         [ToTensor(), ScaleValue(opt.value_scale), normalize])
@@ -219,23 +219,23 @@ def get_test_utils(opt):
     if opt.sample_t_stride > 1:
         temporal_transform.append(TemporalSubsampling(opt.sample_t_stride))
     temporal_transform.append(
-        SlidingWindow(opt.sample_duration, opt.test_stride))
+        SlidingWindow(opt.sample_duration, opt.inference_stride))
     temporal_transform = TemporalCompose(temporal_transform)
 
-    test_data, collate_fn = get_test_set(opt.video_path, opt.annotation_path,
-                                         opt.dataset, opt.file_type,
-                                         opt.test_subset, spatial_transform,
-                                         temporal_transform)
+    inference_data, collate_fn = get_inference_data(
+        opt.video_path, opt.annotation_path, opt.dataset, opt.file_type,
+        opt.inference_subset, spatial_transform, temporal_transform)
 
-    test_loader = torch.utils.data.DataLoader(test_data,
-                                              batch_size=opt.test_batch_size,
-                                              shuffle=False,
-                                              num_workers=opt.n_threads,
-                                              pin_memory=True,
-                                              worker_init_fn=worker_init_fn,
-                                              collate_fn=collate_fn)
+    inference_loader = torch.utils.data.DataLoader(
+        inference_data,
+        batch_size=opt.inference_batch_size,
+        shuffle=False,
+        num_workers=opt.n_threads,
+        pin_memory=True,
+        worker_init_fn=worker_init_fn,
+        collate_fn=collate_fn)
 
-    return test_loader, test_data.class_names
+    return inference_loader, inference_data.class_names
 
 
 def save_checkpoint(save_file_path, epoch, arch, model, optimizer, scheduler):
@@ -305,9 +305,11 @@ if __name__ == '__main__':
             prev_val_loss = val_epoch(i, val_loader, model, criterion,
                                       opt.device, val_logger)
 
-    if opt.test:
-        test_loader, test_class_names = get_test_utils(opt)
-        test_result_path = opt.result_path / '{}.json'.format(opt.test_subset)
+    if opt.inference:
+        inference_loader, inference_class_names = get_inference_utils(opt)
+        inference_result_path = opt.result_path / '{}.json'.format(
+            opt.inference_subset)
 
-        test.test(test_loader, model, test_result_path, test_class_names,
-                  opt.test_no_average, opt.output_topk)
+        inference.inference(inference_loader, model, inference_result_path,
+                            inference_class_names, opt.inference_no_average,
+                            opt.output_topk)
