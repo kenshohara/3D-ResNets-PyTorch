@@ -49,7 +49,7 @@ def video_process(video_file_path, dst_root_path, ext, fps=-1, size=240):
                                      (len(list(dst_dir_path.glob('*.jpg'))),),
                                      dtype=dtype)
     except OSError as exc:
-        if exc.errno == 36:
+        if 'errno = 36' in exc.args[0]:
             hdf5_path = dst_dir_path.parent / f'{dst_dir_path.name[:250]}.hdf5'
             with h5py.File(hdf5_path, 'w') as f:
                 dtype = h5py.special_dtype(vlen='uint8')
