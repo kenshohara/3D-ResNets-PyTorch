@@ -53,6 +53,9 @@ def get_opt():
     if opt.output_topk <= 0:
         opt.output_topk = opt.n_classes
 
+    if opt.inference_batch_size == 0:
+        opt.inference_batch_size = opt.batch_size
+
     opt.arch = '{}-{}'.format(opt.model, opt.model_depth)
     opt.begin_epoch = 1
     opt.mean, opt.std = get_mean_std(opt.value_scale, dataset=opt.mean_dataset)
