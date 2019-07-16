@@ -20,8 +20,6 @@ from temporal_transforms import (LoopPadding, TemporalRandomCrop,
                                  TemporalCenterCrop, TemporalEvenCrop,
                                  SlidingWindow, TemporalSubsampling)
 from temporal_transforms import Compose as TemporalCompose
-from target_transforms import ClassLabel, VideoID, Segment
-from target_transforms import Compose as TargetCompose
 from dataset import get_training_data, get_validation_data, get_inference_data
 from utils import Logger, worker_init_fn, get_lr
 from training import train_epoch
