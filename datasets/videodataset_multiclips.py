@@ -16,7 +16,11 @@ def collate_fn(batch):
         target for multi_targets in batch_targets for target in multi_targets
     ]
 
-    return default_collate(batch_clips), batch_targets
+    target_element = batch_targets[0]
+    if isinstance(target_element, int) or isinstance(target_element, str):
+        return default_collate(batch_clips), default_collate(batch_targets)
+    else:
+        return default_collate(batch_clips), batch_targets
 
 
 class VideoDatasetMultiClips(VideoDataset):
