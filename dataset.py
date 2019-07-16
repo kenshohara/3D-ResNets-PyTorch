@@ -89,7 +89,7 @@ def get_validation_data(video_path,
             video_loader=loader,
             video_path_formatter=video_path_formatter)
 
-    return validation_data
+    return validation_data, collate_fn
 
 
 def get_inference_data(video_path,

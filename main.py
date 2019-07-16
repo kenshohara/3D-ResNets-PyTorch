@@ -188,16 +188,17 @@ def get_val_utils(opt):
         TemporalEvenCrop(opt.sample_duration, opt.n_val_samples))
     temporal_transform = TemporalCompose(temporal_transform)
 
-    validation_data = get_validation_data(opt.video_path, opt.annotation_path,
-                                          opt.dataset, opt.file_type,
-                                          spatial_transform, temporal_transform)
+    validation_data, collate_fn = get_validation_data(
+        opt.video_path, opt.annotation_path, opt.dataset, opt.file_type,
+        spatial_transform, temporal_transform)
     val_loader = torch.utils.data.DataLoader(validation_data,
                                              batch_size=(opt.batch_size //
                                                          opt.n_val_samples),
                                              shuffle=False,
                                              num_workers=opt.n_threads,
                                              pin_memory=True,
-                                             worker_init_fn=worker_init_fn)
+                                             worker_init_fn=worker_init_fn,
+                                             collate_fn=collate_fn)
     val_logger = Logger(opt.result_path / 'val.log', ['epoch', 'loss', 'acc'])
 
     return val_loader, val_logger
