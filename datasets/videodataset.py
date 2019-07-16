@@ -1,5 +1,4 @@
 import json
-import copy
 import functools
 
 import torch
