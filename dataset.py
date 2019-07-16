@@ -79,7 +79,7 @@ def get_validation_data(video_path,
                                       video_loader=loader,
                                       video_path_formatter=video_path_formatter)
     else:
-        validation_data = VideoDataset(
+        validation_data = VideoDatasetMultiClips(
             video_path,
             annotation_path,
             'validation',
