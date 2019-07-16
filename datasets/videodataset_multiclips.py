@@ -43,6 +43,21 @@ class VideoDatasetMultiClips(VideoDataset):
 
         clips, segments = self.__loading(path, video_frame_indices)
 
-        video_id = self.data[index]['video_id']
+        if isinstance(self.target_type, list):
+            target = [self.data[index][t] for t in self.target_type]
+        else:
+            target = self.data[index][self.target_type]
 
-        return clips, [(video_id, s) for s in segments]
+        if 'segment' in self.target_type:
+            if isinstance(self.target_type, list):
+                segment_index = self.target_type.index('segment')
+                targets = []
+                for s in segments:
+                    targets.append(copy.deepcopy(target))
+                    targets[-1][segment_index] = s
+            else:
+                targets = segments
+        else:
+            targets = [target for _ in range(len(segments))]
+
+        return clips, targets

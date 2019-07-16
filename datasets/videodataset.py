@@ -42,7 +42,8 @@ class VideoDataset(data.Dataset):
                  video_loader=None,
                  video_path_formatter=(lambda root_path, label, video_id:
                                        root_path / label / video_id),
-                 image_name_formatter=lambda x: f'image_{x:05d}.jpg'):
+                 image_name_formatter=lambda x: f'image_{x:05d}.jpg',
+                 target_type='label'):
         self.data, self.class_names = self.__make_dataset(
             root_path, annotation_path, subset, video_path_formatter)
 
@@ -54,6 +55,8 @@ class VideoDataset(data.Dataset):
             self.loader = VideoLoader(image_name_formatter)
         else:
             self.loader = video_loader
+
+        self.target_type = target_type
 
     def __make_dataset(self, root_path, annotation_path, subset,
                        video_path_formatter):
@@ -109,7 +112,10 @@ class VideoDataset(data.Dataset):
 
     def __getitem__(self, index):
         path = self.data[index]['video']
-        target = self.data[index]['label']
+        if isinstance(self.target_type, list):
+            target = [self.data[index][t] for t in self.target_type]
+        else:
+            target = self.data[index][self.target_type]
 
         frame_indices = self.data[index]['frame_indices']
         if self.temporal_transform is not None:
