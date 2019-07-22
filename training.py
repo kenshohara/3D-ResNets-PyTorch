@@ -6,8 +6,16 @@ import sys
 from utils import AverageMeter, calculate_accuracy
 
 
-def train_epoch(epoch, data_loader, model, criterion, optimizer, device,
-                current_lr, epoch_logger, batch_logger):
+def train_epoch(epoch,
+                data_loader,
+                model,
+                criterion,
+                optimizer,
+                device,
+                current_lr,
+                epoch_logger,
+                batch_logger,
+                tb_writer=None):
     print('train at epoch {}'.format(epoch))
 
     model.train()
@@ -49,14 +57,13 @@ def train_epoch(epoch, data_loader, model, criterion, optimizer, device,
               'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
               'Data {data_time.val:.3f} ({data_time.avg:.3f})\t'
               'Loss {loss.val:.4f} ({loss.avg:.4f})\t'
-              'Acc {acc.val:.3f} ({acc.avg:.3f})'.format(
-                  epoch,
-                  i + 1,
-                  len(data_loader),
-                  batch_time=batch_time,
-                  data_time=data_time,
-                  loss=losses,
-                  acc=accuracies))
+              'Acc {acc.val:.3f} ({acc.avg:.3f})'.format(epoch,
+                                                         i + 1,
+                                                         len(data_loader),
+                                                         batch_time=batch_time,
+                                                         data_time=data_time,
+                                                         loss=losses,
+                                                         acc=accuracies))
 
     epoch_logger.log({
         'epoch': epoch,
@@ -64,3 +71,8 @@ def train_epoch(epoch, data_loader, model, criterion, optimizer, device,
         'acc': accuracies.avg,
         'lr': current_lr
     })
+
+    if tb_writer is not None:
+        tb_writer.add_scalar('train/loss', losses.avg, epoch)
+        tb_writer.add_scalar('train/acc', accuracies.avg, epoch)
+        tb_writer.add_scalar('train/lr', accuracies.avg, epoch)

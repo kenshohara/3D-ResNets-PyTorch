@@ -257,6 +257,9 @@ def parse_opts():
                         default='jpg',
                         type=str,
                         help='(jpg | hdf5)')
+    parser.add_argument('--tensorboard',
+                        action='store_true',
+                        help='If true, output tensorboard log file.')
 
     args = parser.parse_args()
 

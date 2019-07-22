@@ -284,6 +284,16 @@ if __name__ == '__main__':
             opt.begin_epoch, model, _, _ = resume(opt.resume_path, opt.arch,
                                                   opt.begin_epoch, model)
 
+    if opt.tensorboard:
+        from torch.utils.tensorboard import SummaryWriter
+        if opt.begin_epoch == 1:
+            tb_writer = SummaryWriter(log_dir=opt.result_path)
+        else:
+            tb_writer = SummaryWriter(log_dir=opt.result_path,
+                                      purge_index=opt.begin_epoch)
+    else:
+        tb_writer = None
+
     prev_val_loss = None
     for i in range(opt.begin_epoch, opt.n_epochs + 1):
         if not opt.no_train:
@@ -296,7 +306,7 @@ if __name__ == '__main__':
             current_lr = get_lr(optimizer)
             train_epoch(i, train_loader, model, criterion, optimizer,
                         opt.device, current_lr, train_logger,
-                        train_batch_logger)
+                        train_batch_logger, tb_writer)
 
             if i % opt.checkpoint == 0:
                 save_file_path = opt.result_path / 'save_{}.pth'.format(i)
@@ -305,7 +315,7 @@ if __name__ == '__main__':
 
         if not opt.no_val:
             prev_val_loss = val_epoch(i, val_loader, model, criterion,
-                                      opt.device, val_logger)
+                                      opt.device, val_logger, tb_writer)
 
     if opt.inference:
         inference_loader, inference_class_names = get_inference_utils(opt)
