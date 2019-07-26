@@ -161,6 +161,7 @@ def get_train_utils(opt, model_parameters):
                     nesterov=opt.nesterov)
 
     assert opt.lr_scheduler in ['plateau', 'multistep']
+    assert not (opt.lr_scheduler == 'plateau' and opt.no_val)
     if opt.lr_scheduler == 'plateau':
         scheduler = lr_scheduler.ReduceLROnPlateau(
             optimizer, 'min', patience=opt.plateau_patience)
@@ -297,12 +298,6 @@ if __name__ == '__main__':
     prev_val_loss = None
     for i in range(opt.begin_epoch, opt.n_epochs + 1):
         if not opt.no_train:
-            if opt.lr_scheduler == 'multistep':
-                scheduler.step()
-            elif (opt.lr_scheduler == 'plateau' and not opt.no_val and
-                  prev_val_loss is not None):
-                scheduler.step(prev_val_loss)
-
             current_lr = get_lr(optimizer)
             train_epoch(i, train_loader, model, criterion, optimizer,
                         opt.device, current_lr, train_logger,
@@ -316,6 +311,11 @@ if __name__ == '__main__':
         if not opt.no_val:
             prev_val_loss = val_epoch(i, val_loader, model, criterion,
                                       opt.device, val_logger, tb_writer)
+
+        if opt.lr_scheduler == 'multistep':
+            scheduler.step()
+        elif opt.lr_scheduler == 'plateau':
+            scheduler.step(prev_val_loss)
 
     if opt.inference:
         inference_loader, inference_class_names = get_inference_utils(opt)
