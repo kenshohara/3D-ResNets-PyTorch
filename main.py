@@ -296,7 +296,9 @@ def main_worker(index, opt):
         parameters = get_fine_tuning_parameters(model, opt.ft_begin_module)
     else:
         parameters = model.parameters()
-    print(model)
+
+    if index == 0:
+        print(model)
 
     criterion = CrossEntropyLoss().to(opt.device)
 
@@ -337,7 +339,7 @@ def main_worker(index, opt):
                         opt.device, current_lr, train_logger,
                         train_batch_logger, tb_writer)
 
-            if i % opt.checkpoint == 0:
+            if i % opt.checkpoint == 0 and (not opt.distributed or index == 0):
                 save_file_path = opt.result_path / 'save_{}.pth'.format(i)
                 save_checkpoint(save_file_path, i, opt.arch, model, optimizer,
                                 scheduler)
