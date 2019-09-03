@@ -272,7 +272,7 @@ def save_checkpoint(save_file_path, epoch, arch, model, optimizer, scheduler):
 
 
 def main_worker(index, opt):
-    if index > 0 and opt.device.type == 'cuda':
+    if index >= 0 and opt.device.type == 'cuda':
         opt.device = torch.device(f'cuda:{index}')
 
     if opt.distributed:
