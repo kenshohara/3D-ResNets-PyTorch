@@ -323,7 +323,7 @@ def main_worker(index, opt):
             tb_writer = SummaryWriter(log_dir=opt.result_path)
         else:
             tb_writer = SummaryWriter(log_dir=opt.result_path,
-                                      purge_index=opt.begin_epoch)
+                                      purge_step=opt.begin_epoch)
     else:
         tb_writer = None
 
