@@ -260,6 +260,23 @@ def parse_opts():
     parser.add_argument('--tensorboard',
                         action='store_true',
                         help='If true, output tensorboard log file.')
+    parser.add_argument(
+        '--distributed',
+        action='store_true',
+        help='Use multi-processing distributed training to launch '
+        'N processes per node, which has N GPUs.')
+    parser.add_argument('--dist_url',
+                        default='tcp://127.0.0.1:23456',
+                        type=str,
+                        help='url used to set up distributed training')
+    parser.add_argument('--dist_rank',
+                        default=-1,
+                        type=int,
+                        help='node rank for distributed training')
+    parser.add_argument('--world_size',
+                        default=-1,
+                        type=int,
+                        help='number of nodes for distributed training')
 
     args = parser.parse_args()
 

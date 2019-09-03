@@ -1,16 +1,20 @@
 from pathlib import Path
 import json
 import random
+import os
 
 import numpy as np
 import torch
 from torch.nn import CrossEntropyLoss
 from torch.optim import SGD, lr_scheduler
+import torch.multiprocessing as mp
+import torch.distributed as dist
 from torch.backends import cudnn
 import torchvision
 
 from opts import parse_opts
-from model import generate_model
+from model import (generate_model, load_pretrained_model, make_data_parallel,
+                   get_fine_tuning_parameters)
 from mean import get_mean_std
 from spatial_transforms import (Compose, Normalize, Resize, CenterCrop,
                                 CornerCrop, MultiScaleCornerCrop,
@@ -75,7 +79,10 @@ def resume(resume_path,
     assert arch == checkpoint['arch']
 
     begin_epoch = checkpoint['epoch'] + 1
-    model.load_state_dict(checkpoint['state_dict'])
+    if hasattr(model, 'module'):
+        model.module.load_state_dict(checkpoint['state_dict'])
+    else:
+        model.load_state_dict(checkpoint['state_dict'])
     if optimizer is not None and 'optimizer' in checkpoint:
         optimizer.load_state_dict(checkpoint['optimizer'])
     if scheduler is not None and 'scheduler' in checkpoint:
@@ -135,14 +142,20 @@ def get_train_utils(opt, model_parameters):
         temporal_transform.append(TemporalCenterCrop(opt.sample_duration))
     temporal_transform = TemporalCompose(temporal_transform)
 
-    training_data = get_training_data(opt.video_path, opt.annotation_path,
-                                      opt.dataset, opt.file_type,
-                                      spatial_transform, temporal_transform)
-    train_loader = torch.utils.data.DataLoader(training_data,
+    train_data = get_training_data(opt.video_path, opt.annotation_path,
+                                   opt.dataset, opt.file_type,
+                                   spatial_transform, temporal_transform)
+    if opt.distributed:
+        train_sampler = torch.utils.data.distributed.DistributedSampler(
+            train_data)
+    else:
+        train_sampler = None
+    train_loader = torch.utils.data.DataLoader(train_data,
                                                batch_size=opt.batch_size,
-                                               shuffle=True,
+                                               shuffle=(train_sampler is None),
                                                num_workers=opt.n_threads,
                                                pin_memory=True,
+                                               sampler=train_sampler,
                                                worker_init_fn=worker_init_fn)
     train_logger = Logger(opt.result_path / 'train.log',
                           ['epoch', 'loss', 'acc', 'lr'])
@@ -169,7 +182,8 @@ def get_train_utils(opt, model_parameters):
         scheduler = lr_scheduler.MultiStepLR(optimizer,
                                              opt.multistep_milestones)
 
-    return train_loader, train_logger, train_batch_logger, optimizer, scheduler
+    return (train_loader, train_sampler, train_logger, train_batch_logger,
+            optimizer, scheduler)
 
 
 def get_val_utils(opt):
@@ -189,10 +203,11 @@ def get_val_utils(opt):
         TemporalEvenCrop(opt.sample_duration, opt.n_val_samples))
     temporal_transform = TemporalCompose(temporal_transform)
 
-    validation_data, collate_fn = get_validation_data(
-        opt.video_path, opt.annotation_path, opt.dataset, opt.file_type,
-        spatial_transform, temporal_transform)
-    val_loader = torch.utils.data.DataLoader(validation_data,
+    val_data, collate_fn = get_validation_data(opt.video_path,
+                                               opt.annotation_path, opt.dataset,
+                                               opt.file_type, spatial_transform,
+                                               temporal_transform)
+    val_loader = torch.utils.data.DataLoader(val_data,
                                              batch_size=(opt.batch_size //
                                                          opt.n_val_samples),
                                              shuffle=False,
@@ -242,35 +257,52 @@ def get_inference_utils(opt):
 
 
 def save_checkpoint(save_file_path, epoch, arch, model, optimizer, scheduler):
+    if hasattr(model, 'module'):
+        model_state_dict = model.module.state_dict()
+    else:
+        model_state_dict = model.state_dict()
     save_states = {
         'epoch': epoch,
         'arch': arch,
-        'state_dict': model.state_dict(),
+        'state_dict': model_state_dict,
         'optimizer': optimizer.state_dict(),
         'scheduler': scheduler.state_dict()
     }
     torch.save(save_states, save_file_path)
 
 
-if __name__ == '__main__':
-    opt = get_opt()
+def main_worker(index, opt):
+    if index > 0 and opt.device.type == 'cuda':
+        opt.device = torch.device(f'cuda:{index}')
 
-    opt.device = torch.device('cpu' if opt.no_cuda else 'cuda')
-    if not opt.no_cuda:
-        cudnn.benchmark = True
-    if opt.accimage:
-        torchvision.set_image_backend('accimage')
-    random.seed(opt.manual_seed)
-    np.random.seed(opt.manual_seed)
-    torch.manual_seed(opt.manual_seed)
+    if opt.distributed:
+        opt.dist_rank = opt.dist_rank * opt.ngpus_per_node + index
+        dist.init_process_group(backend='nccl',
+                                init_method=opt.dist_url,
+                                world_size=opt.world_size,
+                                rank=opt.dist_rank)
+        opt.batch_size = int(opt.batch_size / opt.ngpus_per_node)
+        opt.n_threads = int(
+            (opt.n_threads + opt.ngpus_per_node - 1) / opt.ngpus_per_node)
 
-    model, parameters = generate_model(opt)
+    model = generate_model(opt)
+    if opt.pretrain_path:
+        model = load_pretrained_model(model, opt.pretrain_path, opt.model,
+                                      opt.n_finetune_classes)
+
+    model = make_data_parallel(model, opt.distributed, opt.device)
+
+    if opt.pretrain_path:
+        parameters = get_fine_tuning_parameters(model, opt.ft_begin_module)
+    else:
+        parameters = model.parameters()
     print(model)
+
     criterion = CrossEntropyLoss().to(opt.device)
 
     if not opt.no_train:
-        (train_loader, train_logger, train_batch_logger, optimizer,
-         scheduler) = get_train_utils(opt, parameters)
+        (train_loader, train_sampler, train_logger, train_batch_logger,
+         optimizer, scheduler) = get_train_utils(opt, parameters)
     if not opt.no_val:
         val_loader, val_logger = get_val_utils(opt)
 
@@ -298,6 +330,8 @@ if __name__ == '__main__':
     prev_val_loss = None
     for i in range(opt.begin_epoch, opt.n_epochs + 1):
         if not opt.no_train:
+            if opt.distributed:
+                train_sampler.set_epoch(i)
             current_lr = get_lr(optimizer)
             train_epoch(i, train_loader, model, criterion, optimizer,
                         opt.device, current_lr, train_logger,
@@ -325,3 +359,23 @@ if __name__ == '__main__':
         inference.inference(inference_loader, model, inference_result_path,
                             inference_class_names, opt.inference_no_average,
                             opt.output_topk)
+
+
+if __name__ == '__main__':
+    opt = get_opt()
+
+    opt.device = torch.device('cpu' if opt.no_cuda else 'cuda')
+    if not opt.no_cuda:
+        cudnn.benchmark = True
+    if opt.accimage:
+        torchvision.set_image_backend('accimage')
+    random.seed(opt.manual_seed)
+    np.random.seed(opt.manual_seed)
+    torch.manual_seed(opt.manual_seed)
+
+    opt.ngpus_per_node = torch.cuda.device_count()
+    if opt.distributed:
+        opt.world_size = opt.ngpus_per_node * opt.world_size
+        mp.spawn(main_worker, nprocs=opt.ngpus_per_node, args=(opt,))
+    else:
+        main_worker(-1, opt)

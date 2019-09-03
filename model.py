@@ -38,70 +38,74 @@ def generate_model(opt):
     ]
 
     if opt.model == 'resnet':
-        model = resnet.generate_model(
-            model_depth=opt.model_depth,
-            n_classes=opt.n_classes,
-            shortcut_type=opt.resnet_shortcut,
-            conv1_t_size=opt.conv1_t_size,
-            conv1_t_stride=opt.conv1_t_stride,
-            no_max_pool=opt.no_max_pool)
+        model = resnet.generate_model(model_depth=opt.model_depth,
+                                      n_classes=opt.n_classes,
+                                      shortcut_type=opt.resnet_shortcut,
+                                      conv1_t_size=opt.conv1_t_size,
+                                      conv1_t_stride=opt.conv1_t_stride,
+                                      no_max_pool=opt.no_max_pool)
     elif opt.model == 'wideresnet':
-        model = wide_resnet.generate_model(
-            model_depth=opt.model_depth,
-            k=opt.wide_resnet_k,
-            n_classes=opt.n_classes,
-            shortcut_type=opt.resnet_shortcut,
-            conv1_t_size=opt.conv1_t_size,
-            conv1_t_stride=opt.conv1_t_stride,
-            no_max_pool=opt.no_max_pool)
+        model = wide_resnet.generate_model(model_depth=opt.model_depth,
+                                           k=opt.wide_resnet_k,
+                                           n_classes=opt.n_classes,
+                                           shortcut_type=opt.resnet_shortcut,
+                                           conv1_t_size=opt.conv1_t_size,
+                                           conv1_t_stride=opt.conv1_t_stride,
+                                           no_max_pool=opt.no_max_pool)
     elif opt.model == 'resnext':
-        model = resnext.generate_model(
-            model_depth=opt.model_depth,
-            cardinality=opt.resnext_cardinality,
-            n_classes=opt.n_classes,
-            shortcut_type=opt.resnet_shortcut,
-            conv1_t_size=opt.conv1_t_size,
-            conv1_t_stride=opt.conv1_t_stride,
-            no_max_pool=opt.no_max_pool)
+        model = resnext.generate_model(model_depth=opt.model_depth,
+                                       cardinality=opt.resnext_cardinality,
+                                       n_classes=opt.n_classes,
+                                       shortcut_type=opt.resnet_shortcut,
+                                       conv1_t_size=opt.conv1_t_size,
+                                       conv1_t_stride=opt.conv1_t_stride,
+                                       no_max_pool=opt.no_max_pool)
     elif opt.model == 'preresnet':
-        model = pre_act_resnet.generate_model(
-            model_depth=opt.model_depth,
-            n_classes=opt.n_classes,
-            shortcut_type=opt.resnet_shortcut,
-            conv1_t_size=opt.conv1_t_size,
-            conv1_t_stride=opt.conv1_t_stride,
-            no_max_pool=opt.no_max_pool)
+        model = pre_act_resnet.generate_model(model_depth=opt.model_depth,
+                                              n_classes=opt.n_classes,
+                                              shortcut_type=opt.resnet_shortcut,
+                                              conv1_t_size=opt.conv1_t_size,
+                                              conv1_t_stride=opt.conv1_t_stride,
+                                              no_max_pool=opt.no_max_pool)
     elif opt.model == 'densenet':
-        model = densenet.generate_model(
-            model_depth=opt.model_depth,
-            n_classes=opt.n_classes,
-            conv1_t_size=opt.conv1_t_size,
-            conv1_t_stride=opt.conv1_t_stride,
-            no_max_pool=opt.no_max_pool)
+        model = densenet.generate_model(model_depth=opt.model_depth,
+                                        n_classes=opt.n_classes,
+                                        conv1_t_size=opt.conv1_t_size,
+                                        conv1_t_stride=opt.conv1_t_stride,
+                                        no_max_pool=opt.no_max_pool)
 
-    if not opt.no_cuda:
+    return model
+
+
+def load_pretrained_model(model, pretrain_path, model_name, n_finetune_classes):
+    if pretrain_path:
+        print('loading pretrained model {}'.format(pretrain_path))
+        pretrain = torch.load(pretrain_path, map_location='cpu')
+
+        model.load_state_dict(pretrain['state_dict'])
+        tmp_model = model
+        if model_name == 'densenet':
+            tmp_model.classifier = nn.Linear(tmp_model.classifier.in_features,
+                                             n_finetune_classes)
+        else:
+            tmp_model.fc = nn.Linear(tmp_model.fc.in_features,
+                                     n_finetune_classes)
+
+    return model
+
+
+def make_data_parallel(model, is_distributed, device):
+    if is_distributed:
+        if device.type == 'cuda' and device.index is not None:
+            torch.cuda.set_device(device)
+            model.to(device)
+
+            model = nn.parallel.DistributedDataParallel(model,
+                                                        device_ids=[device])
+        else:
+            model.to(device)
+            model = nn.parallel.DistributedDataParallel(model)
+    elif device.type == 'cuda':
         model = nn.DataParallel(model, device_ids=None).cuda()
 
-    if not opt.pretrain_path:
-        return model, model.parameters()
-
-    print('loading pretrained model {}'.format(opt.pretrain_path))
-    pretrain = torch.load(opt.pretrain_path)
-    assert opt.arch == pretrain['arch']
-
-    model.load_state_dict(pretrain['state_dict'])
-
-    if opt.no_cuda:
-        tmp_model = model
-    else:
-        tmp_model = model.module
-    if opt.model == 'densenet':
-        tmp_model.classifier = nn.Linear(tmp_model.classifier.in_features,
-                                         opt.n_finetune_classes).to(opt.device)
-    else:
-        tmp_model.fc = nn.Linear(tmp_model.fc.in_features,
-                                 opt.n_finetune_classes).to(opt.device)
-
-    parameters = get_fine_tuning_parameters(model, opt.ft_begin_module)
-
-    return model, parameters
+    return model
