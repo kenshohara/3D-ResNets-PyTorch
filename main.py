@@ -272,6 +272,10 @@ def save_checkpoint(save_file_path, epoch, arch, model, optimizer, scheduler):
 
 
 def main_worker(index, opt):
+    random.seed(opt.manual_seed)
+    np.random.seed(opt.manual_seed)
+    torch.manual_seed(opt.manual_seed)
+
     if index >= 0 and opt.device.type == 'cuda':
         opt.device = torch.device(f'cuda:{index}')
 
@@ -371,9 +375,6 @@ if __name__ == '__main__':
         cudnn.benchmark = True
     if opt.accimage:
         torchvision.set_image_backend('accimage')
-    random.seed(opt.manual_seed)
-    np.random.seed(opt.manual_seed)
-    torch.manual_seed(opt.manual_seed)
 
     opt.ngpus_per_node = torch.cuda.device_count()
     if opt.distributed:
