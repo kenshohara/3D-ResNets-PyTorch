@@ -157,10 +157,16 @@ def get_train_utils(opt, model_parameters):
                                                pin_memory=True,
                                                sampler=train_sampler,
                                                worker_init_fn=worker_init_fn)
-    train_logger = Logger(opt.result_path / 'train.log',
-                          ['epoch', 'loss', 'acc', 'lr'])
-    train_batch_logger = Logger(opt.result_path / 'train_batch.log',
-                                ['epoch', 'batch', 'iter', 'loss', 'acc', 'lr'])
+
+    if not opt.distributed or opt.dist_rank == 0:
+        train_logger = Logger(opt.result_path / 'train.log',
+                              ['epoch', 'loss', 'acc', 'lr'])
+        train_batch_logger = Logger(
+            opt.result_path / 'train_batch.log',
+            ['epoch', 'batch', 'iter', 'loss', 'acc', 'lr'])
+    else:
+        train_logger = None
+        train_batch_logger = None
 
     if opt.nesterov:
         dampening = 0
@@ -215,7 +221,12 @@ def get_val_utils(opt):
                                              pin_memory=True,
                                              worker_init_fn=worker_init_fn,
                                              collate_fn=collate_fn)
-    val_logger = Logger(opt.result_path / 'val.log', ['epoch', 'loss', 'acc'])
+
+    if not opt.distributed or opt.dist_rank == 0:
+        val_logger = Logger(opt.result_path / 'val.log',
+                            ['epoch', 'loss', 'acc'])
+    else:
+        val_logger = None
 
     return val_loader, val_logger
 
@@ -323,7 +334,7 @@ def main_worker(index, opt):
             opt.begin_epoch, model, _, _ = resume(opt.resume_path, opt.arch,
                                                   opt.begin_epoch, model)
 
-    if opt.tensorboard:
+    if opt.tensorboard and (not opt.distributed or opt.dist_rank == 0):
         from torch.utils.tensorboard import SummaryWriter
         if opt.begin_epoch == 1:
             tb_writer = SummaryWriter(log_dir=opt.result_path)

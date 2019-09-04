@@ -44,14 +44,15 @@ def train_epoch(epoch,
         batch_time.update(time.time() - end_time)
         end_time = time.time()
 
-        batch_logger.log({
-            'epoch': epoch,
-            'batch': i + 1,
-            'iter': (epoch - 1) * len(data_loader) + (i + 1),
-            'loss': losses.val,
-            'acc': accuracies.val,
-            'lr': current_lr
-        })
+        if batch_logger is not None:
+            batch_logger.log({
+                'epoch': epoch,
+                'batch': i + 1,
+                'iter': (epoch - 1) * len(data_loader) + (i + 1),
+                'loss': losses.val,
+                'acc': accuracies.val,
+                'lr': current_lr
+            })
 
         print('Epoch: [{0}][{1}/{2}]\t'
               'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
@@ -65,12 +66,13 @@ def train_epoch(epoch,
                                                          loss=losses,
                                                          acc=accuracies))
 
-    epoch_logger.log({
-        'epoch': epoch,
-        'loss': losses.avg,
-        'acc': accuracies.avg,
-        'lr': current_lr
-    })
+    if epoch_logger is not None:
+        epoch_logger.log({
+            'epoch': epoch,
+            'loss': losses.avg,
+            'acc': accuracies.avg,
+            'lr': current_lr
+        })
 
     if tb_writer is not None:
         tb_writer.add_scalar('train/loss', losses.avg, epoch)
