@@ -3,6 +3,9 @@ import time
 import os
 import sys
 
+import torch
+import torch.distributed as dist
+
 from utils import AverageMeter, calculate_accuracy
 
 
@@ -15,7 +18,8 @@ def train_epoch(epoch,
                 current_lr,
                 epoch_logger,
                 batch_logger,
-                tb_writer=None):
+                tb_writer=None,
+                distributed=False):
     print('train at epoch {}'.format(epoch))
 
     model.train()
@@ -65,6 +69,28 @@ def train_epoch(epoch,
                                                          data_time=data_time,
                                                          loss=losses,
                                                          acc=accuracies))
+
+    if distributed:
+        loss_sum = torch.tensor([losses.sum],
+                                dtype=torch.float32,
+                                device=device)
+        loss_count = torch.tensor([losses.count],
+                                  dtype=torch.float32,
+                                  device=device)
+        acc_sum = torch.tensor([accuracies.sum],
+                               dtype=torch.float32,
+                               device=device)
+        acc_count = torch.tensor([accuracies.count],
+                                 dtype=torch.float32,
+                                 device=device)
+
+        dist.all_reduce(loss_sum, op=dist.ReduceOp.SUM)
+        dist.all_reduce(loss_count, op=dist.ReduceOp.SUM)
+        dist.all_reduce(acc_sum, op=dist.ReduceOp.SUM)
+        dist.all_reduce(acc_count, op=dist.ReduceOp.SUM)
+
+        losses.avg = loss_sum.item() / loss_count.item()
+        accuracies.avg = acc_sum.item() / acc_count.item()
 
     if epoch_logger is not None:
         epoch_logger.log({

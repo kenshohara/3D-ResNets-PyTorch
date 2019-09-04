@@ -213,12 +213,18 @@ def get_val_utils(opt):
                                                opt.annotation_path, opt.dataset,
                                                opt.file_type, spatial_transform,
                                                temporal_transform)
+    if opt.distributed:
+        val_sampler = torch.utils.data.distributed.DistributedSampler(
+            val_data, shuffle=False)
+    else:
+        val_sampler = None
     val_loader = torch.utils.data.DataLoader(val_data,
                                              batch_size=(opt.batch_size //
                                                          opt.n_val_samples),
                                              shuffle=False,
                                              num_workers=opt.n_threads,
                                              pin_memory=True,
+                                             sampler=val_sampler,
                                              worker_init_fn=worker_init_fn,
                                              collate_fn=collate_fn)
 
@@ -352,7 +358,7 @@ def main_worker(index, opt):
             current_lr = get_lr(optimizer)
             train_epoch(i, train_loader, model, criterion, optimizer,
                         opt.device, current_lr, train_logger,
-                        train_batch_logger, tb_writer)
+                        train_batch_logger, tb_writer, opt.distributed)
 
             if i % opt.checkpoint == 0 and (not opt.distributed or index == 0):
                 save_file_path = opt.result_path / 'save_{}.pth'.format(i)
@@ -361,7 +367,8 @@ def main_worker(index, opt):
 
         if not opt.no_val:
             prev_val_loss = val_epoch(i, val_loader, model, criterion,
-                                      opt.device, val_logger, tb_writer)
+                                      opt.device, val_logger, tb_writer,
+                                      opt.distributed)
 
         if opt.lr_scheduler == 'multistep':
             scheduler.step()

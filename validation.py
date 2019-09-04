@@ -2,6 +2,9 @@ import torch
 import time
 import sys
 
+import torch
+import torch.distributed as dist
+
 from utils import AverageMeter, calculate_accuracy
 
 
@@ -11,7 +14,8 @@ def val_epoch(epoch,
               criterion,
               device,
               logger,
-              tb_writer=None):
+              tb_writer=None,
+              distributed=False):
     print('validation at epoch {}'.format(epoch))
 
     model.eval()
@@ -50,6 +54,28 @@ def val_epoch(epoch,
                       data_time=data_time,
                       loss=losses,
                       acc=accuracies))
+
+    if distributed:
+        loss_sum = torch.tensor([losses.sum],
+                                dtype=torch.float32,
+                                device=device)
+        loss_count = torch.tensor([losses.count],
+                                  dtype=torch.float32,
+                                  device=device)
+        acc_sum = torch.tensor([accuracies.sum],
+                               dtype=torch.float32,
+                               device=device)
+        acc_count = torch.tensor([accuracies.count],
+                                 dtype=torch.float32,
+                                 device=device)
+
+        dist.all_reduce(loss_sum, op=dist.ReduceOp.SUM)
+        dist.all_reduce(loss_count, op=dist.ReduceOp.SUM)
+        dist.all_reduce(acc_sum, op=dist.ReduceOp.SUM)
+        dist.all_reduce(acc_count, op=dist.ReduceOp.SUM)
+
+        losses.avg = loss_sum.item() / loss_count.item()
+        accuracies.avg = acc_sum.item() / acc_count.item()
 
     if logger is not None:
         logger.log({'epoch': epoch, 'loss': losses.avg, 'acc': accuracies.avg})
