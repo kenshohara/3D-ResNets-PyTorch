@@ -318,7 +318,7 @@ def main_worker(index, opt):
     else:
         parameters = model.parameters()
 
-    if index == 0:
+    if index <= 0:
         print(model)
 
     criterion = CrossEntropyLoss().to(opt.device)
