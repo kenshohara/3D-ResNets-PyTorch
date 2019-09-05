@@ -152,14 +152,25 @@ class ResNet(nn.Module):
         self.inplanes = 64
         self.no_max_pool = no_max_pool
 
-        self.conv1 = nn.Conv3d(3,
-                               self.inplanes,
-                               kernel_size=(conv1_t_size, 7, 7),
-                               stride=(conv1_t_stride, 2, 2),
-                               padding=(conv1_t_size // 2, 3, 3),
-                               bias=False)
-        self.bn1 = nn.BatchNorm3d(self.inplanes)
+        n_3d_parameters = 3 * self.inplanes * conv1_t_size * 7 * 7
+        n_2p1d_parameters = 3 * 7 * 7 + conv1_t_size * self.inplanes
+        mid_planes = n_3d_parameters // n_2p1d_parameters
+        self.conv1_s = nn.Conv3d(3,
+                                 mid_planes,
+                                 kernel_size=(1, 7, 7),
+                                 stride=(1, 2, 2),
+                                 padding=(0, 3, 3),
+                                 bias=False)
+        self.bn1_s = nn.BatchNorm3d(mid_planes)
+        self.conv1_t = nn.Conv3d(mid_planes,
+                                 self.inplanes,
+                                 kernel_size=(conv1_t_size, 1, 1),
+                                 stride=(conv1_t_stride, 1, 1),
+                                 padding=(conv1_t_size // 2, 0, 0),
+                                 bias=False)
+        self.bn1_t = nn.BatchNorm3d(self.inplanes)
         self.relu = nn.ReLU(inplace=True)
+
         self.maxpool = nn.MaxPool3d(kernel_size=3, stride=2, padding=1)
         self.layer1 = self._make_layer(block, block_inplanes[0], layers[0],
                                        shortcut_type)
@@ -227,9 +238,13 @@ class ResNet(nn.Module):
         return nn.Sequential(*layers)
 
     def forward(self, x):
-        x = self.conv1(x)
-        x = self.bn1(x)
+        x = self.conv1_s(x)
+        x = self.bn1_s(x)
         x = self.relu(x)
+        x = self.conv1_t(x)
+        x = self.bn1_t(x)
+        x = self.relu(x)
+
         if not self.no_max_pool:
             x = self.maxpool(x)
 
