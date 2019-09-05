@@ -214,7 +214,8 @@ def parse_opts():
         '--model',
         default='resnet',
         type=str,
-        help='(resnet | preresnet | wideresnet | resnext | densenet | ')
+        help=
+        '(resnet | resnet2p1d | preresnet | wideresnet | resnext | densenet | ')
     parser.add_argument('--model_depth',
                         default=18,
                         type=int,
