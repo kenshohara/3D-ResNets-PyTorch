@@ -68,7 +68,7 @@ class BasicBlock(nn.Module):
         out = self.conv1_s(x)
         out = self.bn1_s(out)
         out = self.relu(out)
-        out = self.conv1_t(x)
+        out = self.conv1_t(out)
         out = self.bn1_t(out)
         out = self.relu(out)
 
