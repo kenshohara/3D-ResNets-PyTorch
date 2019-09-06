@@ -90,10 +90,10 @@ class BasicBlock(nn.Module):
 class Bottleneck(nn.Module):
     expansion = 4
 
-    def __init__(self, inplanes, planes, stride=1, downsample=None):
+    def __init__(self, in_planes, planes, stride=1, downsample=None):
         super().__init__()
 
-        self.conv1 = conv1x1x1(inplanes, planes)
+        self.conv1 = conv1x1x1(in_planes, planes)
         self.bn1 = nn.BatchNorm3d(planes)
 
         n_3d_parameters = planes * planes * 3 * 3 * 3
@@ -149,11 +149,11 @@ class ResNet(nn.Module):
                  n_classes=400):
         super().__init__()
 
-        self.inplanes = 64
+        self.in_planes = 64
         self.no_max_pool = no_max_pool
 
-        n_3d_parameters = 3 * self.inplanes * conv1_t_size * 7 * 7
-        n_2p1d_parameters = 3 * 7 * 7 + conv1_t_size * self.inplanes
+        n_3d_parameters = 3 * self.in_planes * conv1_t_size * 7 * 7
+        n_2p1d_parameters = 3 * 7 * 7 + conv1_t_size * self.in_planes
         mid_planes = n_3d_parameters // n_2p1d_parameters
         self.conv1_s = nn.Conv3d(3,
                                  mid_planes,
@@ -163,12 +163,12 @@ class ResNet(nn.Module):
                                  bias=False)
         self.bn1_s = nn.BatchNorm3d(mid_planes)
         self.conv1_t = nn.Conv3d(mid_planes,
-                                 self.inplanes,
+                                 self.in_planes,
                                  kernel_size=(conv1_t_size, 1, 1),
                                  stride=(conv1_t_stride, 1, 1),
                                  padding=(conv1_t_size // 2, 0, 0),
                                  bias=False)
-        self.bn1_t = nn.BatchNorm3d(self.inplanes)
+        self.bn1_t = nn.BatchNorm3d(self.in_planes)
         self.relu = nn.ReLU(inplace=True)
 
         self.maxpool = nn.MaxPool3d(kernel_size=3, stride=2, padding=1)
@@ -215,25 +215,25 @@ class ResNet(nn.Module):
 
     def _make_layer(self, block, planes, blocks, shortcut_type, stride=1):
         downsample = None
-        if stride != 1 or self.inplanes != planes * block.expansion:
+        if stride != 1 or self.in_planes != planes * block.expansion:
             if shortcut_type == 'A':
                 downsample = partial(self._downsample_basic_block,
                                      planes=planes * block.expansion,
                                      stride=stride)
             else:
                 downsample = nn.Sequential(
-                    conv1x1x1(self.inplanes, planes * block.expansion, stride),
+                    conv1x1x1(self.in_planes, planes * block.expansion, stride),
                     nn.BatchNorm3d(planes * block.expansion))
 
         layers = []
         layers.append(
-            block(inplanes=self.inplanes,
+            block(in_planes=self.in_planes,
                   planes=planes,
                   stride=stride,
                   downsample=downsample))
-        self.inplanes = planes * block.expansion
+        self.in_planes = planes * block.expansion
         for i in range(1, blocks):
-            layers.append(block(self.inplanes, planes))
+            layers.append(block(self.in_planes, planes))
 
         return nn.Sequential(*layers)
 
