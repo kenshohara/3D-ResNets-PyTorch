@@ -158,7 +158,7 @@ def get_train_utils(opt, model_parameters):
                                                sampler=train_sampler,
                                                worker_init_fn=worker_init_fn)
 
-    if not opt.distributed or opt.dist_rank == 0:
+    if opt.is_master_node:
         train_logger = Logger(opt.result_path / 'train.log',
                               ['epoch', 'loss', 'acc', 'lr'])
         train_batch_logger = Logger(
@@ -228,7 +228,7 @@ def get_val_utils(opt):
                                              worker_init_fn=worker_init_fn,
                                              collate_fn=collate_fn)
 
-    if not opt.distributed or opt.dist_rank == 0:
+    if opt.is_master_node:
         val_logger = Logger(opt.result_path / 'val.log',
                             ['epoch', 'loss', 'acc'])
     else:
@@ -305,6 +305,7 @@ def main_worker(index, opt):
         opt.batch_size = int(opt.batch_size / opt.ngpus_per_node)
         opt.n_threads = int(
             (opt.n_threads + opt.ngpus_per_node - 1) / opt.ngpus_per_node)
+    opt.is_master_node = not opt.distributed or opt.dist_rank == 0
 
     model = generate_model(opt)
     if opt.pretrain_path:
@@ -318,7 +319,7 @@ def main_worker(index, opt):
     else:
         parameters = model.parameters()
 
-    if index <= 0:
+    if opt.is_master_node:
         print(model)
 
     criterion = CrossEntropyLoss().to(opt.device)
@@ -340,7 +341,7 @@ def main_worker(index, opt):
             opt.begin_epoch, model, _, _ = resume(opt.resume_path, opt.arch,
                                                   opt.begin_epoch, model)
 
-    if opt.tensorboard and (not opt.distributed or opt.dist_rank == 0):
+    if opt.tensorboard and opt.is_master_node:
         from torch.utils.tensorboard import SummaryWriter
         if opt.begin_epoch == 1:
             tb_writer = SummaryWriter(log_dir=opt.result_path)
@@ -360,7 +361,7 @@ def main_worker(index, opt):
                         opt.device, current_lr, train_logger,
                         train_batch_logger, tb_writer, opt.distributed)
 
-            if i % opt.checkpoint == 0 and (not opt.distributed or index == 0):
+            if i % opt.checkpoint == 0 and opt.is_master_node:
                 save_file_path = opt.result_path / 'save_{}.pth'.format(i)
                 save_checkpoint(save_file_path, i, opt.arch, model, optimizer,
                                 scheduler)
