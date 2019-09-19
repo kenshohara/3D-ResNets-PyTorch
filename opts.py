@@ -235,6 +235,11 @@ def parse_opts():
                         default='B',
                         type=str,
                         help='Shortcut type of resnet (A | B)')
+    parser.add_argument(
+        '--resnet_widen_factor',
+        default=1,
+        type=int,
+        help='The number of feature maps of resnet is multiplied by this value')
     parser.add_argument('--wide_resnet_k',
                         default=2,
                         type=int,

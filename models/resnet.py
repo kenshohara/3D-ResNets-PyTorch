@@ -109,8 +109,11 @@ class ResNet(nn.Module):
                  conv1_t_stride=1,
                  no_max_pool=False,
                  shortcut_type='B',
+                 widen_factor=1,
                  n_classes=400):
         super().__init__()
+
+        block_inplanes = [x * widen_factor for x in block_inplanes]
 
         self.in_planes = block_inplanes[0]
         self.no_max_pool = no_max_pool
