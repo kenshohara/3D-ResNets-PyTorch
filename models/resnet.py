@@ -112,7 +112,7 @@ class ResNet(nn.Module):
                  n_classes=400):
         super().__init__()
 
-        self.in_planes = 64
+        self.in_planes = block_inplanes[0]
         self.no_max_pool = no_max_pool
 
         self.conv1 = nn.Conv3d(3,
