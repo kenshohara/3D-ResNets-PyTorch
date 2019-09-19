@@ -113,7 +113,7 @@ class ResNet(nn.Module):
                  n_classes=400):
         super().__init__()
 
-        block_inplanes = [x * widen_factor for x in block_inplanes]
+        block_inplanes = [int(x * widen_factor) for x in block_inplanes]
 
         self.in_planes = block_inplanes[0]
         self.no_max_pool = no_max_pool
