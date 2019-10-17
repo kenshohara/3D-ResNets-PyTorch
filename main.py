@@ -371,9 +371,9 @@ def main_worker(index, opt):
                                       opt.device, val_logger, tb_writer,
                                       opt.distributed)
 
-        if opt.lr_scheduler == 'multistep':
+        if not opt.no_train and opt.lr_scheduler == 'multistep':
             scheduler.step()
-        elif opt.lr_scheduler == 'plateau':
+        elif not opt.no_train and opt.lr_scheduler == 'plateau':
             scheduler.step(prev_val_loss)
 
     if opt.inference:
