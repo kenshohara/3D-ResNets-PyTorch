@@ -34,7 +34,9 @@ class VideoDatasetMultiClips(VideoDataset):
                 self.spatial_transform.randomize_parameters()
                 clip = [self.spatial_transform(img) for img in clip]
             clips.append(torch.stack(clip, 0).permute(1, 0, 2, 3))
-            segments.append([clip_frame_indices[0], clip_frame_indices[-1] + 1])
+            segments.append(
+                [min(clip_frame_indices),
+                 max(clip_frame_indices) + 1])
 
         return clips, segments
 
