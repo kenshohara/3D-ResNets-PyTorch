@@ -1,5 +1,5 @@
 import json
-import functools
+from pathlib import Path
 
 import torch
 import torch.utils.data as data
@@ -27,7 +27,7 @@ def get_database(data, subset, root_path, video_path_formatter):
             video_ids.append(key)
             annotations.append(value['annotations'])
             if 'video_path' in value:
-                video_paths.append(value['video_path'])
+                video_paths.append(Path(value['video_path']))
             else:
                 label = value['annotations']['label']
                 video_paths.append(video_path_formatter(root_path, label, key))
