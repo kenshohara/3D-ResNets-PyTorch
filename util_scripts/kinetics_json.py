@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from .utils import get_n_frames
+from .utils import get_n_frames, get_n_frames_hdf5
 
 
 def convert_csv_to_dict(csv_path, subset):
@@ -39,7 +39,7 @@ def load_labels(train_csv_path):
 
 
 def convert_kinetics_csv_to_json(train_csv_path, val_csv_path, test_csv_path,
-                                 video_dir_path, dst_json_path):
+                                 video_dir_path, video_type, dst_json_path):
     labels = load_labels(train_csv_path)
     train_database = convert_csv_to_dict(train_csv_path, 'training')
     val_database = convert_csv_to_dict(val_csv_path, 'validation')
@@ -60,10 +60,16 @@ def convert_kinetics_csv_to_json(train_csv_path, val_csv_path, test_csv_path,
         else:
             label = 'test'
 
-        video_path = video_dir_path / label / k
-        if video_path.exists():
-            n_frames = get_n_frames(video_path)
-            v['annotations']['segment'] = (1, n_frames + 1)
+        if video_type == 'jpg':
+            video_path = video_dir_path / label / k
+            if video_path.exists():
+                n_frames = get_n_frames(video_path)
+                v['annotations']['segment'] = (1, n_frames + 1)
+        else:
+            video_path = video_dir_path / label / f'{k}.hdf5'
+            if video_path.exists():
+                n_frames = get_n_frames_hdf5(video_path)
+                v['annotations']['segment'] = (0, n_frames)
 
     with dst_json_path.open('w') as dst_file:
         json.dump(dst_data, dst_file)
@@ -77,21 +83,28 @@ if __name__ == '__main__':
                         help=('Directory path including '
                               'kinetics_train.csv, kinetics_val.csv, '
                               '(kinetics_test.csv (optional))'))
-    parser.add_argument('n_classes',
-                        default=400,
-                        type=int,
-                        help='400 or 600 (Kinetics-400 or Kinetics-600)')
+    parser.add_argument(
+        'n_classes',
+        default=700,
+        type=int,
+        help='400, 600, or 700 (Kinetics-400, Kinetics-600, or Kinetics-700)')
     parser.add_argument('video_path',
                         default=None,
                         type=Path,
-                        help=('Path of video directory (jpg).'
+                        help=('Path of video directory (jpg or hdf5).'
                               'Using to get n_frames of each video.'))
+    parser.add_argument('video_type',
+                        default='jpg',
+                        type=str,
+                        help=('jpg or hdf5'))
     parser.add_argument('dst_path',
                         default=None,
                         type=Path,
                         help='Path of dst json file.')
 
     args = parser.parse_args()
+
+    assert args.video_type in ['jpg', 'hdf5']
 
     train_csv_path = (args.dir_path /
                       'kinetics-{}_train.csv'.format(args.n_classes))
@@ -101,4 +114,5 @@ if __name__ == '__main__':
                      'kinetics-{}_test.csv'.format(args.n_classes))
 
     convert_kinetics_csv_to_json(train_csv_path, val_csv_path, test_csv_path,
-                                 args.video_path, args.dst_path)
+                                 args.video_path, args.video_type,
+                                 args.dst_path)
