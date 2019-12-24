@@ -16,8 +16,9 @@ def get_class_labels(data):
     return class_labels_map
 
 
-def get_video_ids_and_annotations(data, subset):
+def get_database(data, subset, root_path, video_path_formatter):
     video_ids = []
+    video_paths = []
     annotations = []
 
     for key, value in data['database'].items():
@@ -25,8 +26,13 @@ def get_video_ids_and_annotations(data, subset):
         if this_subset == subset:
             video_ids.append(key)
             annotations.append(value['annotations'])
+            if 'video_path' in value:
+                video_paths.append(value['video_path'])
+            else:
+                label = value['annotations']['label']
+                video_paths.append(video_path_formatter(root_path, label, key))
 
-    return video_ids, annotations
+    return video_ids, video_paths, annotations
 
 
 class VideoDataset(data.Dataset):
@@ -61,7 +67,8 @@ class VideoDataset(data.Dataset):
                        video_path_formatter):
         with annotation_path.open('r') as f:
             data = json.load(f)
-        video_ids, annotations = get_video_ids_and_annotations(data, subset)
+        video_ids, video_paths, annotations = get_database(
+            data, subset, root_path, video_path_formatter)
         class_to_idx = get_class_labels(data)
         idx_to_class = {}
         for name, label in class_to_idx.items():
@@ -80,11 +87,7 @@ class VideoDataset(data.Dataset):
                 label = 'test'
                 label_id = -1
 
-            if 'video_path' in annotations[i]:
-                video_path = annotations[i]['video_path']
-            else:
-                video_path = video_path_formatter(root_path, label,
-                                                  video_ids[i])
+            video_path = video_paths[i]
             if not video_path.exists():
                 continue
 
