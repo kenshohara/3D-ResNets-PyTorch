@@ -80,7 +80,11 @@ class VideoDataset(data.Dataset):
                 label = 'test'
                 label_id = -1
 
-            video_path = video_path_formatter(root_path, label, video_ids[i])
+            if 'video_path' in annotations[i]:
+                video_path = annotations[i]['video_path']
+            else:
+                video_path = video_path_formatter(root_path, label,
+                                                  video_ids[i])
             if not video_path.exists():
                 continue
 
