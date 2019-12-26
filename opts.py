@@ -107,7 +107,7 @@ def parse_opts():
                         default='kinetics',
                         type=str,
                         help=('dataset for mean values of mean subtraction'
-                              '(activitynet | kinetics)'))
+                              '(activitynet | kinetics | 0.5)'))
     parser.add_argument('--no_mean_norm',
                         action='store_true',
                         help='If true, inputs are not normalized by mean.')
@@ -249,9 +249,9 @@ def parse_opts():
                         type=int,
                         help='ResNeXt cardinality')
     parser.add_argument('--input_type',
-                    default='rgb',
-                    type=str,
-                    help='(rgb | flow)')
+                        default='rgb',
+                        type=str,
+                        help='(rgb | flow)')
     parser.add_argument('--manual_seed',
                         default=1,
                         type=int,
