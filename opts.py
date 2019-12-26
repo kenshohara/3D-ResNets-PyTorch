@@ -159,6 +159,10 @@ def parse_opts():
         type=int,
         help='Batch Size for inference. 0 means this is the same as batch_size.'
     )
+    parser.add_argument(
+        '--batchnorm_sync',
+        action='store_true',
+        help='If true, SyncBatchNorm is used instead of BatchNorm.')
     parser.add_argument('--n_epochs',
                         default=200,
                         type=int,

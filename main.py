@@ -322,6 +322,9 @@ def main_worker(index, opt):
     opt.is_master_node = not opt.distributed or opt.dist_rank == 0
 
     model = generate_model(opt)
+    if opt.batchnorm_sync:
+        assert opt.distributed, 'SyncBatchNorm only supports DistributedDataParallel.'
+        model = torch.nn.SyncBatchNorm.convert_sync_batchnorm(model)
     if opt.pretrain_path:
         model = load_pretrained_model(model, opt.pretrain_path, opt.model,
                                       opt.n_finetune_classes)
