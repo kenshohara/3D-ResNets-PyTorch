@@ -105,6 +105,7 @@ class ResNet(nn.Module):
                  block,
                  layers,
                  block_inplanes,
+                 n_input_channels=3,
                  conv1_t_size=7,
                  conv1_t_stride=1,
                  no_max_pool=False,
@@ -118,7 +119,7 @@ class ResNet(nn.Module):
         self.in_planes = block_inplanes[0]
         self.no_max_pool = no_max_pool
 
-        self.conv1 = nn.Conv3d(3,
+        self.conv1 = nn.Conv3d(n_input_channels,
                                self.in_planes,
                                kernel_size=(conv1_t_size, 7, 7),
                                stride=(conv1_t_stride, 2, 2),

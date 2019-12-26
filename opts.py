@@ -248,6 +248,10 @@ def parse_opts():
                         default=32,
                         type=int,
                         help='ResNeXt cardinality')
+    parser.add_argument('--input_type',
+                    default='rgb',
+                    type=str,
+                    help='(rgb | flow)')
     parser.add_argument('--manual_seed',
                         default=1,
                         type=int,

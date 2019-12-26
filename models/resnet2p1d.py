@@ -142,6 +142,7 @@ class ResNet(nn.Module):
                  block,
                  layers,
                  block_inplanes,
+                 n_input_channels=3,
                  conv1_t_size=7,
                  conv1_t_stride=1,
                  no_max_pool=False,
@@ -158,7 +159,7 @@ class ResNet(nn.Module):
         n_3d_parameters = 3 * self.in_planes * conv1_t_size * 7 * 7
         n_2p1d_parameters = 3 * 7 * 7 + conv1_t_size * self.in_planes
         mid_planes = n_3d_parameters // n_2p1d_parameters
-        self.conv1_s = nn.Conv3d(3,
+        self.conv1_s = nn.Conv3d(n_input_channels,
                                  mid_planes,
                                  kernel_size=(1, 7, 7),
                                  stride=(1, 2, 2),

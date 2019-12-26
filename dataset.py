@@ -2,12 +2,13 @@ from datasets.videodataset import VideoDataset
 from datasets.videodataset_multiclips import (VideoDatasetMultiClips,
                                               collate_fn)
 from datasets.activitynet import ActivityNet
-from datasets.loader import VideoLoader, VideoLoaderHDF5
+from datasets.loader import VideoLoader, VideoLoaderHDF5, VideoLoaderFlowHDF5
 
 
 def get_training_data(video_path,
                       annotation_path,
                       dataset_name,
+                      input_type,
                       file_type,
                       spatial_transform=None,
                       temporal_transform=None,
@@ -15,14 +16,20 @@ def get_training_data(video_path,
     assert dataset_name in [
         'kinetics', 'activitynet', 'ucf101', 'hmdb51', 'mit'
     ]
+    assert input_type in ['rgb', 'flow']
     assert file_type in ['jpg', 'hdf5']
 
     if file_type == 'jpg':
+        assert input_type == 'rgb', 'flow input is supported only when input type is hdf5.'
+
         loader = VideoLoader(lambda x: f'image_{x:05d}.jpg')
         video_path_formatter = (
             lambda root_path, label, video_id: root_path / label / video_id)
     else:
-        loader = VideoLoaderHDF5()
+        if input_type == 'rgb':
+            loader = VideoLoaderHDF5()
+        else:
+            loader = VideoLoaderFlowHDF5()
         video_path_formatter = (lambda root_path, label, video_id: root_path /
                                 label / f'{video_id}.hdf5')
 
@@ -51,6 +58,7 @@ def get_training_data(video_path,
 def get_validation_data(video_path,
                         annotation_path,
                         dataset_name,
+                        input_type,
                         file_type,
                         spatial_transform=None,
                         temporal_transform=None,
@@ -58,14 +66,20 @@ def get_validation_data(video_path,
     assert dataset_name in [
         'kinetics', 'activitynet', 'ucf101', 'hmdb51', 'mit'
     ]
+    assert input_type in ['rgb', 'flow']
     assert file_type in ['jpg', 'hdf5']
 
     if file_type == 'jpg':
+        assert input_type == 'rgb', 'flow input is supported only when input type is hdf5.'
+
         loader = VideoLoader(lambda x: f'image_{x:05d}.jpg')
         video_path_formatter = (
             lambda root_path, label, video_id: root_path / label / video_id)
     else:
-        loader = VideoLoaderHDF5()
+        if input_type == 'rgb':
+            loader = VideoLoaderHDF5()
+        else:
+            loader = VideoLoaderFlowHDF5()
         video_path_formatter = (lambda root_path, label, video_id: root_path /
                                 label / f'{video_id}.hdf5')
 
@@ -95,6 +109,7 @@ def get_validation_data(video_path,
 def get_inference_data(video_path,
                        annotation_path,
                        dataset_name,
+                       input_type,
                        file_type,
                        inference_subset,
                        spatial_transform=None,
@@ -103,15 +118,21 @@ def get_inference_data(video_path,
     assert dataset_name in [
         'kinetics', 'activitynet', 'ucf101', 'hmdb51', 'mit'
     ]
+    assert input_type in ['rgb', 'flow']
     assert file_type in ['jpg', 'hdf5']
     assert inference_subset in ['train', 'val', 'test']
 
     if file_type == 'jpg':
+        assert input_type == 'rgb', 'flow input is supported only when input type is hdf5.'
+
         loader = VideoLoader(lambda x: f'image_{x:05d}.jpg')
         video_path_formatter = (
             lambda root_path, label, video_id: root_path / label / video_id)
     else:
-        loader = VideoLoaderHDF5()
+        if input_type == 'rgb':
+            loader = VideoLoaderHDF5()
+        else:
+            loader = VideoLoaderFlowHDF5()
         video_path_formatter = (lambda root_path, label, video_id: root_path /
                                 label / f'{video_id}.hdf5')
 

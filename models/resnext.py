@@ -23,14 +23,13 @@ class ResNeXtBottleneck(Bottleneck):
         mid_planes = cardinality * planes // 32
         self.conv1 = conv1x1x1(inplanes, mid_planes)
         self.bn1 = nn.BatchNorm3d(mid_planes)
-        self.conv2 = nn.Conv3d(
-            mid_planes,
-            mid_planes,
-            kernel_size=3,
-            stride=stride,
-            padding=1,
-            groups=cardinality,
-            bias=False)
+        self.conv2 = nn.Conv3d(mid_planes,
+                               mid_planes,
+                               kernel_size=3,
+                               stride=stride,
+                               padding=1,
+                               groups=cardinality,
+                               bias=False)
         self.bn2 = nn.BatchNorm3d(mid_planes)
         self.conv3 = conv1x1x1(mid_planes, planes * self.expansion)
 
@@ -41,6 +40,7 @@ class ResNeXt(ResNet):
                  block,
                  layers,
                  block_inplanes,
+                 n_input_channels=3,
                  conv1_t_size=7,
                  conv1_t_stride=1,
                  no_max_pool=False,
@@ -48,8 +48,9 @@ class ResNeXt(ResNet):
                  cardinality=32,
                  n_classes=400):
         block = partialclass(block, cardinality=cardinality)
-        super().__init__(block, layers, block_inplanes, conv1_t_size,
-                         conv1_t_stride, no_max_pool, shortcut_type, n_classes)
+        super().__init__(block, layers, block_inplanes, n_input_channels,
+                         conv1_t_size, conv1_t_stride, no_max_pool,
+                         shortcut_type, n_classes)
 
         self.fc = nn.Linear(cardinality * 32 * block.expansion, n_classes)
 

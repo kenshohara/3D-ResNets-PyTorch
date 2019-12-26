@@ -64,3 +64,28 @@ class VideoLoaderHDF5(object):
                     return video
 
         return video
+
+
+class VideoLoaderFlowHDF5(object):
+
+    def __init__(self):
+        self.flows = ['u', 'v']
+
+    def __call__(self, video_path, frame_indices):
+        with h5py.File(video_path, 'r') as f:
+
+            flow_data = []
+            for flow in self.flows:
+                flow_data.append(f[f'video_{flow}'])
+
+            video = []
+            for i in frame_indices:
+                if i < len(flow_data[0]):
+                    frame = [
+                        Image.open(io.BytesIO(video_data[i]))
+                        for video_data in flow_data
+                    ]
+                    frame.append(frame[-1])  # add dummy data into third channel
+                    video.append(Image.merge('RGB', frame))
+
+        return video

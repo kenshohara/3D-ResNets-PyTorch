@@ -58,6 +58,10 @@ def get_opt():
     if opt.inference_batch_size == 0:
         opt.inference_batch_size = opt.batch_size
 
+    opt.n_input_channels = 3
+    if opt.input_type == 'flow':
+        opt.n_input_channels = 2
+
     opt.arch = '{}-{}'.format(opt.model, opt.model_depth)
     opt.begin_epoch = 1
     opt.mean, opt.std = get_mean_std(opt.value_scale, dataset=opt.mean_dataset)
@@ -143,7 +147,7 @@ def get_train_utils(opt, model_parameters):
     temporal_transform = TemporalCompose(temporal_transform)
 
     train_data = get_training_data(opt.video_path, opt.annotation_path,
-                                   opt.dataset, opt.file_type,
+                                   opt.dataset, opt.input_type, opt.file_type,
                                    spatial_transform, temporal_transform)
     if opt.distributed:
         train_sampler = torch.utils.data.distributed.DistributedSampler(
@@ -211,7 +215,8 @@ def get_val_utils(opt):
 
     val_data, collate_fn = get_validation_data(opt.video_path,
                                                opt.annotation_path, opt.dataset,
-                                               opt.file_type, spatial_transform,
+                                               opt.input_type, opt.file_type,
+                                               spatial_transform,
                                                temporal_transform)
     if opt.distributed:
         val_sampler = torch.utils.data.distributed.DistributedSampler(
@@ -258,8 +263,9 @@ def get_inference_utils(opt):
     temporal_transform = TemporalCompose(temporal_transform)
 
     inference_data, collate_fn = get_inference_data(
-        opt.video_path, opt.annotation_path, opt.dataset, opt.file_type,
-        opt.inference_subset, spatial_transform, temporal_transform)
+        opt.video_path, opt.annotation_path, opt.dataset, opt.input_type,
+        opt.file_type, opt.inference_subset, spatial_transform,
+        temporal_transform)
 
     inference_loader = torch.utils.data.DataLoader(
         inference_data,

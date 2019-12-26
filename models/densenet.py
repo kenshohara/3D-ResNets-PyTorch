@@ -14,30 +14,29 @@ class _DenseLayer(nn.Sequential):
         self.add_module('relu1', nn.ReLU(inplace=True))
         self.add_module(
             'conv1',
-            nn.Conv3d(
-                num_input_features,
-                bn_size * growth_rate,
-                kernel_size=1,
-                stride=1,
-                bias=False))
+            nn.Conv3d(num_input_features,
+                      bn_size * growth_rate,
+                      kernel_size=1,
+                      stride=1,
+                      bias=False))
         self.add_module('norm2', nn.BatchNorm3d(bn_size * growth_rate))
         self.add_module('relu2', nn.ReLU(inplace=True))
         self.add_module(
             'conv2',
-            nn.Conv3d(
-                bn_size * growth_rate,
-                growth_rate,
-                kernel_size=3,
-                stride=1,
-                padding=1,
-                bias=False))
+            nn.Conv3d(bn_size * growth_rate,
+                      growth_rate,
+                      kernel_size=3,
+                      stride=1,
+                      padding=1,
+                      bias=False))
         self.drop_rate = drop_rate
 
     def forward(self, x):
         new_features = super().forward(x)
         if self.drop_rate > 0:
-            new_features = F.dropout(
-                new_features, p=self.drop_rate, training=self.training)
+            new_features = F.dropout(new_features,
+                                     p=self.drop_rate,
+                                     training=self.training)
         return torch.cat([x, new_features], 1)
 
 
@@ -60,12 +59,11 @@ class _Transition(nn.Sequential):
         self.add_module('relu', nn.ReLU(inplace=True))
         self.add_module(
             'conv',
-            nn.Conv3d(
-                num_input_features,
-                num_output_features,
-                kernel_size=1,
-                stride=1,
-                bias=False))
+            nn.Conv3d(num_input_features,
+                      num_output_features,
+                      kernel_size=1,
+                      stride=1,
+                      bias=False))
         self.add_module('pool', nn.AvgPool3d(kernel_size=2, stride=2))
 
 
@@ -82,6 +80,7 @@ class DenseNet(nn.Module):
     """
 
     def __init__(self,
+                 n_input_channels=3,
                  conv1_t_size=7,
                  conv1_t_stride=1,
                  no_max_pool=False,
@@ -96,36 +95,32 @@ class DenseNet(nn.Module):
 
         # First convolution
         self.features = [('conv1',
-                          nn.Conv3d(
-                              3,
-                              num_init_features,
-                              kernel_size=(conv1_t_size, 7, 7),
-                              stride=(conv1_t_stride, 2, 2),
-                              padding=(conv1_t_size // 2, 3, 3),
-                              bias=False)),
+                          nn.Conv3d(n_input_channels,
+                                    num_init_features,
+                                    kernel_size=(conv1_t_size, 7, 7),
+                                    stride=(conv1_t_stride, 2, 2),
+                                    padding=(conv1_t_size // 2, 3, 3),
+                                    bias=False)),
                          ('norm1', nn.BatchNorm3d(num_init_features)),
                          ('relu1', nn.ReLU(inplace=True))]
         if not no_max_pool:
-            self.features.append(('pool1',
-                                  nn.MaxPool3d(
-                                      kernel_size=3, stride=2, padding=1)))
+            self.features.append(
+                ('pool1', nn.MaxPool3d(kernel_size=3, stride=2, padding=1)))
         self.features = nn.Sequential(OrderedDict(self.features))
 
         # Each denseblock
         num_features = num_init_features
         for i, num_layers in enumerate(block_config):
-            block = _DenseBlock(
-                num_layers=num_layers,
-                num_input_features=num_features,
-                bn_size=bn_size,
-                growth_rate=growth_rate,
-                drop_rate=drop_rate)
+            block = _DenseBlock(num_layers=num_layers,
+                                num_input_features=num_features,
+                                bn_size=bn_size,
+                                growth_rate=growth_rate,
+                                drop_rate=drop_rate)
             self.features.add_module('denseblock{}'.format(i + 1), block)
             num_features = num_features + num_layers * growth_rate
             if i != len(block_config) - 1:
-                trans = _Transition(
-                    num_input_features=num_features,
-                    num_output_features=num_features // 2)
+                trans = _Transition(num_input_features=num_features,
+                                    num_output_features=num_features // 2)
                 self.features.add_module('transition{}'.format(i + 1), trans)
                 num_features = num_features // 2
 
@@ -137,8 +132,9 @@ class DenseNet(nn.Module):
 
         for m in self.modules():
             if isinstance(m, nn.Conv3d):
-                nn.init.kaiming_normal_(
-                    m.weight, mode='fan_out', nonlinearity='relu')
+                nn.init.kaiming_normal_(m.weight,
+                                        mode='fan_out',
+                                        nonlinearity='relu')
             elif isinstance(m, nn.BatchNorm3d):
                 nn.init.constant_(m.weight, 1)
                 nn.init.constant_(m.bias, 0)
@@ -148,8 +144,9 @@ class DenseNet(nn.Module):
     def forward(self, x):
         features = self.features(x)
         out = F.relu(features, inplace=True)
-        out = F.adaptive_avg_pool3d(
-            out, output_size=(1, 1, 1)).view(features.size(0), -1)
+        out = F.adaptive_avg_pool3d(out,
+                                    output_size=(1, 1,
+                                                 1)).view(features.size(0), -1)
         out = self.classifier(out)
         return out
 
@@ -158,28 +155,24 @@ def generate_model(model_depth, **kwargs):
     assert model_depth in [121, 169, 201, 264]
 
     if model_depth == 121:
-        model = DenseNet(
-            num_init_features=64,
-            growth_rate=32,
-            block_config=(6, 12, 24, 16),
-            **kwargs)
+        model = DenseNet(num_init_features=64,
+                         growth_rate=32,
+                         block_config=(6, 12, 24, 16),
+                         **kwargs)
     elif model_depth == 169:
-        model = DenseNet(
-            num_init_features=64,
-            growth_rate=32,
-            block_config=(6, 12, 32, 32),
-            **kwargs)
+        model = DenseNet(num_init_features=64,
+                         growth_rate=32,
+                         block_config=(6, 12, 32, 32),
+                         **kwargs)
     elif model_depth == 201:
-        model = DenseNet(
-            num_init_features=64,
-            growth_rate=32,
-            block_config=(6, 12, 48, 32),
-            **kwargs)
+        model = DenseNet(num_init_features=64,
+                         growth_rate=32,
+                         block_config=(6, 12, 48, 32),
+                         **kwargs)
     elif model_depth == 264:
-        model = DenseNet(
-            num_init_features=64,
-            growth_rate=32,
-            block_config=(6, 12, 64, 48),
-            **kwargs)
+        model = DenseNet(num_init_features=64,
+                         growth_rate=32,
+                         block_config=(6, 12, 64, 48),
+                         **kwargs)
 
     return model
