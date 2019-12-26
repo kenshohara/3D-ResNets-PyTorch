@@ -19,7 +19,7 @@ from mean import get_mean_std
 from spatial_transforms import (Compose, Normalize, Resize, CenterCrop,
                                 CornerCrop, MultiScaleCornerCrop,
                                 RandomResizedCrop, RandomHorizontalFlip,
-                                ToTensor, ScaleValue, ColorJitter)
+                                ToTensor, ScaleValue, ColorJitter, Lambda)
 from temporal_transforms import (LoopPadding, TemporalRandomCrop,
                                  TemporalCenterCrop, TemporalEvenCrop,
                                  SlidingWindow, TemporalSubsampling)
@@ -132,6 +132,8 @@ def get_train_utils(opt, model_parameters):
     if opt.colorjitter:
         spatial_transform.append(ColorJitter())
     spatial_transform.append(ToTensor())
+    if opt.input_type == 'flow':
+        spatial_transform.append(Lambda(lambda img: img[:2, :, :]))
     spatial_transform.append(ScaleValue(opt.value_scale))
     spatial_transform.append(normalize)
     spatial_transform = Compose(spatial_transform)
@@ -199,12 +201,15 @@ def get_train_utils(opt, model_parameters):
 def get_val_utils(opt):
     normalize = get_normalize_method(opt.mean, opt.std, opt.no_mean_norm,
                                      opt.no_std_norm)
-    spatial_transform = Compose([
+    spatial_transform = [
         Resize(opt.sample_size),
         CenterCrop(opt.sample_size),
-        ToTensor(),
-        ScaleValue(opt.value_scale), normalize
-    ])
+        ToTensor()
+    ]
+    if opt.input_type == 'flow':
+        spatial_transform.append(Lambda(lambda img: img[:2, :, :]))
+    spatial_transform.extend([ScaleValue(opt.value_scale), normalize])
+    spatial_transform = Compose(spatial_transform)
 
     temporal_transform = []
     if opt.sample_t_stride > 1:
@@ -251,8 +256,10 @@ def get_inference_utils(opt):
     spatial_transform = [Resize(opt.sample_size)]
     if opt.inference_crop == 'center':
         spatial_transform.append(CenterCrop(opt.sample_size))
-    spatial_transform.extend(
-        [ToTensor(), ScaleValue(opt.value_scale), normalize])
+    spatial_transform.append(ToTensor())
+    if opt.input_type == 'flow':
+        spatial_transform.append(Lambda(lambda img: img[:2, :, :]))
+    spatial_transform.extend([ScaleValue(opt.value_scale), normalize])
     spatial_transform = Compose(spatial_transform)
 
     temporal_transform = []

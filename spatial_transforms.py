@@ -12,6 +12,12 @@ class Compose(transforms.Compose):
             t.randomize_parameters()
 
 
+class Lambda(transforms.Lambda):
+
+    def randomize_parameters(self):
+        pass
+
+
 class ToTensor(transforms.ToTensor):
 
     def randomize_parameters(self):
