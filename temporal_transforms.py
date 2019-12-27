@@ -21,18 +21,6 @@ class Compose(object):
                 frame_indices = t(frame_indices)
         return frame_indices
 
-        if isinstance(frame_indices[0], list):
-            dst_frame_indices = []
-            for clip_frame_indices in frame_indices:
-                for t in self.transforms:
-                    clip_frame_indices = t(clip_frame_indices)
-                dst_frame_indices.append(clip_frame_indices)
-            return dst_frame_indices
-        else:
-            for t in self.transforms:
-                frame_indices = t(frame_indices)
-            return frame_indices
-
 
 class LoopPadding(object):
 
