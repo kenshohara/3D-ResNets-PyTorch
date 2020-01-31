@@ -66,9 +66,18 @@ def get_opt():
         opt.n_input_channels = 2
         opt.mean = opt.mean[:2]
         opt.std = opt.std[:2]
-    print(opt)
-    with (opt.result_path / 'opts.json').open('w') as opt_file:
-        json.dump(vars(opt), opt_file, default=json_serial)
+
+    if opt.distributed:
+        opt.dist_rank = int(os.environ["OMPI_COMM_WORLD_RANK"])
+
+        if opt.dist_rank == 0:
+            print(opt)
+            with (opt.result_path / 'opts.json').open('w') as opt_file:
+                json.dump(vars(opt), opt_file, default=json_serial)
+    else:
+        print(opt)
+        with (opt.result_path / 'opts.json').open('w') as opt_file:
+            json.dump(vars(opt), opt_file, default=json_serial)
 
     return opt
 
