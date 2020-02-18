@@ -82,27 +82,30 @@ def get_opt():
     return opt
 
 
-def resume(resume_path,
-           arch,
-           begin_epoch,
-           model,
-           optimizer=None,
-           scheduler=None):
-    print('loading checkpoint {}'.format(resume_path))
-    checkpoint = torch.load(resume_path)
+def resume_model(resume_path, arch, model):
+    print('loading checkpoint {} model'.format(resume_path))
+    checkpoint = torch.load(resume_path, map_location='cpu')
     assert arch == checkpoint['arch']
 
-    begin_epoch = checkpoint['epoch'] + 1
     if hasattr(model, 'module'):
         model.module.load_state_dict(checkpoint['state_dict'])
     else:
         model.load_state_dict(checkpoint['state_dict'])
+
+    return model
+
+
+def resume_train_utils(resume_path, begin_epoch, optimizer, scheduler):
+    print('loading checkpoint {} train utils'.format(resume_path))
+    checkpoint = torch.load(resume_path, map_location='cpu')
+
+    begin_epoch = checkpoint['epoch'] + 1
     if optimizer is not None and 'optimizer' in checkpoint:
         optimizer.load_state_dict(checkpoint['optimizer'])
     if scheduler is not None and 'scheduler' in checkpoint:
         scheduler.load_state_dict(checkpoint['scheduler'])
 
-    return begin_epoch, model, optimizer, scheduler
+    return begin_epoch, optimizer, scheduler
 
 
 def get_normalize_method(mean, std, no_mean_norm, no_std_norm):
@@ -337,7 +340,8 @@ def main_worker(index, opt):
     if opt.pretrain_path:
         model = load_pretrained_model(model, opt.pretrain_path, opt.model,
                                       opt.n_finetune_classes)
-
+    if opt.resume_path is not None:
+        model = resume_model(opt.resume_path, opt.arch, model)
     model = make_data_parallel(model, opt.distributed, opt.device)
 
     if opt.pretrain_path:
@@ -353,19 +357,13 @@ def main_worker(index, opt):
     if not opt.no_train:
         (train_loader, train_sampler, train_logger, train_batch_logger,
          optimizer, scheduler) = get_train_utils(opt, parameters)
-    if not opt.no_val:
-        val_loader, val_logger = get_val_utils(opt)
-
-    if opt.resume_path is not None:
-        if not opt.no_train:
-            opt.begin_epoch, model, optimizer, scheduler = resume(
-                opt.resume_path, opt.arch, opt.begin_epoch, model, optimizer,
-                scheduler)
+        if opt.resume_path is not None:
+            opt.begin_epoch, optimizer, scheduler = resume_train_utils(
+                opt.resume_path, opt.begin_epoch, optimizer, scheduler)
             if opt.overwrite_milestones:
                 scheduler.milestones = opt.multistep_milestones
-        else:
-            opt.begin_epoch, model, _, _ = resume(opt.resume_path, opt.arch,
-                                                  opt.begin_epoch, model)
+    if not opt.no_val:
+        val_loader, val_logger = get_val_utils(opt)
 
     if opt.tensorboard and opt.is_master_node:
         from torch.utils.tensorboard import SummaryWriter
