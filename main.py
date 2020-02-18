@@ -19,7 +19,8 @@ from mean import get_mean_std
 from spatial_transforms import (Compose, Normalize, Resize, CenterCrop,
                                 CornerCrop, MultiScaleCornerCrop,
                                 RandomResizedCrop, RandomHorizontalFlip,
-                                ToTensor, ScaleValue, ColorJitter, Lambda)
+                                ToTensor, ScaleValue, ColorJitter,
+                                PickFirstChannels)
 from temporal_transforms import (LoopPadding, TemporalRandomCrop,
                                  TemporalCenterCrop, TemporalEvenCrop,
                                  SlidingWindow, TemporalSubsampling)
@@ -146,7 +147,7 @@ def get_train_utils(opt, model_parameters):
         spatial_transform.append(ColorJitter())
     spatial_transform.append(ToTensor())
     if opt.input_type == 'flow':
-        spatial_transform.append(Lambda(lambda img: img[:2, :, :]))
+        spatial_transform.append(PickFirstChannels(n=2))
     spatial_transform.append(ScaleValue(opt.value_scale))
     spatial_transform.append(normalize)
     spatial_transform = Compose(spatial_transform)
@@ -220,7 +221,7 @@ def get_val_utils(opt):
         ToTensor()
     ]
     if opt.input_type == 'flow':
-        spatial_transform.append(Lambda(lambda img: img[:2, :, :]))
+        spatial_transform.append(PickFirstChannels(n=2))
     spatial_transform.extend([ScaleValue(opt.value_scale), normalize])
     spatial_transform = Compose(spatial_transform)
 
@@ -271,7 +272,7 @@ def get_inference_utils(opt):
         spatial_transform.append(CenterCrop(opt.sample_size))
     spatial_transform.append(ToTensor())
     if opt.input_type == 'flow':
-        spatial_transform.append(Lambda(lambda img: img[:2, :, :]))
+        spatial_transform.append(PickFirstChannels(n=2))
     spatial_transform.extend([ScaleValue(opt.value_scale), normalize])
     spatial_transform = Compose(spatial_transform)
 

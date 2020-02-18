@@ -12,12 +12,6 @@ class Compose(transforms.Compose):
             t.randomize_parameters()
 
 
-class Lambda(transforms.Lambda):
-
-    def randomize_parameters(self):
-        pass
-
-
 class ToTensor(transforms.ToTensor):
 
     def randomize_parameters(self):
@@ -207,3 +201,15 @@ class ColorJitter(transforms.ColorJitter):
 
     def randomize_parameters(self):
         self.randomize = True
+
+
+class PickFirstChannels(object):
+
+    def __init__(self, n):
+        self.n = n
+
+    def __call__(self, tensor):
+        return img[:self.n, :, :]
+
+    def randomize_parameters(self):
+        pass
