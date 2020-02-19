@@ -209,7 +209,7 @@ class PickFirstChannels(object):
         self.n = n
 
     def __call__(self, tensor):
-        return img[:self.n, :, :]
+        return tensor[:self.n, :, :]
 
     def randomize_parameters(self):
         pass
