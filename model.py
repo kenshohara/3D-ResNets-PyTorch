@@ -6,7 +6,7 @@ from models import resnet, pre_act_resnet, wide_resnet, resnext, densenet
 
 def generate_model(opt):
     assert opt.model in [
-        'resnet', 'preresnet', 'wideresnet', 'resnext', 'densenet'
+        'resnet', 'preresnet', 'wideresnet', 'resnext', 'densenet', 'resnet3d'
     ]
 
     if opt.model == 'resnet':
@@ -161,6 +161,11 @@ def generate_model(opt):
                 sample_size=opt.sample_size,
                 sample_duration=opt.sample_duration)
 
+    elif opt.model == 'resnet3d':
+        from models.resnet_3d import resnet18_2d3d_full
+        from models.resnet import get_fine_tuning_parameters
+        model = resnet18_2d3d_full(num_classes=opt.n_classes)
+
     if not opt.no_cuda:
         model = model.cuda()
         model = nn.DataParallel(model, device_ids=None)
@@ -170,7 +175,7 @@ def generate_model(opt):
             pretrain = torch.load(opt.pretrain_path)
             assert opt.arch == pretrain['arch']
 
-            model.load_state_dict(pretrain['state_dict'])
+            model.load_state_dict(pretrain['state_dict'], strict=(opt.model != 'resnet3d'))
 
             if opt.model == 'densenet':
                 model.module.classifier = nn.Linear(

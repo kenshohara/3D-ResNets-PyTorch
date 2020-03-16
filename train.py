@@ -24,8 +24,8 @@ def train_epoch(epoch, data_loader, model, criterion, optimizer, opt,
 
         if not opt.no_cuda:
             targets = targets.cuda(non_blocking=True)
-        inputs = Variable(inputs)
-        targets = Variable(targets)
+        # inputs = Variable(inputs)
+        # targets = Variable(targets)
         outputs = model(inputs)
         loss = criterion(outputs, targets)
         acc = calculate_accuracy(outputs, targets)
