@@ -40,7 +40,7 @@ if __name__ == '__main__':
     opt.std = get_std(opt.norm_value)
     print(opt)
     with open(os.path.join(opt.result_path, 'opts.json'), 'w') as opt_file:
-        json.dump(vars(opt), opt_file)
+        json.dump(vars(opt), opt_file, indent=2)
 
     torch.manual_seed(opt.manual_seed)
 
