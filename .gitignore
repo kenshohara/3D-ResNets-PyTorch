@@ -103,3 +103,5 @@ ENV/
 .DS_Store
 
 .vscode
+
+data/

@@ -37,7 +37,8 @@ def get_default_image_loader():
 def video_loader(video_dir_path, frame_indices, image_loader):
     video = []
     for i in frame_indices:
-        image_path = os.path.join(video_dir_path, 'image_{:05d}.jpg'.format(i))
+        # image_path = os.path.join(video_dir_path, 'image_{:05d}.jpg'.format(i))
+        image_path = os.path.join(video_dir_path, 'img_{:05d}.jpg'.format(i)) # 非标准数据集
         if os.path.exists(image_path):
             video.append(image_loader(image_path))
         else:
