@@ -4,31 +4,20 @@ import h5py
 from PIL import Image
 
 
-class ImageLoader(object):
-
-    def __init__(self):
-        from torchvision import get_image_backend
-        if get_image_backend() == 'accimage':
-            self.loader = self.__accimage_loader
-        else:
-            self.loader = self.__pil_loader
+class ImageLoaderPIL(object):
 
     def __call__(self, path):
-        return self.loader(path)
-
-    def __pil_loader(self, path):
         # open path as file to avoid ResourceWarning (https://github.com/python-pillow/Pillow/issues/835)
         with path.open('rb') as f:
             with Image.open(f) as img:
                 return img.convert('RGB')
 
-    def __accimage_loader(self, path):
+
+class ImageLoaderAccImage(object):
+
+    def __call__(self, path):
         import accimage
-        try:
-            return accimage.Image(str(path))
-        except IOError:
-            # Potentially a decoding problem, fall back to PIL.Image
-            return self.__pil_loader(path)
+        return accimage.Image(str(path))
 
 
 class VideoLoader(object):
@@ -36,7 +25,7 @@ class VideoLoader(object):
     def __init__(self, image_name_formatter, image_loader=None):
         self.image_name_formatter = image_name_formatter
         if image_loader is None:
-            self.image_loader = ImageLoader()
+            self.image_loader = ImageLoaderPIL()
         else:
             self.image_loader = image_loader
 

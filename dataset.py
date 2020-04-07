@@ -1,8 +1,14 @@
+from torchvision import get_image_backend
+
 from datasets.videodataset import VideoDataset
 from datasets.videodataset_multiclips import (VideoDatasetMultiClips,
                                               collate_fn)
 from datasets.activitynet import ActivityNet
 from datasets.loader import VideoLoader, VideoLoaderHDF5, VideoLoaderFlowHDF5
+
+
+def image_name_formatter(x):
+    return f'image_{x:05d}.jpg'
 
 
 def get_training_data(video_path,
@@ -22,7 +28,12 @@ def get_training_data(video_path,
     if file_type == 'jpg':
         assert input_type == 'rgb', 'flow input is supported only when input type is hdf5.'
 
-        loader = VideoLoader(lambda x: f'image_{x:05d}.jpg')
+        if get_image_backend() == 'accimage':
+            from datasets.loader import ImageLoaderAccImage
+            loader = VideoLoader(image_name_formatter, ImageLoaderAccImage())
+        else:
+            loader = VideoLoader(image_name_formatter)
+
         video_path_formatter = (
             lambda root_path, label, video_id: root_path / label / video_id)
     else:
@@ -72,7 +83,12 @@ def get_validation_data(video_path,
     if file_type == 'jpg':
         assert input_type == 'rgb', 'flow input is supported only when input type is hdf5.'
 
-        loader = VideoLoader(lambda x: f'image_{x:05d}.jpg')
+        if get_image_backend() == 'accimage':
+            from datasets.loader import ImageLoaderAccImage
+            loader = VideoLoader(image_name_formatter, ImageLoaderAccImage())
+        else:
+            loader = VideoLoader(image_name_formatter)
+
         video_path_formatter = (
             lambda root_path, label, video_id: root_path / label / video_id)
     else:
@@ -125,7 +141,12 @@ def get_inference_data(video_path,
     if file_type == 'jpg':
         assert input_type == 'rgb', 'flow input is supported only when input type is hdf5.'
 
-        loader = VideoLoader(lambda x: f'image_{x:05d}.jpg')
+        if get_image_backend() == 'accimage':
+            from datasets.loader import ImageLoaderAccImage
+            loader = VideoLoader(image_name_formatter, ImageLoaderAccImage())
+        else:
+            loader = VideoLoader(image_name_formatter)
+
         video_path_formatter = (
             lambda root_path, label, video_id: root_path / label / video_id)
     else:
