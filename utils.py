@@ -1,4 +1,10 @@
 import csv
+import random
+from functools import partialmethod
+
+import torch
+import numpy as np
+from sklearn.metrics import precision_recall_fscore_support
 
 
 class AverageMeter(object):
@@ -23,7 +29,7 @@ class AverageMeter(object):
 class Logger(object):
 
     def __init__(self, path, header):
-        self.log_file = open(path, 'w')
+        self.log_file = path.open('w')
         self.logger = csv.writer(self.log_file, delimiter='\t')
 
         self.logger.writerow(header)
@@ -42,19 +48,50 @@ class Logger(object):
         self.log_file.flush()
 
 
-def load_value_file(file_path):
-    with open(file_path, 'r') as input_file:
-        value = float(input_file.read().rstrip('\n\r'))
-
-    return value
-
-
 def calculate_accuracy(outputs, targets):
-    batch_size = targets.size(0)
+    with torch.no_grad():
+        batch_size = targets.size(0)
 
-    _, pred = outputs.topk(1, 1, True)
-    pred = pred.t()
-    correct = pred.eq(targets.view(1, -1))
-    n_correct_elems = correct.float().sum().data[0]
+        _, pred = outputs.topk(1, 1, largest=True, sorted=True)
+        pred = pred.t()
+        correct = pred.eq(targets.view(1, -1))
+        n_correct_elems = correct.float().sum().item()
 
-    return n_correct_elems / batch_size
+        return n_correct_elems / batch_size
+
+
+def calculate_precision_and_recall(outputs, targets, pos_label=1):
+    with torch.no_grad():
+        _, pred = outputs.topk(1, 1, largest=True, sorted=True)
+        precision, recall, _, _ = precision_recall_fscore_support(
+            targets.view(-1, 1).cpu().numpy(),
+            pred.cpu().numpy())
+
+        return precision[pos_label], recall[pos_label]
+
+
+def worker_init_fn(worker_id):
+    torch_seed = torch.initial_seed()
+
+    random.seed(torch_seed + worker_id)
+
+    if torch_seed >= 2**32:
+        torch_seed = torch_seed % 2**32
+    np.random.seed(torch_seed + worker_id)
+
+
+def get_lr(optimizer):
+    lrs = []
+    for param_group in optimizer.param_groups:
+        lr = float(param_group['lr'])
+        lrs.append(lr)
+
+    return max(lrs)
+
+
+def partialclass(cls, *args, **kwargs):
+
+    class PartialClass(cls):
+        __init__ = partialmethod(cls.__init__, *args, **kwargs)
+
+    return PartialClass

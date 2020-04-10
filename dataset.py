@@ -1,146 +1,188 @@
-from datasets.kinetics import Kinetics
+from torchvision import get_image_backend
+
+from datasets.videodataset import VideoDataset
+from datasets.videodataset_multiclips import (VideoDatasetMultiClips,
+                                              collate_fn)
 from datasets.activitynet import ActivityNet
-from datasets.ucf101 import UCF101
-from datasets.hmdb51 import HMDB51
+from datasets.loader import VideoLoader, VideoLoaderHDF5, VideoLoaderFlowHDF5
 
 
-def get_training_set(opt, spatial_transform, temporal_transform,
-                     target_transform):
-    assert opt.dataset in ['kinetics', 'activitynet', 'ucf101', 'hmdb51']
+def image_name_formatter(x):
+    return f'image_{x:05d}.jpg'
 
-    if opt.dataset == 'kinetics':
-        training_data = Kinetics(
-            opt.video_path,
-            opt.annotation_path,
-            'training',
-            spatial_transform=spatial_transform,
-            temporal_transform=temporal_transform,
-            target_transform=target_transform)
-    elif opt.dataset == 'activitynet':
-        training_data = ActivityNet(
-            opt.video_path,
-            opt.annotation_path,
-            'training',
-            False,
-            spatial_transform=spatial_transform,
-            temporal_transform=temporal_transform,
-            target_transform=target_transform)
-    elif opt.dataset == 'ucf101':
-        training_data = UCF101(
-            opt.video_path,
-            opt.annotation_path,
-            'training',
-            spatial_transform=spatial_transform,
-            temporal_transform=temporal_transform,
-            target_transform=target_transform)
-    elif opt.dataset == 'hmdb51':
-        training_data = HMDB51(
-            opt.video_path,
-            opt.annotation_path,
-            'training',
-            spatial_transform=spatial_transform,
-            temporal_transform=temporal_transform,
-            target_transform=target_transform)
+
+def get_training_data(video_path,
+                      annotation_path,
+                      dataset_name,
+                      input_type,
+                      file_type,
+                      spatial_transform=None,
+                      temporal_transform=None,
+                      target_transform=None):
+    assert dataset_name in [
+        'kinetics', 'activitynet', 'ucf101', 'hmdb51', 'mit'
+    ]
+    assert input_type in ['rgb', 'flow']
+    assert file_type in ['jpg', 'hdf5']
+
+    if file_type == 'jpg':
+        assert input_type == 'rgb', 'flow input is supported only when input type is hdf5.'
+
+        if get_image_backend() == 'accimage':
+            from datasets.loader import ImageLoaderAccImage
+            loader = VideoLoader(image_name_formatter, ImageLoaderAccImage())
+        else:
+            loader = VideoLoader(image_name_formatter)
+
+        video_path_formatter = (
+            lambda root_path, label, video_id: root_path / label / video_id)
+    else:
+        if input_type == 'rgb':
+            loader = VideoLoaderHDF5()
+        else:
+            loader = VideoLoaderFlowHDF5()
+        video_path_formatter = (lambda root_path, label, video_id: root_path /
+                                label / f'{video_id}.hdf5')
+
+    if dataset_name == 'activitynet':
+        training_data = ActivityNet(video_path,
+                                    annotation_path,
+                                    'training',
+                                    spatial_transform=spatial_transform,
+                                    temporal_transform=temporal_transform,
+                                    target_transform=target_transform,
+                                    video_loader=loader,
+                                    video_path_formatter=video_path_formatter)
+    else:
+        training_data = VideoDataset(video_path,
+                                     annotation_path,
+                                     'training',
+                                     spatial_transform=spatial_transform,
+                                     temporal_transform=temporal_transform,
+                                     target_transform=target_transform,
+                                     video_loader=loader,
+                                     video_path_formatter=video_path_formatter)
 
     return training_data
 
 
-def get_validation_set(opt, spatial_transform, temporal_transform,
-                       target_transform):
-    assert opt.dataset in ['kinetics', 'activitynet', 'ucf101', 'hmdb51']
+def get_validation_data(video_path,
+                        annotation_path,
+                        dataset_name,
+                        input_type,
+                        file_type,
+                        spatial_transform=None,
+                        temporal_transform=None,
+                        target_transform=None):
+    assert dataset_name in [
+        'kinetics', 'activitynet', 'ucf101', 'hmdb51', 'mit'
+    ]
+    assert input_type in ['rgb', 'flow']
+    assert file_type in ['jpg', 'hdf5']
 
-    if opt.dataset == 'kinetics':
-        validation_data = Kinetics(
-            opt.video_path,
-            opt.annotation_path,
+    if file_type == 'jpg':
+        assert input_type == 'rgb', 'flow input is supported only when input type is hdf5.'
+
+        if get_image_backend() == 'accimage':
+            from datasets.loader import ImageLoaderAccImage
+            loader = VideoLoader(image_name_formatter, ImageLoaderAccImage())
+        else:
+            loader = VideoLoader(image_name_formatter)
+
+        video_path_formatter = (
+            lambda root_path, label, video_id: root_path / label / video_id)
+    else:
+        if input_type == 'rgb':
+            loader = VideoLoaderHDF5()
+        else:
+            loader = VideoLoaderFlowHDF5()
+        video_path_formatter = (lambda root_path, label, video_id: root_path /
+                                label / f'{video_id}.hdf5')
+
+    if dataset_name == 'activitynet':
+        validation_data = ActivityNet(video_path,
+                                      annotation_path,
+                                      'validation',
+                                      spatial_transform=spatial_transform,
+                                      temporal_transform=temporal_transform,
+                                      target_transform=target_transform,
+                                      video_loader=loader,
+                                      video_path_formatter=video_path_formatter)
+    else:
+        validation_data = VideoDatasetMultiClips(
+            video_path,
+            annotation_path,
             'validation',
-            opt.n_val_samples,
-            spatial_transform,
-            temporal_transform,
-            target_transform,
-            sample_duration=opt.sample_duration)
-    elif opt.dataset == 'activitynet':
-        validation_data = ActivityNet(
-            opt.video_path,
-            opt.annotation_path,
-            'validation',
-            False,
-            opt.n_val_samples,
-            spatial_transform,
-            temporal_transform,
-            target_transform,
-            sample_duration=opt.sample_duration)
-    elif opt.dataset == 'ucf101':
-        validation_data = UCF101(
-            opt.video_path,
-            opt.annotation_path,
-            'validation',
-            opt.n_val_samples,
-            spatial_transform,
-            temporal_transform,
-            target_transform,
-            sample_duration=opt.sample_duration)
-    elif opt.dataset == 'hmdb51':
-        validation_data = HMDB51(
-            opt.video_path,
-            opt.annotation_path,
-            'validation',
-            opt.n_val_samples,
-            spatial_transform,
-            temporal_transform,
-            target_transform,
-            sample_duration=opt.sample_duration)
-    return validation_data
+            spatial_transform=spatial_transform,
+            temporal_transform=temporal_transform,
+            target_transform=target_transform,
+            video_loader=loader,
+            video_path_formatter=video_path_formatter)
+
+    return validation_data, collate_fn
 
 
-def get_test_set(opt, spatial_transform, temporal_transform, target_transform):
-    assert opt.dataset in ['kinetics', 'activitynet', 'ucf101', 'hmdb51']
-    assert opt.test_subset in ['val', 'test']
+def get_inference_data(video_path,
+                       annotation_path,
+                       dataset_name,
+                       input_type,
+                       file_type,
+                       inference_subset,
+                       spatial_transform=None,
+                       temporal_transform=None,
+                       target_transform=None):
+    assert dataset_name in [
+        'kinetics', 'activitynet', 'ucf101', 'hmdb51', 'mit'
+    ]
+    assert input_type in ['rgb', 'flow']
+    assert file_type in ['jpg', 'hdf5']
+    assert inference_subset in ['train', 'val', 'test']
 
-    if opt.test_subset == 'val':
+    if file_type == 'jpg':
+        assert input_type == 'rgb', 'flow input is supported only when input type is hdf5.'
+
+        if get_image_backend() == 'accimage':
+            from datasets.loader import ImageLoaderAccImage
+            loader = VideoLoader(image_name_formatter, ImageLoaderAccImage())
+        else:
+            loader = VideoLoader(image_name_formatter)
+
+        video_path_formatter = (
+            lambda root_path, label, video_id: root_path / label / video_id)
+    else:
+        if input_type == 'rgb':
+            loader = VideoLoaderHDF5()
+        else:
+            loader = VideoLoaderFlowHDF5()
+        video_path_formatter = (lambda root_path, label, video_id: root_path /
+                                label / f'{video_id}.hdf5')
+
+    if inference_subset == 'train':
+        subset = 'training'
+    elif inference_subset == 'val':
         subset = 'validation'
-    elif opt.test_subset == 'test':
+    elif inference_subset == 'test':
         subset = 'testing'
-    if opt.dataset == 'kinetics':
-        test_data = Kinetics(
-            opt.video_path,
-            opt.annotation_path,
+    if dataset_name == 'activitynet':
+        inference_data = ActivityNet(video_path,
+                                     annotation_path,
+                                     subset,
+                                     spatial_transform=spatial_transform,
+                                     temporal_transform=temporal_transform,
+                                     target_transform=target_transform,
+                                     video_loader=loader,
+                                     video_path_formatter=video_path_formatter,
+                                     is_untrimmed_setting=True)
+    else:
+        inference_data = VideoDatasetMultiClips(
+            video_path,
+            annotation_path,
             subset,
-            0,
-            spatial_transform,
-            temporal_transform,
-            target_transform,
-            sample_duration=opt.sample_duration)
-    elif opt.dataset == 'activitynet':
-        test_data = ActivityNet(
-            opt.video_path,
-            opt.annotation_path,
-            subset,
-            True,
-            0,
-            spatial_transform,
-            temporal_transform,
-            target_transform,
-            sample_duration=opt.sample_duration)
-    elif opt.dataset == 'ucf101':
-        test_data = UCF101(
-            opt.video_path,
-            opt.annotation_path,
-            subset,
-            0,
-            spatial_transform,
-            temporal_transform,
-            target_transform,
-            sample_duration=opt.sample_duration)
-    elif opt.dataset == 'hmdb51':
-        test_data = HMDB51(
-            opt.video_path,
-            opt.annotation_path,
-            subset,
-            0,
-            spatial_transform,
-            temporal_transform,
-            target_transform,
-            sample_duration=opt.sample_duration)
+            spatial_transform=spatial_transform,
+            temporal_transform=temporal_transform,
+            target_transform=target_transform,
+            video_loader=loader,
+            video_path_formatter=video_path_formatter,
+            target_type=['video_id', 'segment'])
 
-    return test_data
+    return inference_data, collate_fn
