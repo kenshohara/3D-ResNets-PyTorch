@@ -2,7 +2,8 @@
 
 ## Update (2020/4/13)
 
-We published a paper on arXiv. [
+We published a paper on arXiv.
+[
 Hirokatsu Kataoka, Tenga Wakamiya, Kensho Hara, and Yutaka Satoh,  
 "Would Mega-scale Datasets Further Enhance Spatiotemporal 3D CNNs",  
 arXiv preprint, arXiv:2004.04968, 2020.
