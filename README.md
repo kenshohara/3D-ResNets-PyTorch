@@ -94,7 +94,7 @@ r3d200_K_200ep.pth: --model resnet --model_depth 200 --n_pretrain_classes 700
 r3d200_KM_200ep.pth: --model resnet --model_depth 200 --n_pretrain_classes 1039
 ```
 
-Old pretrained models are still available [here](Pre-trained models are available here.).  
+Old pretrained models are still available [here](https://drive.google.com/drive/folders/1zvl89AgFAApbH0At-gMuZSeQB_LpNP-M?usp=sharing).  
 However, some modifications are required to use the old pretrained models in the current scripts.
 
 ## Requirements
