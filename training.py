@@ -103,4 +103,4 @@ def train_epoch(epoch,
     if tb_writer is not None:
         tb_writer.add_scalar('train/loss', losses.avg, epoch)
         tb_writer.add_scalar('train/acc', accuracies.avg, epoch)
-        tb_writer.add_scalar('train/lr', accuracies.avg, epoch)
+        tb_writer.add_scalar('train/lr', current_lr, epoch)
