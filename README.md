@@ -120,7 +120,7 @@ conda install pytorch torchvision cudatoolkit=10.1 -c soumith
 python -m util_scripts.generate_video_jpgs mp4_video_dir_path jpg_video_dir_path activitynet
 ```
 
-* Add fps infomartion into the json file ```util_scripts/add_fps_into_activitynet_json.py```
+* Add fps information into the json file ```util_scripts/add_fps_into_activitynet_json.py```
 
 ```bash
 python -m util_scripts.add_fps_into_activitynet_json mp4_video_dir_path json_file_path
