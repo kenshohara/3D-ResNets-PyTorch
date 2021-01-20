@@ -1,7 +1,8 @@
 import torch
 from torch import nn
 
-from models import resnet, resnet2p1d, pre_act_resnet, wide_resnet, resnext, densenet
+from models import (resnet, resnet2p1d, pre_act_resnet,
+                    wide_resnet, resnext, densenet, googlenet)
 
 
 def get_module_name(name):
@@ -34,7 +35,8 @@ def get_fine_tuning_parameters(model, ft_begin_module):
 
 def generate_model(opt):
     assert opt.model in [
-        'resnet', 'resnet2p1d', 'preresnet', 'wideresnet', 'resnext', 'densenet'
+        'resnet', 'resnet2p1d', 'preresnet', 'wideresnet',
+        'resnext', 'densenet', 'googlenet'
     ]
 
     if opt.model == 'resnet':
@@ -90,6 +92,11 @@ def generate_model(opt):
                                         conv1_t_size=opt.conv1_t_size,
                                         conv1_t_stride=opt.conv1_t_stride,
                                         no_max_pool=opt.no_max_pool)
+    elif opt.model == 'googlenet':
+        model = googlenet.generate_model(n_classes=opt.n_classes,
+                                         n_input_channels=opt.n_input_channels,
+                                         conv1_t_size=opt.conv1_t_size,
+                                         conv1_t_stride=opt.conv1_t_stride)
 
     return model
 
