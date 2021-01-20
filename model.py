@@ -28,6 +28,8 @@ def get_fine_tuning_parameters(model, ft_begin_module):
 
         if add_flag:
             parameters.append({'params': v})
+        else:
+            v.requires_grad = False
 
     return parameters
 
